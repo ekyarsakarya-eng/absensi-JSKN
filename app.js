@@ -44,7 +44,7 @@ async function showPage(page){
       loadProfil();
     }
   } catch(e) {
-    console.error('showPage error:', e); // <-- INI PENTING
+    console.error('showPage error:', e);
   }
 }
 
@@ -237,7 +237,7 @@ async function updateStatusHome(){
       statusHariIni.shift = hasil.data.shift || '';
       statusHariIni.pos = hasil.data.pos || '';
       localStorage.setItem('statusHariIni_'+currentUser.username, JSON.stringify({
-      ...statusHariIni,
+     ...statusHariIni,
         tgl: hasil.data.tanggal
       }));
     }
@@ -358,7 +358,7 @@ async function cekStatusHariIni(){
       statusHariIni.shift = hasil.data.shift || '';
       statusHariIni.pos = hasil.data.pos || '';
       localStorage.setItem('statusHariIni_'+currentUser.username, JSON.stringify({
-      ...statusHariIni,
+     ...statusHariIni,
         tgl: hasil.data.tanggal
       }));
     }
@@ -896,7 +896,7 @@ async function gantiPassword(){
     return;
   }
 
-    if(baru.length < 5){
+  if(baru.length < 5){
     notif.className = 'status gagal';
     notif.textContent = '❌ Password minimal 5 karakter';
     notif.classList.remove('hidden');
