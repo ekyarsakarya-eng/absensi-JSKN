@@ -1,22 +1,9 @@
 {
   "name": "Absensi JASKIN",
-  "short_name": "Absensi JSKN",
-  "description": "Aplikasi Absensi Kehadiran & Patroli Satpam",
-  "start_url": "/absensi-JSKN/",
+  "short_name": "JASKIN",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#F9F5F5",
   "theme_color": "#8B4B5C",
-  "orientation": "portrait",
-  "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+  "orientation": "portrait"
 }
