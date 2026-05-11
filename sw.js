@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ABSENSI-JSKN-V1.2';
+const CACHE_NAME = 'ABSENSI-JSKN-V1.4';
 const URLS_TO_CACHE = [
   '/absensi-JSKN/',
   '/absensi-JSKN/index.html',
