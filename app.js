@@ -1,4 +1,4 @@
-const GAS_URL = 'https://script.google.com/u/0/home/projects/1MKYDkUuDsyxIlw8-6Ij-BbLWn5t-ocS8t5bVYgoZk7NZED2ixl3hDIBX/edit';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzTLDlivTgJS3QUIm-qmaHRFLVmu-aPYdYwMoG-YdG6xSyeUF9sDUaHV7_E-4xLUAiB/exec';
 let currentUser = null;
 let stream = null;
 let gpsData = null;
