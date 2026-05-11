@@ -825,3 +825,174 @@ window.addEventListener('load', ()=>{
   }
   showPage('login');
 });
+
+// === PATROLI BARCODE ===
+let html5QrcodeScanner = null;
+
+async function bukaPatroli(){
+  document.getElementById('tombolUtamaAbsen').classList.add('hidden');
+  document.getElementById('areaPatroli').classList.remove('hidden');
+
+  // Load opsi shift
+  const shiftSelect = document.getElementById('selectShiftPatroli');
+  shiftSelect.innerHTML = DAFTAR_SHIFT.map(s => `<option value="${s}">${s}</option>`).join('');
+
+  // Start scanner
+  if(!html5QrcodeScanner){
+    html5QrcodeScanner = new Html5Qrcode("reader-patroli");
+  }
+
+  html5QrcodeScanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    (decodedText) => {
+      // Format: PATROLI_KODEPOS_NAMAPOS
+      if(decodedText.startsWith('PATROLI_')){
+        const parts = decodedText.split('_');
+        const kode = parts[1];
+        prosesScanPatroli(kode);
+        html5QrcodeScanner.stop();
+      }
+    },
+    (errorMessage) => {}
+  ).catch(err => {
+    alert('Gagal buka kamera: '+err);
+  });
+}
+
+function tutupPatroli(){
+  if(html5QrcodeScanner){
+    html5QrcodeScanner.stop().catch(()=>{});
+  }
+  document.getElementById('areaPatroli').classList.add('hidden');
+  document.getElementById('tombolUtamaAbsen').classList.remove('hidden');
+}
+
+async function prosesScanPatroli(kodeBarcode){
+  const shift = document.getElementById('selectShiftPatroli').value;
+  if(!shift){
+    alert('Pilih shift dulu');
+    return;
+  }
+
+  showNotif('Barcode terdeteksi! Ambil foto bukti patroli...', false, true);
+
+  // Buka kamera buat foto bukti
+  document.getElementById('areaPatroli').classList.add('hidden');
+  document.getElementById('kameraAreaPatroli').classList.remove('hidden');
+
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
+    document.getElementById('videoPatroli').srcObject = stream;
+    document.getElementById('btnKirimPatroli').dataset.kode = kodeBarcode;
+    document.getElementById('btnKirimPatroli').dataset.shift = shift;
+  }catch(e){
+    alert('Gagal buka kamera: '+e.message);
+    tutupPatroli();
+  }
+}
+
+document.getElementById('btnKirimPatroli')?.addEventListener('click', async ()=>{
+  const video = document.getElementById('videoPatroli');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  ctx.drawImage(video,0,0);
+
+  // Watermark
+  ctx.fillStyle = 'rgba(0,0,0,0.7)';
+  ctx.fillRect(10, canvas.height-100, 300, 90);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 16px Arial';
+  ctx.fillText('PATROLI', 15, canvas.height-80);
+  ctx.font = '12px Arial';
+  ctx.fillText(document.getElementById('wmJamBox').textContent, 15, canvas.height-65);
+  ctx.fillText(document.getElementById('wmTanggal').textContent, 15, canvas.height-50);
+  ctx.fillText(document.getElementById('wmGps').textContent, 15, canvas.height-35);
+  ctx.fillText(document.getElementById('wmAlamat').textContent.substring(0,35), 15, canvas.height-20);
+
+  const b64 = canvas.toDataURL('image/jpeg').split(',')[1];
+
+  if(stream){
+    stream.getTracks().forEach(t=>t.stop());
+    stream = null;
+  }
+
+  const kode = document.getElementById('btnKirimPatroli').dataset.kode;
+  const shift = document.getElementById('btnKirimPatroli').dataset.shift;
+
+  showLoading(true);
+  try{
+    const res = await fetch(GAS_URL,{
+      method:'POST',
+      body:JSON.stringify({
+        action:'patroli',
+        nama:currentUser.nama,
+        kodeBarcode: kode,
+        shift: shift,
+        lat: gpsData?.lat || '',
+        lng: gpsData?.lng || '',
+        foto: b64
+      })
+    });
+    const hasil = await res.json();
+    showLoading(false);
+
+    if(hasil.status==='sukses'){
+      document.getElementById('audioTing').play();
+      showNotif(`✅ ${hasil.pesan} jam ${hasil.jam}`, false, false);
+      document.getElementById('kameraAreaPatroli').classList.add('hidden');
+      loadLogPatroli();
+      setTimeout(tutupPatroli, 2000);
+    } else {
+      showNotif('❌ '+(hasil.message || hasil.pesan || 'Gagal patroli'), true, false);
+      setTimeout(tutupPatroli, 2000);
+    }
+  }catch(e){
+    showLoading(false);
+    showNotif('❌ Koneksi error: '+e.message, true, false);
+    setTimeout(tutupPatroli, 2000);
+  }
+});
+
+async function loadLogPatroli(){
+  const today = Utilities.formatDate(new Date(), "GMT+7", "dd/MM/yyyy");
+  try{
+    const res = await fetch(GAS_URL,{
+      method:'POST',
+      body:JSON.stringify({
+        action:'getLogPatroli',
+        nama: currentUser.nama,
+        tanggal: today,
+        shift: statusHariIni.shift || ''
+      })
+    });
+    const hasil = await res.json();
+
+    if(hasil.status==='sukses'){
+      const list = document.getElementById('listPatroli');
+      if(hasil.data.length === 0){
+        list.innerHTML = '<p style="text-align:center;color:var(--text2);padding:20px">Belum ada patroli hari ini</p>';
+      } else {
+        list.innerHTML = hasil.data.map(p => `
+          <div class="card" style="margin:8px 0;padding:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-weight:600">${p.pos}</div>
+                <div style="font-size:12px;color:var(--text2)">${p.jam} - Shift ${p.shift}</div>
+              </div>
+              <span class="material-icons-round" style="color:#4A7C59">check_circle</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('progressPatroli').textContent = `${hasil.ringkasan.persentase}%`;
+      document.getElementById('posBelumPatroli').textContent = hasil.ringkasan.belum_patroli.join(', ') || 'Semua sudah dipatroli';
+    }
+  }catch(e){}
+}
+
+// Panggil loadLogPatroli() di updateStatusHome()
