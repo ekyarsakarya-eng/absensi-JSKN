@@ -1,2 +1,0 @@
-# absensi-JSKN
-presensi Jaskin
