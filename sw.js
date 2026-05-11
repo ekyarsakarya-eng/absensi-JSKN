@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ABSENSI-JSKN-V1.1';
+const CACHE_NAME = 'ABSENSI-JSKN-V1.2';
 const URLS_TO_CACHE = [
   '/absensi-JSKN/',
   '/absensi-JSKN/index.html',
@@ -18,14 +18,14 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
-      keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+      keys.filter(k => k!== CACHE_NAME).map(k => caches.delete(k))
     ))
   );
   self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
-  if (event.request.url.includes('script.google.com') || 
+  if (event.request.url.includes('script.google.com') ||
       event.request.url.includes('nominatim.openstreetmap.org')) {
     return event.respondWith(fetch(event.request));
   }
