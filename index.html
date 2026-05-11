@@ -1,8 +1,44 @@
 <!DOCTYPE html>
 <html lang="id">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Absensi Satpam">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js');
+  });
+}
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(() => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User install PWA');
+        }
+        deferredPrompt = null;
+      });
+    }
+  }, 1000);
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  console.log('PWA sudah terinstall');
+});
+</script>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#8B4B5C">
 <title>Absensi Satpam JASKIN</title>
 <style>
@@ -61,9 +97,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .status.sukses{background:#E8F5E9;color:#2C5F2D}
 .status.loading{background:#F0E6E8;color:#6D3A47}
 .status.error{background:#FCE8E8;color:#8B2C2C}
-[data-theme="dark"] .status.gagal{background:#3A1F1F;color:#FF8A}
-[data-theme="dark"] .status.sukses{background:#1F3A2A;color:#8AFFB0}
-[data-theme="dark"] .status.loading{background:#3A2A2E;color:#D4A5AF}
+[data-theme="dark"].status.gagal{background:#3A1F1F;color:#FF8A}
+[data-theme="dark"].status.sukses{background:#1F3A2A;color:#8AFFB0}
+[data-theme="dark"].status.loading{background:#3A2A2E;color:#D4A5AF}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;max-width:480px;margin:0 auto;z-index:100}
 .nav-item{flex:1;padding:10px;text-align:center;cursor:pointer;transition:all.3s}
 .nav-item.active{color:var(--primary)}
@@ -71,11 +107,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .nav-icon{font-size:24px}
 .nav-label{font-size:11px;margin-top:2px}
 .hidden{display:none!important}
-.login-wrap{width:100%;max-width:360px;padding:20px}
 #page-login{background:var(--bg);display:flex;align-items:center;justify-content:center}
-#page-login .card{padding:32px 24px;box-shadow:0 4px 16px rgba(139,75,92,.15)}
+#page-login.login-wrap{width:100%;max-width:360px;padding:20px}
+#page-login.card{padding:32px 24px;box-shadow:0 4px 16px rgba(139,75,92,.15)}
 #page-login h2{text-align:center;color:var(--primary);font-size:24px;font-weight:700;margin-bottom:8px}
-#page-login .subtitle{text-align:center;color:var(--text2);font-size:14px;margin-bottom:32px}
+#page-login.subtitle{text-align:center;color:var(--text2);font-size:14px;margin-bottom:32px}
 #itemMasuk.active,#itemPulang.active,#homeItemMasuk.active,#homeItemPulang.active{border:2px solid var(--primary)}
 #itemMasuk.done,#itemPulang.done,#homeItemMasuk.done,#homeItemPulang.done{border:2px solid var(--success);background:#F0F5F1}
 [data-theme="dark"] #itemMasuk.done,[data-theme="dark"] #itemPulang.done,[data-theme="dark"] #homeItemMasuk.done,[data-theme="dark"] #homeItemPulang.done{background:#1F2E24}
@@ -89,14 +125,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .rekap-table{width:100%;border-collapse:collapse;font-size:14px}
 .rekap-table thead tr{background:var(--primary);color:#fff}
 .rekap-table th{padding:12px;text-align:center}
-.rekap-table th:first-child{border-radius:8px 0 0;text-align:left}
+.rekap-table th:first-child{border-radius:8px 0 0 0;text-align:left}
 .rekap-table th:last-child{border-radius:0 8px 0 0}
 .rekap-table td{padding:12px;text-align:center;border-bottom:1px solid var(--border)}
 .rekap-table td:first-child{text-align:left;font-weight:600}
 .rekap-table tbody tr:nth-child(even){background:var(--bg)}
-.rekap-table .weekend{background:#FFF5F5}
-[data-theme="dark"] .rekap-table .weekend{background:#2A1E21}
-.rekap-table .hari-min{color:var(--warning);font-weight:600}
+.rekap-table.weekend{background:#FFF5F5}
+[data-theme="dark"].rekap-table.weekend{background:#2A1E21}
+.rekap-table.hari-min{color:var(--warning);font-weight:600}
 .bulan-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .bulan-nav button{background:var(--primary);color:#fff;border:none;width:36px;height:36px;border-radius:50%;font-size:20px;cursor:pointer}
 .bulan-nav button:hover{background:var(--primary-dark)}
@@ -118,12 +154,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="login-wrap">
       <div class="card">
         <h2>👮 JASKIN</h2>
-        <p class="subtitle">ABSENSI KEHADIRAN & PATROLI TERPADU</p>
+        <p class="subtitle">ABSENSI KARYAWAN & PATROLI TERPADU</p>
         <div class="form-group">
           <div class="input-wrap">
             <input type="text" id="username" placeholder="Username" autocomplete="username">
           </div>
-        </div>
         <div class="form-group">
           <div class="input-wrap">
             <input type="password" id="password" placeholder="Password" autocomplete="current-password">
@@ -144,6 +179,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <h1>Halo, <span id="namaKaryawan">User</span>!</h1>
           <p id="tglSekarang">Loading...</p>
         </div>
+      </div>
       <div class="header-actions">
         <button class="icon-btn" onclick="toggleDarkMode()" id="btnDarkMode">🌙</button>
         <button class="icon-btn" onclick="logout()"><span class="material-icons-round">logout</span></button>
@@ -213,11 +249,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <div id="formAbsenMasuk" class="hidden">
             <div class="form-group">
               <label>Pilih Shift</label>
-              <select id="selectShift"></select>
+              <select id="selectShift" style="width:100%;padding:14px;border:1px solid var(--border);border-radius:8px;font-size:16px;background:var(--bg);color:var(--text)"></select>
             </div>
             <div class="form-group">
               <label>Pilih Pos Jaga</label>
-              <select id="selectPos"></select>
+              <select id="selectPos" style="width:100%;padding:14px;border:1px solid var(--border);border-radius:8px;font-size:16px;background:var(--bg);color:var(--text)"></select>
             </div>
           </div>
 
@@ -257,24 +293,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
               <div id="wmGps"></div>
               <div id="wmAlamat" style="max-width:200px"></div>
             </div>
+          </div>
           <div class="camera-controls">
             <button id="btnAmbilFoto" class="btn btn-success">Ambil Foto</button>
             <button id="btnBatalFoto" class="btn btn-danger">Batal</button>
           </div>
         </div>
 
+        <!-- AREA PATROLI -->
         <div id="areaPatroli" class="hidden">
           <div class="card" style="background:var(--bg);margin:0">
             <h3 style="margin-bottom:16px">🚨 Patroli Pos</h3>
+
             <div class="form-group">
               <label>Pilih Shift Patroli</label>
-              <select id="selectShiftPatroli"></select>
+              <select id="selectShiftPatroli" style="width:100%;padding:14px;border:1px solid var(--border);border-radius:8px;font-size:16px;background:var(--card);color:var(--text)"></select>
             </div>
+
             <div id="reader-patroli" style="width:100%;border-radius:12px;overflow:hidden;margin:16px 0"></div>
+
             <button class="btn btn-danger" onclick="tutupPatroli()">
               <span class="material-icons-round">close</span>
               BATAL PATROLI
             </button>
+
             <div class="patroli-progress">
               <div style="font-size:13px;color:var(--text2);margin-bottom:8px">Progress Patroli Shift Ini</div>
               <div class="patroli-progress-bar">
@@ -284,10 +326,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
                 <span style="font-size:12px;color:var(--text2)">Sudah: <b id="posSudahPatroli">0</b></span>
                 <span style="font-size:12px;color:var(--text2)">Belum: <b id="posBelumPatroli">0</b></span>
               </div>
+            </div>
+
             <div id="listPatroli"></div>
           </div>
         </div>
 
+        <!-- KAMERA PATROLI -->
         <div id="kameraAreaPatroli" class="hidden">
           <div class="camera-container">
             <video id="videoPatroli" autoplay playsinline></video>
@@ -297,6 +342,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
               <div id="wmTanggalPatroli"></div>
               <div id="wmGpsPatroli"></div>
             </div>
+          </div>
           <div class="camera-controls">
             <button id="btnKirimPatroli" class="btn btn-success">KIRIM PATROLI</button>
             <button class="btn btn-danger" onclick="tutupPatroli()">BATAL</button>
@@ -322,6 +368,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <span id="namaBulan">Oktober 2025</span>
           <button onclick="gantiBulan(1)">›</button>
         </div>
+
         <div class="stats">
           <div class="stat-card blue">
             <div class="stat-label">Total Hadir</div>
@@ -333,6 +380,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <div class="stat-value" id="totalJam">0j</div>
             <div style="font-size:12px;margin-top:4px">Kerja</div>
           </div>
+        </div>
+
         <div style="overflow-x:auto">
           <table class="rekap-table" id="rekapTable">
             <thead>
@@ -349,6 +398,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <tbody id="rekapBody"></tbody>
           </table>
         </div>
+
         <div id="rekapEmpty" class="hidden" style="text-align:center;padding:40px;color:var(--text2)">Belum ada data</div>
       </div>
     </div>
@@ -365,6 +415,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <h3 id="profilNama">-</h3>
         <p style="color:var(--text2);font-size:14px" id="profilUsername">@username</p>
       </div>
+
       <div class="card">
         <h3 style="margin-bottom:16px">Ganti Foto Profil</h3>
         <input type="file" id="inputFotoProfil" accept="image/*" style="display:none">
@@ -374,6 +425,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         </button>
         <div id="notifFoto" class="status hidden" style="margin-top:12px"></div>
       </div>
+
       <div class="card">
         <h3 style="margin-bottom:16px">Ganti Password</h3>
         <div class="form-group">
@@ -381,6 +433,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <input type="password" id="passLama" placeholder="Password Lama">
             <span class="toggle-pass" onclick="togglePassProfil('passLama', this)">👁️‍🗨️</span>
           </div>
+        </div>
         <div class="form-group">
           <div class="input-wrap">
             <input type="password" id="passBaru" placeholder="Password Baru">
@@ -397,6 +450,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         </button>
         <div id="notifPass" class="status hidden" style="margin-top:12px"></div>
       </div>
+
       <div class="card">
         <h3 style="margin-bottom:16px">Data Personal</h3>
         <div class="form-group">
