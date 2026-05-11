@@ -498,36 +498,6 @@ window.addEventListener('appinstalled', () => {
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Absensi Jaskin">
 <link rel="apple-touch-icon" href="icon-192.png">
-
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js');
-  });
-}
-
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  setTimeout(() => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User install PWA');
-        }
-        deferredPrompt = null;
-      });
-    }
-  }, 1000);
-});
-
-window.addEventListener('appinstalled', () => {
-  deferredPrompt = null;
-  console.log('PWA sudah terinstall');
-});
-</script>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
