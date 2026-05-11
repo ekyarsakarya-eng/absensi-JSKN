@@ -1,7 +1,7 @@
-const CACHE_NAME = 'jaskin-v3'; // Naikin versinya tiap update
+const CACHE_NAME = 'jaskin-v4';
 
 self.addEventListener('install', event => {
-  self.skipWaiting(); // Langsung aktif, skip cache pas install
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
@@ -14,9 +14,6 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Cache pas fetch aja, bukan pas install
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
-  );
+  event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
 });
