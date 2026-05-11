@@ -26,19 +26,19 @@
   --shadow:0 2px 8px rgba(0,0,0,.4);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;transition:background .3s,color .3s}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;transition:background.3s,color.3s}
 #app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--card);position:relative}
-.page{display:none!important;min-height:100vh;width:100%;position:absolute;top:0;left:0;background:var(--card)}
-.page.active{display:block!important}
+.page{display:none;min-height:100vh;width:100%;position:absolute;top:0;left:0;background:var(--card)}
+.page.active{display:block}
 .header{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;padding:16px;position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center}
 .header h1{font-size:18px;font-weight:600}
 .header p{font-size:13px;opacity:.9;margin-top:2px}
 .header-actions{display:flex;gap:12px;align-items:center}
 .icon-btn{background:rgba(255,255,255,.2);border:none;width:36px;height:36px;border-radius:50%;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .icon-btn:active{transform:scale(.9)}
-.content{padding:16px;padding-bottom:80px}
+.content{padding:16px;padding-bottom:90px}
 .card{background:var(--card);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:var(--shadow);border:1px solid var(--border)}
-.btn{width:100%;padding:14px;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn{width:100%;padding:14px;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:all.2s;display:flex;align-items:center;justify-content:center;gap:8px}
 .btn:active{transform:scale(.98)}
 .btn-primary{background:var(--primary);color:#fff}
 .btn-primary:hover{background:var(--primary-dark)}
@@ -69,21 +69,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .status.sukses{background:#E8F5E9;color:#2C5F2D}
 .status.loading{background:#F0E6E8;color:#6D3A47}
 .status.error{background:#FCE8E8;color:#8B2C2C}
-[data-theme="dark"] .status.gagal{background:#3A1F1F;color:#FF8A8A}
-[data-theme="dark"] .status.sukses{background:#1F3A2A;color:#8AFFB0}
-[data-theme="dark"] .status.loading{background:#3A2A2E;color:#D4A5AF}
+[data-theme="dark"].status.gagal{background:#3A1F1F;color:#FF8A8A}
+[data-theme="dark"].status.sukses{background:#1F3A2A;color:#8AFFB0}
+[data-theme="dark"].status.loading{background:#3A2A2E;color:#D4A5AF}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;max-width:480px;margin:0 auto;z-index:100}
-.nav-item{flex:1;padding:10px;text-align:center;cursor:pointer;transition:all .3s}
+.bottom-nav.hidden{display:none}
+.nav-item{flex:1;padding:8px;text-align:center;cursor:pointer;transition:all.3s}
 .nav-item.active{color:var(--primary)}
 .nav-item:active{background:var(--bg)}
-.nav-icon{font-size:24px}
-.nav-label{font-size:11px;margin-top:2px}
+.nav-icon{font-size:22px}
+.nav-label{font-size:10px;margin-top:2px}
 .hidden{display:none!important}
 #page-login{background:var(--bg);display:flex;align-items:center;justify-content:center}
-#page-login .login-wrap{width:100%;max-width:360px;padding:20px}
-#page-login .card{padding:32px 24px;box-shadow:0 4px 16px rgba(139,75,92,.15)}
+#page-login.login-wrap{width:100%;max-width:360px;padding:20px}
+#page-login.card{padding:32px 24px;box-shadow:0 4px 16px rgba(139,75,92,.15)}
 #page-login h2{text-align:center;color:var(--primary);font-size:24px;font-weight:700;margin-bottom:8px}
-#page-login .subtitle{text-align:center;color:var(--text2);font-size:14px;margin-bottom:32px}
+#page-login.subtitle{text-align:center;color:var(--text2);font-size:14px;margin-bottom:32px}
 #itemMasuk.active,#itemPulang.active,#homeItemMasuk.active,#homeItemPulang.active{border:2px solid var(--primary)}
 #itemMasuk.done,#itemPulang.done,#homeItemMasuk.done,#homeItemPulang.done{border:2px solid var(--success);background:#F0F5F1}
 [data-theme="dark"] #itemMasuk.done,[data-theme="dark"] #itemPulang.done,[data-theme="dark"] #homeItemMasuk.done,[data-theme="dark"] #homeItemPulang.done{background:#1F2E24}
@@ -103,7 +104,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .rekap-table td:first-child{text-align:left;font-weight:600}
 .rekap-table tbody tr:nth-child(even){background:var(--bg)}
 .rekap-table.weekend{background:#FFF5F5}
-[data-theme="dark"] .rekap-table.weekend{background:#2A1E21}
+[data-theme="dark"].rekap-table.weekend{background:#2A1E21}
 .rekap-table.hari-min{color:var(--warning);font-weight:600}
 .bulan-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .bulan-nav button{background:var(--primary);color:#fff;border:none;width:36px;height:36px;border-radius:50%;font-size:20px;cursor:pointer}
@@ -112,7 +113,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 #reader-patroli{border-radius:12px;overflow:hidden}
 .patroli-progress{background:var(--bg);border-radius:12px;padding:16px;margin:16px 0}
 .patroli-progress-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin:8px 0}
-.patroli-progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--primary-light));transition:width .3s}
+.patroli-progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--primary-light));transition:width.3s}
 </style>
 </head>
 <body>
@@ -129,13 +130,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <div class="input-wrap">
             <input type="text" id="username" placeholder="Username" autocomplete="username">
           </div>
-        </div>
         <div class="form-group">
           <div class="input-wrap">
             <input type="password" id="password" placeholder="Password" autocomplete="current-password">
             <span class="toggle-pass" onclick="togglePassword()">👁️‍🗨️</span>
           </div>
-        </div>
         <button id="btnLogin" class="btn btn-primary">Login</button>
         <div id="loginStatus" class="status gagal hidden"></div>
       </div>
@@ -196,7 +195,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
   <div class="page" id="page-absensi">
     <div class="header">
-      <h1>Absensi & Patroli</h1>
+      <h1>Absensi</h1>
       <p id="tglAbsen">Loading...</p>
     </div>
     <div class="content">
@@ -220,11 +219,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <div id="formAbsenMasuk" class="hidden">
             <div class="form-group">
               <label>Pilih Shift</label>
-              <select id="selectShift" style="width:100%;padding:14px;border:1px solid var(--border);border-radius:8px;font-size:16px;background:var(--bg);color:var(--text)"></select>
+              <select id="selectShift"></select>
             </div>
             <div class="form-group">
               <label>Pilih Pos Jaga</label>
-              <select id="selectPos" style="width:100%;padding:14px;border:1px solid var(--border);border-radius:8px;font-size:16px;background:var(--bg);color:var(--text)"></select>
+              <select id="selectPos"></select>
             </div>
           </div>
 
@@ -236,11 +235,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           </div>
 
           <button id="btnAksiUtama" class="btn btn-primary" data-tipe="in" disabled>CEK STATUS...</button>
-
-          <button id="btnBukaPatroli" class="btn btn-warning" style="margin-top:12px" onclick="bukaPatroli()">
-            <span class="material-icons-round">qr_code_scanner</span>
-            PATROLI POS
-          </button>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px">
             <div id="itemMasuk" class="card" style="margin:0;padding:12px;text-align:center">
@@ -271,38 +265,52 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           </div>
         </div>
 
-        <div id="areaPatroli" class="hidden">
-          <div class="card" style="background:var(--bg);margin:0">
-            <h3 style="margin-bottom:16px">🚨 Patroli Pos</h3>
+        <img id="preview" class="hidden" style="width:100%;border-radius:12px;margin-top:16px">
+        <div id="notifAbsen" class="status hidden">
+          <span id="notifIcon"></span> <span id="notifText"></span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            <div class="form-group">
-              <label>Pilih Shift Patroli</label>
-              <select id="selectShiftPatroli" style="width:100%;padding:14px;border:1px solid var(--border);border-radius:8px;font-size:16px;background:var(--card);color:var(--text)"></select>
-            </div>
+  <div class="page" id="page-patroli">
+    <div class="header">
+      <h1>Patroli Pos</h1>
+      <p id="tglPatroli">Loading...</p>
+    </div>
+    <div class="content">
+      <div class="card">
+        <h3 style="margin-bottom:16px">🚨 Scan QR Pos</h3>
 
-            <div id="reader-patroli" style="width:100%;border-radius:12px;overflow:hidden;margin:16px 0"></div>
+        <div class="form-group">
+          <label>Pilih Shift Patroli</label>
+          <select id="selectShiftPatroli"></select>
+        </div>
 
-            <button class="btn btn-danger" onclick="tutupPatroli()">
-              <span class="material-icons-round">close</span>
-              BATAL PATROLI
-            </button>
+        <div id="areaPatroliScan">
+          <div id="reader-patroli" style="width:100%;border-radius:12px;overflow:hidden;margin:16px 0"></div>
+          <button class="btn btn-primary" onclick="mulaiScanPatroli()">
+            <span class="material-icons-round">qr_code_scanner</span>
+            MULAI SCAN QR
+          </button>
+        </div>
 
-            <div class="patroli-progress">
-              <div style="font-size:13px;color:var(--text2);margin-bottom:8px">Progress Patroli Shift Ini</div>
-              <div class="patroli-progress-bar">
-                <div class="patroli-progress-fill" id="progressPatroliBar" style="width:0%"></div>
-              </div>
-              <div style="display:flex;justify-content:space-between;margin-top:8px">
-                <span style="font-size:12px;color:var(--text2)">Sudah: <b id="posSudahPatroli">0</b></span>
-                <span style="font-size:12px;color:var(--text2)">Belum: <b id="posBelumPatroli">0</b></span>
-              </div>
-            </div>
-
-            <div id="listPatroli"></div>
+        <div class="patroli-progress">
+          <div style="font-size:13px;color:var(--text2);margin-bottom:8px">Progress Patroli Shift Ini</div>
+          <div class="patroli-progress-bar">
+            <div class="patroli-progress-fill" id="progressPatroliBar" style="width:0%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px">
+            <span style="font-size:12px;color:var(--text2)">Sudah: <b id="posSudahPatroli">0</b></span>
+            <span style="font-size:12px;color:var(--text2)">Belum: <b id="posBelumPatroli">0</b></span>
           </div>
         </div>
 
-        <div id="kameraAreaPatroli" class="hidden">
+        <div id="listPatroli"></div>
+      </div>
+
+      <div id="kameraAreaPatroli" class="hidden">
+        <div class="card">
           <div class="camera-container">
             <video id="videoPatroli" autoplay playsinline></video>
             <div style="position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,.7);color:#fff;padding:8px;border-radius:6px;font-size:11px;line-height:1.4">
@@ -311,16 +319,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
               <div id="wmTanggalPatroli"></div>
               <div id="wmGpsPatroli"></div>
             </div>
-          </div>
           <div class="camera-controls">
             <button id="btnKirimPatroli" class="btn btn-success">KIRIM PATROLI</button>
-            <button class="btn btn-danger" onclick="tutupPatroli()">BATAL</button>
+            <button class="btn btn-danger" onclick="batalFotoPatroli()">BATAL</button>
           </div>
-        </div>
-
-        <img id="preview" class="hidden" style="width:100%;border-radius:12px;margin-top:16px">
-        <div id="notifAbsen" class="status hidden">
-          <span id="notifIcon"></span> <span id="notifText"></span>
         </div>
       </div>
     </div>
@@ -402,7 +404,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <input type="password" id="passLama" placeholder="Password Lama">
             <span class="toggle-pass" onclick="togglePassProfil('passLama', this)">👁️‍🗨️</span>
           </div>
-        </div>
         <div class="form-group">
           <div class="input-wrap">
             <input type="password" id="passBaru" placeholder="Password Baru">
@@ -457,6 +458,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="nav-icon">📷</div>
       <div class="nav-label">Absen</div>
     </div>
+    <div class="nav-item" onclick="showPage('patroli')">
+      <div class="nav-icon">🚨</div>
+      <div class="nav-label">Patroli</div>
+    </div>
     <div class="nav-item" onclick="showPage('rekap')">
       <div class="nav-icon">📊</div>
       <div class="nav-label">Rekap</div>
@@ -487,9 +492,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User install PWA');
-        }
         deferredPrompt = null;
       });
     }
@@ -498,7 +500,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 window.addEventListener('appinstalled', () => {
   deferredPrompt = null;
-  console.log('PWA sudah terinstall');
 });
 
 function togglePassword(){
