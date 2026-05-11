@@ -16,31 +16,35 @@ function showLoading(show){
 }
 
 async function showPage(page){
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-'+page).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  try {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-'+page).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
-  if(page!=='login'){
-    document.getElementById('bottomNav').classList.remove('hidden');
-    const nav = document.querySelector(`.nav-item[onclick="showPage('${page}')"]`);
-    if(nav) nav.classList.add('active');
-  } else {
-    document.getElementById('bottomNav').classList.add('hidden');
-  }
+    if(page!=='login'){
+      document.getElementById('bottomNav').classList.remove('hidden');
+      const nav = document.querySelector(`.nav-item[onclick="showPage('${page}')"]`);
+      if(nav) nav.classList.add('active');
+    } else {
+      document.getElementById('bottomNav').classList.add('hidden');
+    }
 
-  if(page==='home'){
-    updateJam();
-    await updateStatusHome();
-    checkOfflineData();
-  }
-  if(page==='absensi'){
-    await initAbsensi();
-  }
-  if(page==='rekap'){
-    loadRekap();
-  }
-  if(page==='profil'){
-    loadProfil();
+    if(page==='home'){
+      updateJam();
+      await updateStatusHome();
+      checkOfflineData();
+    }
+    if(page==='absensi'){
+      await initAbsensi();
+    }
+    if(page==='rekap'){
+      loadRekap();
+    }
+    if(page==='profil'){
+      loadProfil();
+    }
+  } catch(e) {
+    console.error('showPage error:', e); // <-- INI PENTING
   }
 }
 
