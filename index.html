@@ -1,54 +1,15 @@
 <!DOCTYPE html>
 <html lang="id">
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Absensi JSKN">
-<link rel="apple-touch-icon" href="icon-192.png">
-
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js');
-  });
-}
-
-// PAKSA INSTALL: Begitu user buka, langsung tawarin install
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  
-  // Tunggu 1 detik, langsung munculin prompt
-  setTimeout(() => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User install PWA');
-        }
-        deferredPrompt = null;
-      });
-    }
-  }, 1000);
-});
-
-// Kalau udah diinstall, jangan munculin lagi
-window.addEventListener('appinstalled', () => {
-  deferredPrompt = null;
-  console.log('PWA sudah terinstall');
-});
-</script>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0B63F3">
-<title>Absensi JASKIN</title>
+<meta name="theme-color" content="#8B4B5C">
+<title>Admin Panel - Absensi Satpam</title>
 <style>
 :root{
   --bg:#F9F5F5;--card:#fff;--text:#2C1810;--text2:#7A5C5C;--border:#E8D5D5;
   --primary:#8B4B5C;--primary-light:#A66573;--primary-dark:#6D3A47;
+  --success:#4A7C59;--danger:#C44536;--warning:#B8733D;
   --shadow:0 2px 8px rgba(139,75,92,.12);
 }
 [data-theme="dark"]{
@@ -57,379 +18,563 @@ window.addEventListener('appinstalled', () => {
   --shadow:0 2px 8px rgba(0,0,0,.4);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;transition:background.3s,color.3s}
-#app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--card);position:relative}
-.page{display:none!important;min-height:100vh;width:100%;position:absolute;top:0;left:0;background:var(--card)}
-.page.active{display:block!important}
-.header{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;padding:16px;position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center}
-.header h1{font-size:18px;font-weight:600}
-.header p{font-size:13px;opacity:.9;margin-top:2px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);transition:background.3s,color.3s}
+#app{max-width:800px;margin:0 auto;min-height:100vh;background:var(--card)}
+.header{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;padding:20px;position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:20px;font-weight:700}
 .header-actions{display:flex;gap:12px;align-items:center}
-.icon-btn{background:rgba(255,255,255,.2);border:none;width:36px;height:36px;border-radius:50%;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.icon-btn{background:rgba(255,255,255,.2);border:none;width:40px;height:40px;border-radius:50%;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .icon-btn:active{transform:scale(.9)}
-.content{padding:16px;padding-bottom:80px}
-.card{background:var(--card);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:var(--shadow);border:1px solid var(--border)}
-.btn{width:100%;padding:14px;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:all.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.content{padding:20px}
+.card{background:var(--card);border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.card h3{margin-bottom:16px;color:var(--primary);font-size:18px;display:flex;align-items:center;gap:8px}
+.btn{padding:12px 20px;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:all.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
 .btn:active{transform:scale(.98)}
 .btn-primary{background:var(--primary);color:#fff}
 .btn-primary:hover{background:var(--primary-dark)}
-.btn-success{background:#4A7C59;color:#fff}
-.btn-danger{background:#C44536;color:#fff}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-warning{background:var(--warning);color:#fff}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .form-group{margin-bottom:16px}
-.form-group input{width:100%;padding:14px;border:1px solid var(--border);border-radius:8px;font-size:16px;background:var(--bg);color:var(--text)}
-.form-group input:focus{outline:none;border-color:var(--primary);background:var(--card)}
-.input-wrap{position:relative}
-.input-wrap input{padding-right:45px}
-.toggle-pass{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:22px;color:var(--text2);user-select:none}
-.camera-container{position:relative;width:100%;max-width:400px;margin:0 auto}
-#video{width:100%;border-radius:12px;background:#000}
-#canvas{display:none}
-.camera-controls{display:flex;gap:12px;margin-top:16px}
-.camera-controls button{flex:1}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
-.stat-card{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;padding:16px;border-radius:12px}
-.stat-card.blue{background:linear-gradient(135deg,var(--primary),var(--primary-light))}
-.stat-card.green{background:linear-gradient(135deg,#4A7C59,#5A8C69)}
-.stat-label{font-size:12px;opacity:.9}
-.stat-value{font-size:28px;font-weight:700;margin-top:4px}
+.form-group label{font-size:13px;color:var(--text2);margin-bottom:6px;display:block;font-weight:600}
+.form-group input,.form-group select{width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:15px;background:var(--bg);color:var(--text)}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--primary);background:var(--card)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .status{padding:12px;border-radius:8px;margin-top:16px;text-align:center;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px}
 .status.gagal{background:#FCE8E8;color:#8B2C2C}
 .status.sukses{background:#E8F5E9;color:#2C5F2D}
 .status.loading{background:#F0E6E8;color:#6D3A47}
-.status.error{background:#FCE8E8;color:#8B2C2C}
 [data-theme="dark"].status.gagal{background:#3A1F1F;color:#FF8A8A}
 [data-theme="dark"].status.sukses{background:#1F3A2A;color:#8AFFB0}
 [data-theme="dark"].status.loading{background:#3A2A2E;color:#D4A5AF}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;max-width:480px;margin:0 auto;z-index:100}
-.nav-item{flex:1;padding:10px;text-align:center;cursor:pointer;transition:all.3s}
-.nav-item.active{color:var(--primary)}
-.nav-item:active{background:var(--bg)}
-.nav-icon{font-size:24px}
-.nav-label{font-size:11px;margin-top:2px}
 .hidden{display:none!important}
-#page-login{background:var(--bg);display:flex;align-items:center;justify-content:center}
-#page-login.login-wrap{width:100%;max-width:360px;padding:20px}
-#page-login.card{padding:32px 24px;box-shadow:0 4px 16px rgba(139,75,92,.15)}
-#page-login h2{text-align:center;color:var(--primary);font-size:24px;font-weight:700;margin-bottom:8px}
-#page-login.subtitle{text-align:center;color:var(--text2);font-size:14px;margin-bottom:32px}
-#itemMasuk.active,#itemPulang.active,#homeItemMasuk.active,#homeItemPulang.active{border:2px solid var(--primary)}
-#itemMasuk.done,#itemPulang.done,#homeItemMasuk.done,#homeItemPulang.done{border:2px solid #4A7C59;background:#F0F5F1}
-[data-theme="dark"] #itemMasuk.done,[data-theme="dark"] #itemPulang.done,[data-theme="dark"] #homeItemMasuk.done,[data-theme="dark"] #homeItemPulang.done{background:#1F2E24}
-.material-icons-round{font-family:'Material Icons Round';font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-smoothing:antialiased}
+#page-login{background:var(--bg);display:flex;align-items:center;justify-content:center;min-height:100vh}
+.login-wrap{width:100%;max-width:400px;padding:20px}
+.login-wrap.card{padding:32px 24px;box-shadow:0 4px 16px rgba(139,75,92,.15)}
+.login-wrap h2{text-align:center;color:var(--primary);font-size:28px;font-weight:700;margin-bottom:8px}
+.login-wrap.subtitle{text-align:center;color:var(--text2);font-size:14px;margin-bottom:32px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+table thead tr{background:var(--primary);color:#fff}
+table th{padding:12px;text-align:left}
+table th:first-child{border-radius:8px 0 0 0}
+table th:last-child{border-radius:0 8px 0 0}
+table td{padding:12px;border-bottom:1px solid var(--border)}
+table tbody tr:nth-child(even){background:var(--bg)}
+table tbody tr:hover{background:var(--bg)}
+.barcode-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:16px}
+.barcode-item{background:var(--bg);border:2px dashed var(--border);border-radius:12px;padding:16px;text-align:center}
+.barcode-item canvas{max-width:100%;margin:12px 0}
+.barcode-item h4{color:var(--primary);margin-bottom:8px}
+.barcode-item code{background:var(--card);padding:4px 8px;border-radius:4px;font-size:12px;color:var(--text2)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px}
+.stat-box{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;padding:20px;border-radius:12px}
+.stat-box.label{font-size:13px;opacity:.9}
+.stat-box.value{font-size:32px;font-weight:700;margin-top:8px}
+.stat-box.desc{font-size:12px;margin-top:4px;opacity:.8}
+.tabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--border)}
+.tab{padding:12px 20px;background:transparent;border:none;color:var(--text2);cursor:pointer;font-weight:600;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.tab-content{display:none}
+.tab-content.active{display:block}
 .loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:9999}
 .loading-overlay.active{display:flex}
 .spinner{width:40px;height:40px;border:4px solid #fff;border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.offline-badge{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#B8733D;color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;z-index:200;display:none}
-.offline-badge.active{display:block}
-.rekap-table{width:100%;border-collapse:collapse;font-size:14px}
-.rekap-table thead tr{background:var(--primary);color:#fff}
-.rekap-table th{padding:12px;text-align:center}
-.rekap-table th:first-child{border-radius:8px 0 0 0;text-align:left}
-.rekap-table th:last-child{border-radius:0 8px 0 0}
-.rekap-table td{padding:12px;text-align:center;border-bottom:1px solid var(--border)}
-.rekap-table td:first-child{text-align:left;font-weight:600}
-.rekap-table tbody tr:nth-child(even){background:var(--bg)}
-.rekap-table.weekend{background:#FFF5F5}
-[data-theme="dark"].rekap-table.weekend{background:#2A1E21}
-.rekap-table.hari-min{color:#B8733D;font-weight:600}
-.bulan-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.bulan-nav button{background:var(--primary);color:#fff;border:none;width:36px;height:36px;border-radius:50%;font-size:20px;cursor:pointer}
-.bulan-nav button:hover{background:var(--primary-dark)}
-.bulan-nav span{font-weight:600;font-size:16px}
+.material-icons-round{font-family:'Material Icons Round';font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-smoothing:antialiased}
 </style>
-<meta name="theme-color" content="#8B4B5C">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-<div class="offline-badge" id="offlineBadge">📡 Offline - Data akan disync otomatis</div>
 <div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
 
 <div id="app">
-  <div class="page active" id="page-login">
+  <!-- LOGIN PAGE -->
+  <div id="page-login">
     <div class="login-wrap">
       <div class="card">
-        <h2>JASKIN</h2>
-        <p class="subtitle">SYSTEM ABSENSI KARYAWAN TERPADU</p>
+        <h2>🔐 ADMIN PANEL</h2>
+        <p class="subtitle">Absensi Satpam JASKIN V1.4</p>
         <div class="form-group">
-          <div class="input-wrap">
-            <input type="text" id="username" placeholder="Username" autocomplete="username">
-          </div>
+          <label>Password Admin</label>
+          <input type="password" id="passwordAdmin" placeholder="Masukkan password admin" autocomplete="current-password">
         </div>
-        <div class="form-group">
-          <div class="input-wrap">
-            <input type="password" id="password" placeholder="Password" autocomplete="current-password">
-            <span class="toggle-pass" onclick="togglePassword()">👁️‍🗨️</span>
-          </div>
-        </div>
-        <button id="btnLogin" class="btn btn-primary">Login</button>
+        <button class="btn btn-primary" style="width:100%" onclick="loginAdmin()">
+          <span class="material-icons-round">login</span>
+          LOGIN ADMIN
+        </button>
         <div id="loginStatus" class="status gagal hidden"></div>
       </div>
     </div>
   </div>
 
-  <div class="page" id="page-home">
+  <!-- DASHBOARD -->
+  <div id="page-dashboard" class="hidden">
     <div class="header">
-      <div style="display:flex;align-items:center;gap:12px">
-        <img id="fotoProfil" src="" style="width:48px;height:48px;border-radius:50%;background:#fff;display:none;object-fit:cover">
-        <div>
-          <h1>Halo, <span id="namaKaryawan">User</span>!</h1>
-          <p id="tglSekarang">Loading...</p>
-        </div>
-      </div>
+      <h1>⚙️ Admin Dashboard</h1>
       <div class="header-actions">
         <button class="icon-btn" onclick="toggleDarkMode()" id="btnDarkMode">🌙</button>
-        <button class="icon-btn" onclick="logout()"><span class="material-icons-round">logout</span></button>
+        <button class="icon-btn" onclick="logoutAdmin()"><span class="material-icons-round">logout</span></button>
       </div>
     </div>
+
     <div class="content">
-      <div class="card">
-        <h3 style="margin-bottom:8px">Jam Sekarang</h3>
-        <div id="jamSekarang" style="font-size:48px;font-weight:700;text-align:center;margin:20px 0">--:--:--</div>
-      </div>
-
-      <div class="card">
-        <h3 style="margin-bottom:12px">Status Hari Ini</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-          <div id="homeItemMasuk" class="card" style="margin:0;padding:12px;text-align:center">
-            <div style="font-size:12px;color:var(--text2)">Masuk</div>
-            <div id="homeWaktuMasuk" style="font-weight:600;margin-top:4px;font-size:18px">-</div>
-          </div>
-          <div id="homeItemPulang" class="card" style="margin:0;padding:12px;text-align:center">
-            <div style="font-size:12px;color:var(--text2)">Pulang</div>
-            <div id="homeWaktuPulang" style="font-weight:600;margin-top:4px;font-size:18px">-</div>
-          </div>
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="label">Total Karyawan</div>
+          <div class="value" id="statKaryawan">0</div>
+          <div class="desc">Satpam Aktif</div>
         </div>
-       <button id="btnAbsenCepat" class="btn btn-primary" onclick="absenCepatDariHome()" disabled>
-  <span class="material-icons-round" id="iconAbsenCepat">hourglass_empty</span>
-  <span id="textAbsenCepat">Cek status...</span>
-</button>
-      </div>
-
-      <div class="card" id="syncCard" style="display:none">
-        <div style="display:flex;align-items:center;gap:12px">
-          <span class="material-icons-round" style="color:#ff9800">cloud_upload</span>
-          <div style="flex:1">
-            <div style="font-weight:600" id="syncText">Ada 0 data offline</div>
-            <div style="font-size:12px;color:var(--text2)">Klik untuk sync sekarang</div>
-          </div>
-          <button class="btn btn-primary" style="width:auto;padding:8px 16px" onclick="syncOfflineData()">Sync</button>
+        <div class="stat-box" style="background:linear-gradient(135deg,#4A7C59,#5A8C69)">
+          <div class="label">Patroli Hari Ini</div>
+          <div class="value" id="statPatroli">0</div>
+          <div class="desc">Pos Terpatroli</div>
+        </div>
+        <div class="stat-box" style="background:linear-gradient(135deg,#B8733D,#C8834D)">
+          <div class="label">Total Pos</div>
+          <div class="value" id="statPos">0</div>
+          <div class="desc">Titik Patroli</div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div class="page" id="page-absensi">
-    <div class="header">
-      <h1>Absensi</h1>
-      <p id="tglAbsen">Loading...</p>
-    </div>
-    <div class="content">
-      <div class="card">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
-          <img id="fotoProfilAbsen" src="" style="width:56px;height:56px;border-radius:50%;background:var(--bg);display:none;object-fit:cover">
-          <div>
-            <div style="font-weight:600" id="namaAbsen">-</div>
-            <div style="font-size:13px;color:var(--text2)" id="jabatanAbsen">Karyawan</div>
-          </div>
-        </div>
-        
-        <div id="tombolUtamaAbsen">
-          <div style="text-align:center;margin-bottom:20px">
-            <div id="iconAksi" class="material-icons-round" style="font-size:64px;color:var(--primary)">login</div>
-            <h3 id="judulAksi" style="margin:16px 0 8px">MASUK</h3>
-            <p id="subAksi" style="color:var(--text2);font-size:14px">Tap untuk absen masuk</p>
-          </div>
-          <div id="jamAbsen" style="text-align:center;font-size:32px;font-weight:700;margin-bottom:20px">--:--:--</div>
-          <button id="btnAksiUtama" class="btn btn-primary" data-tipe="in" disabled>CEK STATUS...</button>
-          
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px">
-            <div id="itemMasuk" class="card" style="margin:0;padding:12px;text-align:center">
-              <div style="font-size:12px;color:var(--text2)">Masuk</div>
-              <div id="waktuMasuk" style="font-weight:600;margin-top:4px">Belum absen</div>
-            </div>
-            <div id="itemPulang" class="card" style="margin:0;padding:12px;text-align:center">
-              <div style="font-size:12px;color:var(--text2)">Pulang</div>
-              <div id="waktuPulang" style="font-weight:600;margin-top:4px">Belum absen</div>
-            </div>
-          </div>
-        </div>
-        
-        <div id="kameraArea" class="hidden">
-          <div class="camera-container">
-            <video id="video" autoplay playsinline></video>
-            <div style="position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,.7);color:#fff;padding:8px;border-radius:6px;font-size:11px;line-height:1.4">
-              <div id="wmJamBox" style="font-weight:700;font-size:13px">00.00</div>
-              <div id="wmTanggal"></div>
-              <div id="wmGps"></div>
-              <div id="wmAlamat" style="max-width:200px"></div>
-            </div>
-          </div>
-          <div class="camera-controls">
-            <button id="btnAmbilFoto" class="btn btn-success">Ambil Foto</button>
-            <button id="btnBatalFoto" class="btn btn-danger">Batal</button>
-          </div>
-        </div>
-        
-        <img id="preview" class="hidden" style="width:100%;border-radius:12px;margin-top:16px">
-        <div id="notifAbsen" class="status hidden">
-          <span id="notifIcon"></span> <span id="notifText"></span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="page" id="page-rekap">
-    <div class="header">
-      <h1>Rekap Absensi</h1>
-    </div>
-    <div class="content">
-      <div class="card">
-        <div class="bulan-nav">
-          <button onclick="gantiBulan(-1)">‹</button>
-          <span id="namaBulan">Oktober 2025</span>
-          <button onclick="gantiBulan(1)">›</button>
-        </div>
-        
-        <div class="stats">
-          <div class="stat-card blue">
-            <div class="stat-label">Total Hadir</div>
-            <div class="stat-value" id="totalMasuk">0</div>
-            <div style="font-size:12px;margin-top:4px">Hari</div>
-          </div>
-          <div class="stat-card green">
-            <div class="stat-label">Total Jam</div>
-            <div class="stat-value" id="totalJam">0j</div>
-            <div style="font-size:12px;margin-top:4px">Kerja</div>
-          </div>
-        </div>
-        
-        <div style="overflow-x:auto">
-          <table class="rekap-table" id="rekapTable">
-            <thead>
-              <tr>
-                <th>Tanggal</th>
-                <th>Hari</th>
-                <th>Masuk</th>
-                <th>Pulang</th>
-                <th>Durasi</th>
-              </tr>
-            </thead>
-            <tbody id="rekapBody"></tbody>
-          </table>
-        </div>
-        
-        <div id="rekapEmpty" class="hidden" style="text-align:center;padding:40px;color:var(--text2)">Belum ada data</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="page" id="page-profil">
-    <div class="header">
-      <h1>Profil Saya</h1>
-      <button class="icon-btn" onclick="showPage('home')"><span class="material-icons-round">close</span></button>
-    </div>
-    <div class="content">
-      <div class="card" style="text-align:center">
-        <img id="profilFotoBesar" src="" style="width:120px;height:120px;border-radius:50%;object-fit:cover;background:var(--bg);margin:0 auto 16px">
-        <h3 id="profilNama">-</h3>
-        <p style="color:var(--text2);font-size:14px" id="profilUsername">@username</p>
-      </div>
-
-      <div class="card">
-        <h3 style="margin-bottom:16px">Ganti Foto Profil</h3>
-        <input type="file" id="inputFotoProfil" accept="image/*" style="display:none">
-        <button class="btn btn-primary" onclick="document.getElementById('inputFotoProfil').click()">
-          <span class="material-icons-round">photo_camera</span>
-          PILIH FOTO BARU
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('barcode')">
+          <span class="material-icons-round" style="font-size:18px;vertical-align:middle">qr_code</span> Barcode Pos
         </button>
-        <div id="notifFoto" class="status hidden" style="margin-top:12px"></div>
-      </div>
-       <div class="card">
-        <h3 style="margin-bottom:16px">Ganti Password</h3>
-        <div class="form-group">
-          <div class="input-wrap">
-            <input type="password" id="passLama" placeholder="Password Lama">
-            <span class="toggle-pass" onclick="togglePassProfil('passLama', this)">👁️‍🗨️</span>
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="input-wrap">
-            <input type="password" id="passBaru" placeholder="Password Baru">
-            <span class="toggle-pass" onclick="togglePassProfil('passBaru', this)">👁️‍🗨️</span>
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="input-wrap">
-            <input type="password" id="passBaru2" placeholder="Ulangi Password Baru">
-            <span class="toggle-pass" onclick="togglePassProfil('passBaru2', this)">👁️‍🗨️</span>
-          </div>
-        </div>
-        <button class="btn btn-primary" onclick="gantiPassword()">
-          <span class="material-icons-round">lock</span>
-          UPDATE PASSWORD
+        <button class="tab" onclick="switchTab('periode')">
+          <span class="material-icons-round" style="font-size:18px;vertical-align:middle">calendar_month</span> Periode
         </button>
-        <div id="notifPass" class="status hidden" style="margin-top:12px"></div>
-      </div>
-      <div class="card">
-        <h3 style="margin-bottom:16px">Data Personal</h3>
-        <div class="form-group">
-          <label style="font-size:13px;color:var(--text2);margin-bottom:6px;display:block">No HP</label>
-          <input type="tel" id="inputNoHP" placeholder="08xxxxxxxxxx">
-        </div>
-        <div class="form-group">
-          <label style="font-size:13px;color:var(--text2);margin-bottom:6px;display:block">Alamat</label>
-          <input type="text" id="inputAlamat" placeholder="Alamat lengkap">
-        </div>
-        <div class="form-group">
-          <label style="font-size:13px;color:var(--text2);margin-bottom:6px;display:block">No Rekening</label>
-          <input type="text" id="inputRekening" placeholder="Bank - No Rekening">
-        </div>
-        <div class="form-group">
-          <label style="font-size:13px;color:var(--text2);margin-bottom:6px;display:block">Tempat, Tanggal Lahir</label>
-          <input type="text" id="inputTTL" placeholder="Jakarta, 01-01-1990">
-        </div>
-        <button class="btn btn-primary" onclick="updateDataPersonal()">
-          <span class="material-icons-round">save</span>
-          SIMPAN DATA
+        <button class="tab" onclick="switchTab('patroli')">
+          <span class="material-icons-round" style="font-size:18px;vertical-align:middle">security</span> Log Patroli
         </button>
-        <div id="notifData" class="status hidden" style="margin-top:12px"></div>
+        <button class="tab" onclick="switchTab('arsip')">
+          <span class="material-icons-round" style="font-size:18px;vertical-align:middle">archive</span> Arsip
+        </button>
+      </div>
+
+      <!-- TAB BARCODE -->
+      <div id="tab-barcode" class="tab-content active">
+        <div class="card">
+          <h3><span class="material-icons-round">qr_code_2</span> Generate Barcode Pos Jaga</h3>
+          <p style="color:var(--text2);font-size:14px;margin-bottom:16px">
+            Generate barcode unik untuk tiap pos. Print & tempel di lokasi. Satpam scan barcode = bukti patroli.
+          </p>
+          <button class="btn btn-primary" onclick="generateBarcode()">
+            <span class="material-icons-round">autorenew</span>
+            GENERATE BARCODE SEMUA POS
+          </button>
+          <button class="btn btn-success" style="margin-left:8px" onclick="downloadSemuaBarcode()">
+            <span class="material-icons-round">download</span>
+            DOWNLOAD SEMUA
+          </button>
+          <div id="statusBarcode" class="status hidden"></div>
+          <div id="barcodeGrid" class="barcode-grid"></div>
+        </div>
+      </div>
+
+      <!-- TAB PERIODE -->
+      <div id="tab-periode" class="tab-content">
+        <div class="card">
+          <h3><span class="material-icons-round">event</span> Rebuild Periode Absensi</h3>
+          <p style="color:var(--text2);font-size:14px;margin-bottom:16px">
+            Ganti bulan/tahun. Data bulan lama otomatis diarsipkan. Data karyawan aman, tidak dihapus.
+          </p>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Bulan</label>
+              <select id="bulanPeriode">
+                <option value="1">Januari</option>
+                <option value="2">Februari</option>
+                <option value="3">Maret</option>
+                <option value="4">April</option>
+                <option value="5">Mei</option>
+                <option value="6">Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">Agustus</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tahun</label>
+              <input type="number" id="tahunPeriode" value="2026" min="2020" max="2050">
+            </div>
+          </div>
+          <button class="btn btn-warning" onclick="rebuildPeriode()">
+            <span class="material-icons-round">build</span>
+            REBUILD PERIODE
+          </button>
+          <div id="statusPeriode" class="status hidden"></div>
+        </div>
+      </div>
+
+      <!-- TAB PATROLI -->
+      <div id="tab-patroli" class="tab-content">
+        <div class="card">
+          <h3><span class="material-icons-round">track_changes</span> Log Patroli Real-time</h3>
+          <div class="grid-3">
+            <div class="form-group">
+              <label>Tanggal</label>
+              <input type="date" id="filterTglPatroli">
+            </div>
+            <div class="form-group">
+              <label>Shift</label>
+              <select id="filterShiftPatroli">
+                <option value="">Semua Shift</option>
+                <option value="Pagi">Pagi</option>
+                <option value="Siang">Siang</option>
+                <option value="Malam">Malam</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary" style="width:100%" onclick="loadLogPatroli()">
+                <span class="material-icons-round">search</span>
+                CARI
+              </button>
+            </div>
+          </div>
+          <div id="statusPatroli" class="status hidden"></div>
+          <div class="table-wrap" style="margin-top:16px">
+            <table id="tablePatroli">
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Jam</th>
+                  <th>Nama</th>
+                  <th>Shift</th>
+                  <th>Pos</th>
+                  <th>GPS</th>
+                  <th>Foto</th>
+                </tr>
+              </thead>
+              <tbody id="bodyPatroli"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB ARSIP -->
+      <div id="tab-arsip" class="tab-content">
+        <div class="card">
+          <h3><span class="material-icons-round">folder</span> Arsip Rekap Bulanan</h3>
+          <button class="btn btn-primary" onclick="loadArsip()">
+            <span class="material-icons-round">refresh</span>
+            REFRESH LIST ARSIP
+          </button>
+          <div id="statusArsip" class="status hidden"></div>
+          <div id="listArsip" style="margin-top:16px"></div>
+        </div>
       </div>
     </div>
   </div>
+</div>
 
-   <div class="bottom-nav hidden" id="bottomNav">
-    <div class="nav-item active" onclick="showPage('home')">
-      <div class="nav-icon">🏠</div>
-      <div class="nav-label">Home</div>
-    </div>
-    <div class="nav-item" onclick="showPage('absensi')">
-      <div class="nav-icon">📷</div>
-      <div class="nav-label">Absen</div>
-    </div>
-    <div class="nav-item" onclick="showPage('rekap')">
-      <div class="nav-icon">📊</div>
-      <div class="nav-label">Rekap</div>
-    </div>
-    <div class="nav-item" onclick="showPage('profil')">
-      <div class="nav-icon">👤</div>
-      <div class="nav-label">Profil</div>
-     </div>
-  </div>  <!-- Pastikan ini ada -->
-</div> 
-    
-<canvas id="canvas" style="display:none"></canvas>
-<audio id="audioTing" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-notification-951.mp3" preload="auto"></audio>
-
-<script src="app.js"></script>
 <script>
-function togglePassword(){
-  const i = document.getElementById('password');
-  const ic = event.target;
-  if(i.type=='password'){i.type='text';ic.textContent='👁️'}
-  else{i.type='password';ic.textContent='👁️‍🗨️'}
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzTLDlivTgJS3QUIm-qmaHRFLVmu-aPYdYwMoG-YdG6xSyeUF9sDUaHV7_E-4xLUAiB/exec';
+let passwordAdmin = '';
+let daftarPos = [];
+
+function showLoading(show){
+  document.getElementById('loadingOverlay').classList.toggle('active', show);
 }
+
+function toggleDarkMode(){
+  const html = document.documentElement;
+  const btn = document.getElementById('btnDarkMode');
+  if(html.getAttribute('data-theme')==='dark'){
+    html.removeAttribute('data-theme');
+    btn.textContent = '🌙';
+    localStorage.setItem('theme','light');
+  } else {
+    html.setAttribute('data-theme','dark');
+    btn.textContent = '☀️';
+    localStorage.setItem('theme','dark');
+  }
+}
+
+if(localStorage.getItem('theme')==='dark'){
+  document.documentElement.setAttribute('data-theme','dark');
+  document.getElementById('btnDarkMode').textContent = '☀️';
+}
+
+async function loginAdmin(){
+  const pass = document.getElementById('passwordAdmin').value;
+  const status = document.getElementById('loginStatus');
+
+  if(!pass){
+    status.textContent = 'Password wajib diisi';
+    status.classList.remove('hidden');
+    return;
+  }
+
+  showLoading(true);
+  status.classList.add('hidden');
+
+  try{
+    const res = await fetch(GAS_URL,{
+      method:'POST',
+      body:JSON.stringify({action:'adminLogin',password:pass})
+    });
+    const hasil = await res.json();
+    showLoading(false);
+
+    if(hasil.status==='sukses'){
+      passwordAdmin = pass;
+      sessionStorage.setItem('adminPass', pass);
+      document.getElementById('page-login').classList.add('hidden');
+      document.getElementById('page-dashboard').classList.remove('hidden');
+      loadDashboard();
+    } else {
+      status.textContent = hasil.message || 'Password salah';
+      status.classList.remove('hidden');
+    }
+  }catch(e){
+    showLoading(false);
+    status.textContent = 'Koneksi error: '+e.message;
+    status.classList.remove('hidden');
+  }
+}
+
+function logoutAdmin(){
+  passwordAdmin = '';
+  sessionStorage.removeItem('adminPass');
+  document.getElementById('page-dashboard').classList.add('hidden');
+  document.getElementById('page-login').classList.remove('hidden');
+  document.getElementById('passwordAdmin').value = '';
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  event.target.closest('.tab').classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+async function loadDashboard(){
+  // Load stats
+  document.getElementById('statKaryawan').textContent = '9'; // Hardcoded dari KARYAWAN
+  document.getElementById('statPos').textContent = '7'; // Hardcoded dari DAFTAR_POS
+
+  // Load patroli hari ini
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('filterTglPatroli').value = today;
+  await loadLogPatroli();
+}
+
+async function generateBarcode(){
+  const status = document.getElementById('statusBarcode');
+  showLoading(true);
+  status.className = 'status loading';
+  status.textContent = '⏳ Generate barcode...';
+  status.classList.remove('hidden');
+
+  try{
+    const res = await fetch(GAS_URL,{
+      method:'POST',
+      body:JSON.stringify({action:'generateBarcodePos',passwordAdmin:passwordAdmin})
+    });
+    const hasil = await res.json();
+    showLoading(false);
+
+    if(hasil.status==='sukses'){
+      status.className = 'status sukses';
+      status.textContent = '✅ '+hasil.pesan;
+      daftarPos = hasil.data;
+      renderBarcode();
+      document.getElementById('statPos').textContent = daftarPos.length;
+    } else {
+      status.className = 'status gagal';
+      status.textContent = '❌ '+hasil.message;
+    }
+  }catch(e){
+    showLoading(false);
+    status.className = 'status gagal';
+    status.textContent = '❌ Error: '+e.message;
+  }
+}
+
+function renderBarcode(){
+  const grid = document.getElementById('barcodeGrid');
+  grid.innerHTML = daftarPos.map(pos => `
+    <div class="barcode-item">
+      <h4>${pos.nama}</h4>
+      <div id="qr-${pos.kode}"></div>
+      <code>${pos.kode}</code>
+      <button class="btn btn-primary" style="width:100%;margin-top:8px;font-size:13px" onclick="downloadBarcode('${pos.kode}','${pos.nama}')">
+        <span class="material-icons-round" style="font-size:16px">download</span>
+        Download
+      </button>
+    </div>
+  `).join('');
+
+  // Generate QR
+  setTimeout(() => {
+    daftarPos.forEach(pos => {
+      new QRCode(document.getElementById('qr-'+pos.kode), {
+        text: pos.qr,
+        width: 180,
+        height: 180,
+        colorDark: "#8B4B5C",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    });
+  }, 100);
+}
+
+function downloadBarcode(kode, nama){
+  const canvas = document.querySelector(`#qr-${kode} canvas`);
+  const url = canvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Barcode_${nama.replace(/ /g,'_')}.png`;
+  a.click();
+}
+
+function downloadSemuaBarcode(){
+  daftarPos.forEach(pos => {
+    setTimeout(() => downloadBarcode(pos.kode, pos.nama), 200);
+  });
+}
+
+async function rebuildPeriode(){
+  const bulan = document.getElementById('bulanPeriode').value;
+  const tahun = document.getElementById('tahunPeriode').value;
+  const status = document.getElementById('statusPeriode');
+
+  if(!confirm(`Yakin rebuild periode ${bulan}/${tahun}? Data bulan lama akan diarsipkan.`)) return;
+
+  showLoading(true);
+  status.className = 'status loading';
+  status.textContent = '⏳ Rebuild periode...';
+  status.classList.remove('hidden');
+
+  try{
+    const res = await fetch(GAS_URL,{
+      method:'POST',
+      body:JSON.stringify({action:'rebuildPeriode',passwordAdmin:passwordAdmin,bulan:parseInt(bulan),tahun:parseInt(tahun)})
+    });
+    const hasil = await res.json();
+    showLoading(false);
+
+    if(hasil.status==='sukses'){
+      status.className = 'status sukses';
+      status.textContent = '✅ '+hasil.pesan;
+    } else {
+      status.className = 'status gagal';
+      status.textContent = '❌ '+hasil.message;
+    }
+  }catch(e){
+    showLoading(false);
+    status.className = 'status gagal';
+    status.textContent = '❌ Error: '+e.message;
+  }
+}
+
+async function loadLogPatroli(){
+  const tgl = document.getElementById('filterTglPatroli').value;
+  const shift = document.getElementById('filterShiftPatroli').value;
+  const status = document.getElementById('statusPatroli');
+
+  showLoading(true);
+  status.classList.add('hidden');
+
+  try{
+    const tglFormat = tgl? tgl.split('-').reverse().join('/') : '';
+    const res = await fetch(GAS_URL,{
+      method:'POST',
+      body:JSON.stringify({action:'getLogPatroli',tanggal:tglFormat,shift:shift})
+    });
+    const hasil = await res.json();
+    showLoading(false);
+
+    if(hasil.status==='sukses'){
+      const tbody = document.getElementById('bodyPatroli');
+      if(hasil.data.length === 0){
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text2);padding:40px">Belum ada data patroli</td></tr>';
+      } else {
+        tbody.innerHTML = hasil.data.map(p => `
+          <tr>
+            <td>${p.tanggal}</td>
+            <td>${p.jam}</td>
+            <td>${p.nama}</td>
+            <td>${p.shift}</td>
+            <td>${p.pos}</td>
+            <td style="font-size:11px">${p.gps}</td>
+            <td><a href="${p.foto}" target="_blank" style="color:var(--primary)">Lihat</a></td>
+          </tr>
+        `).join('');
+      }
+      document.getElementById('statPatroli').textContent = hasil.data.length;
+    }
+  }catch(e){
+    showLoading(false);
+    status.className = 'status gagal';
+    status.textContent = '❌ Error: '+e.message;
+    status.classList.remove('hidden');
+  }
+}
+
+async function loadArsip(){
+  const status = document.getElementById('statusArsip');
+  showLoading(true);
+  status.classList.add('hidden');
+
+  try{
+    const res = await fetch(GAS_URL,{
+      method:'POST',
+      body:JSON.stringify({action:'getListArsip',passwordAdmin:passwordAdmin})
+    });
+    const hasil = await res.json();
+    showLoading(false);
+
+    if(hasil.status==='sukses'){
+      const list = document.getElementById('listArsip');
+      if(hasil.data.length === 0){
+        list.innerHTML = '<p style="text-align:center;color:var(--text2);padding:20px">Belum ada arsip</p>';
+      } else {
+        list.innerHTML = hasil.data.map(a => `
+          <div class="card" style="margin:8px 0;padding:12px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-weight:600">${a}</div>
+              <div style="font-size:12px;color:var(--text2)">Arsip Bulanan</div>
+            </div>
+            <span class="material-icons-round" style="color:var(--success)">folder</span>
+          </div>
+        `).join('');
+      }
+    }
+  }catch(e){
+    showLoading(false);
+    status.className = 'status gagal';
+    status.textContent = '❌ Error: '+e.message;
+    status.classList.remove('hidden');
+  }
+}
+
+// Auto login jika ada session
+window.addEventListener('load', () => {
+  const saved = sessionStorage.getItem('adminPass');
+  if(saved){
+    passwordAdmin = saved;
+    document.getElementById('page-login').classList.add('hidden');
+    document.getElementById('page-dashboard').classList.remove('hidden');
+    loadDashboard();
+  }
+
+  // Set default bulan tahun sekarang
+  const now = new Date();
+  document.getElementById('bulanPeriode').value = now.getMonth() + 1;
+  document.getElementById('tahunPeriode').value = now.getFullYear();
+});
 </script>
 </body>
 </html>
