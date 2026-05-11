@@ -81,7 +81,8 @@ function toggleDarkMode(){
 
 if(localStorage.getItem('theme')==='dark'){
   document.documentElement.setAttribute('data-theme','dark');
-  document.getElementById('btnDarkMode').textContent = '☀️';
+  const btn = document.getElementById('btnDarkMode');
+  if(btn) btn.textContent = '☀️';
 }
 
 document.getElementById('btnLogin').addEventListener('click', async ()=>{
@@ -125,7 +126,6 @@ document.getElementById('btnLogin').addEventListener('click', async ()=>{
         document.getElementById('fotoProfilAbsen').src = currentUser.foto;
         document.getElementById('fotoProfilAbsen').style.display = 'block';
       }
-      // Load opsi shift & pos
       await loadOpsiAbsen();
       showPage('home');
     } else {
@@ -136,6 +136,7 @@ document.getElementById('btnLogin').addEventListener('click', async ()=>{
     showLoading(false);
     status.textContent = 'Koneksi error: '+e.message;
     status.classList.remove('hidden');
+    console.error('Login error:', e);
   }
 });
 
@@ -171,7 +172,9 @@ async function loadOpsiAbsen(){
       document.getElementById('selectPos').innerHTML = opsiPos.map(p => `<option value="${p}">${p}</option>`).join('');
       document.getElementById('selectShiftPatroli').innerHTML = opsiShift.map(s => `<option value="${s}">${s}</option>`).join('');
     }
-  }catch(e){}
+  }catch(e){
+    console.error('Gagal loadOpsiAbsen:', e);
+  }
 }
 
 async function checkOfflineData(){
@@ -230,11 +233,12 @@ async function updateStatusHome(){
       statusHariIni.shift = hasil.data.shift || '';
       statusHariIni.pos = hasil.data.pos || '';
       localStorage.setItem('statusHariIni_'+currentUser.username, JSON.stringify({
-       ...statusHariIni,
+      ...statusHariIni,
         tgl: hasil.data.tanggal
       }));
     }
   }catch(e){
+    console.error('updateStatusHome error:', e);
     const cached = localStorage.getItem('statusHariIni_'+currentUser.username);
     if(cached) {
       const c = JSON.parse(cached);
@@ -350,11 +354,12 @@ async function cekStatusHariIni(){
       statusHariIni.shift = hasil.data.shift || '';
       statusHariIni.pos = hasil.data.pos || '';
       localStorage.setItem('statusHariIni_'+currentUser.username, JSON.stringify({
-       ...statusHariIni,
+      ...statusHariIni,
         tgl: hasil.data.tanggal
       }));
     }
   }catch(e){
+    console.error('cekStatusHariIni error:', e);
     const cached = localStorage.getItem('statusHariIni_'+currentUser.username);
     if(cached) {
       const c = JSON.parse(cached);
@@ -459,7 +464,6 @@ document.getElementById('btnAmbilFoto').addEventListener('click', async ()=>{
   canvas.height = video.videoHeight;
   ctx.drawImage(video,0,0);
 
-  // Watermark
   ctx.fillStyle = 'rgba(0,0,0,0.7)';
   ctx.fillRect(10, canvas.height-80, 250, 70);
   ctx.fillStyle = '#fff';
@@ -557,7 +561,6 @@ function showNotif(teks, error=false, offline=false){
   setTimeout(()=>n.classList.add('hidden'),3000);
 }
 
-// === PATROLI ===
 async function bukaPatroli(){
   document.getElementById('tombolUtamaAbsen').classList.add('hidden');
   document.getElementById('areaPatroli').classList.remove('hidden');
@@ -630,7 +633,6 @@ document.getElementById('btnKirimPatroli').addEventListener('click', async ()=>{
   canvas.height = video.videoHeight;
   ctx.drawImage(video,0,0);
 
-  // Watermark Patroli
   ctx.fillStyle = 'rgba(139,75,92,0.9)';
   ctx.fillRect(10, canvas.height-100, 300, 90);
   ctx.fillStyle = '#fff';
@@ -730,7 +732,6 @@ async function loadLogPatroli(){
   }catch(e){}
 }
 
-// === REKAP ===
 function gantiBulan(delta){
   currentBulan += delta;
   if(currentBulan < 0){
@@ -810,7 +811,6 @@ async function loadRekap(){
   }
 }
 
-// === PROFIL ===
 function loadProfil(){
   if(!currentUser) return;
   document.getElementById('profilNama').textContent = currentUser.nama;
@@ -878,21 +878,21 @@ async function gantiPassword(){
 
   notif.classList.add('hidden');
 
-  if(!lama || !baru || !baru2){
+  if(!lama ||!baru ||!baru2){
     notif.className = 'status gagal';
     notif.textContent = '❌ Semua field wajib diisi';
     notif.classList.remove('hidden');
     return;
   }
 
-  if(baru !== baru2){
+  if(baru!== baru2){
     notif.className = 'status gagal';
     notif.textContent = '❌ Password baru tidak sama';
     notif.classList.remove('hidden');
     return;
   }
 
-  if(baru.length < 5){
+    if(baru.length < 5){
     notif.className = 'status gagal';
     notif.textContent = '❌ Password minimal 5 karakter';
     notif.classList.remove('hidden');
@@ -976,7 +976,6 @@ async function updateDataPersonal(){
   }
 }
 
-// Auto login jika ada session
 window.addEventListener('load', () => {
   const saved = localStorage.getItem('currentUser');
   if(saved){
@@ -994,7 +993,6 @@ window.addEventListener('load', () => {
   }
 });
 
-// Deteksi online/offline
 window.addEventListener('online', () => {
   document.getElementById('offlineBadge').classList.remove('active');
   syncOfflineData();
