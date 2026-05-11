@@ -15,8 +15,23 @@ function showLoading(show){
   document.getElementById('loadingOverlay').classList.toggle('active', show);
 }
 
+function getTodayStr(){
+  const t = new Date();
+  return `${String(t.getDate()).padStart(2,'0')}/${String(t.getMonth()+1).padStart(2,'0')}/${t.getFullYear()}`;
+}
+
 async function showPage(page){
   try {
+    // Stop kamera & scanner kalau pindah halaman
+    if(stream){
+      stream.getTracks().forEach(t=>t.stop());
+      stream = null;
+    }
+    if(html5QrcodeScanner){
+      await html5QrcodeScanner.stop().catch(()=>{});
+      html5QrcodeScanner = null;
+    }
+
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-'+page).classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -45,6 +60,7 @@ async function showPage(page){
     }
   } catch(e) {
     console.error('showPage error:', e);
+    showNotif('Error buka halaman: '+e.message, true, false);
   }
 }
 
@@ -211,6 +227,7 @@ async function syncOfflineData(){
   localStorage.setItem('offlineAbsen','[]');
   checkOfflineData();
   alert(`Sync selesai: ${sukses}/${data.length} data berhasil`);
+  await updateStatusHome();
 }
 
 async function updateStatusHome(){
@@ -237,8 +254,8 @@ async function updateStatusHome(){
       statusHariIni.shift = hasil.data.shift || '';
       statusHariIni.pos = hasil.data.pos || '';
       localStorage.setItem('statusHariIni_'+currentUser.username, JSON.stringify({
-     ...statusHariIni,
-        tgl: hasil.data.tanggal
+       ...statusHariIni,
+        tgl: hasil.data.tanggal || getTodayStr()
       }));
     }
   }catch(e){
@@ -246,11 +263,7 @@ async function updateStatusHome(){
     const cached = localStorage.getItem('statusHariIni_'+currentUser.username);
     if(cached) {
       const c = JSON.parse(cached);
-      const today = new Date();
-      const todayStr = String(today.getDate()).padStart(2,'0') + '/' +
-                       String(today.getMonth()+1).padStart(2,'0') + '/' +
-                       today.getFullYear();
-      if(c.tgl === todayStr) statusHariIni = c;
+      if(c.tgl === getTodayStr()) statusHariIni = c;
     }
   }
 
@@ -321,7 +334,7 @@ async function getGPS(){
         if(gpsPatroli) gpsPatroli.textContent = 'GPS tidak aktif';
         res();
       },
-      {enableHighAccuracy:true,timeout:5000}
+      {enableHighAccuracy:true,timeout:10000,maximumAge:60000}
     );
   });
 }
@@ -358,8 +371,8 @@ async function cekStatusHariIni(){
       statusHariIni.shift = hasil.data.shift || '';
       statusHariIni.pos = hasil.data.pos || '';
       localStorage.setItem('statusHariIni_'+currentUser.username, JSON.stringify({
-     ...statusHariIni,
-        tgl: hasil.data.tanggal
+       ...statusHariIni,
+        tgl: hasil.data.tanggal || getTodayStr()
       }));
     }
   }catch(e){
@@ -367,11 +380,7 @@ async function cekStatusHariIni(){
     const cached = localStorage.getItem('statusHariIni_'+currentUser.username);
     if(cached) {
       const c = JSON.parse(cached);
-      const today = new Date();
-      const todayStr = String(today.getDate()).padStart(2,'0') + '/' +
-                       String(today.getMonth()+1).padStart(2,'0') + '/' +
-                       today.getFullYear();
-      if(c.tgl === todayStr) statusHariIni = c;
+      if(c.tgl === getTodayStr()) statusHariIni = c;
     }
   }
 
@@ -478,7 +487,7 @@ document.getElementById('btnAmbilFoto').addEventListener('click', async ()=>{
   ctx.fillText(document.getElementById('wmGps').textContent, 15, canvas.height-35);
   ctx.fillText(document.getElementById('wmAlamat').textContent.substring(0,30), 15, canvas.height-20);
 
-  const b64 = canvas.toDataURL('image/jpeg').split(',')[1];
+  const b64 = canvas.toDataURL('image/jpeg',0.8).split(',')[1];
 
   if(stream){
     stream.getTracks().forEach(t=>t.stop());
@@ -549,8 +558,7 @@ function showNotif(teks, error=false, offline=false){
   const n = document.getElementById('notifAbsen');
   const ic = document.getElementById('notifIcon');
   const tx = document.getElementById('notifText');
-  n.classList.remove('hidden');
-  n.classList.remove('gagal','sukses','loading');
+  n.classList.remove('hidden','gagal','sukses','loading');
   if(error){
     n.classList.add('gagal');
     ic.textContent = '❌';
@@ -648,7 +656,7 @@ document.getElementById('btnKirimPatroli').addEventListener('click', async ()=>{
   ctx.fillText(document.getElementById('wmGpsPatroli').textContent, 15, canvas.height-35);
   ctx.fillText(document.getElementById('wmAlamat').textContent.substring(0,35), 15, canvas.height-20);
 
-  const b64 = canvas.toDataURL('image/jpeg').split(',')[1];
+  const b64 = canvas.toDataURL('image/jpeg',0.8).split(',')[1];
 
   if(stream){
     stream.getTracks().forEach(t=>t.stop());
@@ -693,10 +701,7 @@ document.getElementById('btnKirimPatroli').addEventListener('click', async ()=>{
 });
 
 async function loadLogPatroli(){
-  const today = new Date();
-  const todayStr = String(today.getDate()).padStart(2,'0') + '/' +
-                   String(today.getMonth()+1).padStart(2,'0') + '/' +
-                   today.getFullYear();
+  const todayStr = getTodayStr();
 
   try{
     const res = await fetch(GAS_URL,{
@@ -980,6 +985,7 @@ async function updateDataPersonal(){
   }
 }
 
+// Auto login kalau sudah pernah login
 window.addEventListener('load', () => {
   const saved = localStorage.getItem('currentUser');
   if(saved){
@@ -997,6 +1003,7 @@ window.addEventListener('load', () => {
   }
 });
 
+// Handle online/offline
 window.addEventListener('online', () => {
   document.getElementById('offlineBadge').classList.remove('active');
   syncOfflineData();
