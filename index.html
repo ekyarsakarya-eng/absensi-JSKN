@@ -66,7 +66,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .status.gagal{background:#FCE8E8;color:#8B2C2C}
 .status.sukses{background:#E8F5E9;color:#2C5F2D}
 .status.loading{background:#F0E6E8;color:#6D3A47}
-.status.error{background:#FCE8E8;color:#8B2C2C}
+.status.error{background:#FCE8E8;color:#8B2C}
 [data-theme="dark"] .status.gagal{background:#3A1F1F;color:#FF8A8A}
 [data-theme="dark"] .status.sukses{background:#1F3A2A;color:#8AFFB0}
 [data-theme="dark"] .status.loading{background:#3A2A2E;color:#D4A5AF}
@@ -129,6 +129,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <div class="input-wrap">
             <input type="text" id="username" placeholder="Username" autocomplete="username">
           </div>
+        </div>
         <div class="form-group">
           <div class="input-wrap">
             <input type="password" id="password" placeholder="Password" autocomplete="current-password">
@@ -148,7 +149,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <h1>Halo, <span id="namaKaryawan">User</span>!</h1>
           <p id="tglSekarang">Loading...</p>
         </div>
-      </div>
       <div class="header-actions">
         <button class="icon-btn" onclick="toggleDarkMode()" id="btnDarkMode">🌙</button>
         <button class="icon-btn" onclick="logout()"><span class="material-icons-round">logout</span></button>
@@ -302,7 +302,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
               <div id="wmTanggalPatroli"></div>
               <div id="wmGpsPatroli"></div>
             </div>
-          </div>
           <div class="camera-controls">
             <button id="btnKirimPatroli" class="btn btn-success">KIRIM PATROLI</button>
             <button class="btn btn-danger" onclick="tutupPatroli()">BATAL</button>
