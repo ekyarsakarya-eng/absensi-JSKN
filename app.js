@@ -4,7 +4,7 @@ let user = JSON.parse(localStorage.getItem('user') || 'null');
 let isDark = localStorage.getItem('dark') === 'true';
 let currentType = '';
 let stream = null;
-let watermarkInterval = null;
+let animationFrame = null;
 let currentLocation = { lat: 0, long: 0, alamat: 'Mengambil lokasi...' };
 
 if (isDark) document.documentElement.classList.add('dark');
@@ -109,7 +109,7 @@ function renderDashboard() {
       </h3>
       <div style="position:relative">
         <video id="video" class="w-full rounded-lg bg-black" autoplay playsinline></video>
-        <canvas id="canvas" class="hidden"></canvas>
+        <canvas id="canvas" class="hidden w-full rounded-lg"></canvas>
       </div>
       <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">Pastikan wajah terlihat jelas</p>
       <div class="flex gap-2 mt-4">
@@ -209,7 +209,6 @@ async function openCamera(type) {
   document.getElementById('modalCam').classList.remove('hidden');
   document.getElementById('modalCam').classList.add('flex');
   
-  // AMBIL LOKASI DULUAN
   navigator.geolocation.getCurrentPosition(async pos => {
     currentLocation.lat = pos.coords.latitude;
     currentLocation.long = pos.coords.longitude;
@@ -225,10 +224,10 @@ async function openCamera(type) {
     const video = document.getElementById('video');
     video.srcObject = stream;
     
-    // WATERMARK LIVE DI CANVAS, BUKAN DIV TERPISAH
-    video.addEventListener('loadedmetadata', () => {
-      startWatermarkCanvas();
-    });
+    video.onloadedmetadata = () => {
+      video.play();
+      drawLiveWatermark();
+    };
     
   } catch (err) {
     alert('Gagal akses kamera: ' + err.message);
@@ -236,19 +235,22 @@ async function openCamera(type) {
   }
 }
 
-function startWatermarkCanvas() {
+function drawLiveWatermark() {
   const video = document.getElementById('video');
   const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
   
-  const drawFrame = () => {
-    if (!stream || !video.videoWidth) {
-      requestAnimationFrame(drawFrame);
+  video.style.display = 'none';
+  canvas.style.display = 'block';
+  
+  function draw() {
+    if (!stream || video.paused || video.ended) {
+      cancelAnimationFrame(animationFrame);
       return;
     }
     
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0);
     
     // WATERMARK KIRI BAWAH
@@ -256,11 +258,11 @@ function startWatermarkCanvas() {
     const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const tgl = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'numeric', year: 'numeric' });
     
-    const boxHeight = 85;
-    const boxWidth = 270;
-    const padding = 15;
+    const boxHeight = 88;
+    const boxWidth = 280;
+    const padding = 12;
     
-    // Posisi kiri bawah
+    // Posisi KIRI BAWAH
     const x = padding;
     const y = canvas.height - boxHeight - padding;
     
@@ -268,44 +270,44 @@ function startWatermarkCanvas() {
     ctx.fillRect(x, y, boxWidth, boxHeight);
     
     ctx.fillStyle = 'white';
-    ctx.font = 'bold 22px Arial';
-    ctx.fillText(jam, x + 10, y + 25);
+    ctx.font = 'bold 26px Arial';
+    ctx.fillText(jam, x + 10, y + 28);
     
-    ctx.font = '14px Arial';
-    ctx.fillText(tgl, x + 10, y + 44);
-    ctx.fillText(`${currentLocation.lat.toFixed(6)},${currentLocation.long.toFixed(6)}`, x + 10, y + 61);
+    ctx.font = '15px Arial';
+    ctx.fillText(tgl, x + 10, y + 47);
+    ctx.fillText(`${currentLocation.lat.toFixed(6)},${currentLocation.long.toFixed(6)}`, x + 10, y + 65);
     
-    ctx.font = '11px Arial';
-    ctx.fillText(currentLocation.alamat.substring(0, 40), x + 10, y + 77);
+    ctx.font = '12px Arial';
+    ctx.fillText(currentLocation.alamat.substring(0, 42), x + 10, y + 81);
     
-    // Render canvas ke video element
-    video.style.display = 'none';
-    canvas.style.display = 'block';
-    canvas.style.width = '100%';
-    canvas.style.borderRadius = '8px';
-    
-    requestAnimationFrame(drawFrame);
-  };
-  
-  drawFrame();
+    animationFrame = requestAnimationFrame(draw);
+  }
+  draw();
 }
 
 function closeCam() {
   if (stream) stream.getTracks().forEach(t => t.stop());
-  if (watermarkInterval) clearInterval(watermarkInterval);
+  if (animationFrame) cancelAnimationFrame(animationFrame);
+  
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  video.style.display = 'block';
+  canvas.style.display = 'none';
+  
   document.getElementById('modalCam').classList.add('hidden');
   document.getElementById('modalCam').classList.remove('flex');
-  document.getElementById('video').style.display = 'block';
-  document.getElementById('canvas').style.display = 'none';
 }
 
 async function capture() {
   const canvas = document.getElementById('canvas');
-  // Canvas udah ada watermark dari startWatermarkCanvas, langsung pake
-  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.8);
+  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+  
+  const sizeKB = Math.round((fotoBase64.length * 3/4) / 1024);
+  console.log(`Ukuran foto: ${sizeKB} KB`);
+  
   closeCam();
   
-  document.getElementById('statusCard').innerHTML = '<i class="fa-solid fa-spinner fa-spin text-maroon mr-2"></i>Mengirim data absen...';
+  document.getElementById('statusCard').innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>Mengirim data... (${sizeKB} KB)`;
   
   const res = await api('absen', {
     username: user.username,
