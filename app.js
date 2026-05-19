@@ -124,39 +124,40 @@ function renderDashboard() {
     <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md my-8">
       <div class="text-center mb-4">
         <div class="relative inline-block">
-          <img id="fotoProfil" src="" class="w-28 h-28 rounded-full object-cover mx-auto border-4 border-maroon shadow-lg">
+          <img id="fotoProfil" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=800000&color=fff&size=128'}" 
+               class="w-28 h-28 rounded-full object-cover mx-auto border-4 border-maroon shadow-lg">
           <button onclick="gantiFotoProfil()" class="absolute bottom-0 right-0 bg-maroon text-white p-2 rounded-full shadow-lg hover:bg-maroon-dark">
             <i class="fa-solid fa-camera text-sm"></i>
           </button>
         </div>
-        <h3 id="namaProfil" class="font-bold text-xl mt-3 text-maroon dark:text-white"></h3>
-        <p id="usernameProfil" class="text-gray-500 dark:text-gray-400 text-sm"></p>
+        <h3 class="font-bold text-xl mt-3 text-maroon dark:text-white">${user.nama}</h3>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">@${user.username}</p>
       </div>
       
       <div class="space-y-2 mb-4 max-h-80 overflow-y-auto pr-2 text-sm">
         <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
           <p class="text-xs text-gray-500 dark:text-gray-400">No KTP</p>
-          <p id="ktpProfil" class="font-semibold dark:text-white">-</p>
+          <p id="ktpProfil" class="font-semibold dark:text-white">${user.ktp || '-'}</p>
         </div>
         <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
           <p class="text-xs text-gray-500 dark:text-gray-400">No HP</p>
-          <p id="hpProfil" class="font-semibold dark:text-white">-</p>
+          <p id="hpProfil" class="font-semibold dark:text-white">${user.hp || '-'}</p>
         </div>
         <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
           <p class="text-xs text-gray-500 dark:text-gray-400">Alamat</p>
-          <p id="alamatProfil" class="font-semibold dark:text-white">-</p>
+          <p id="alamatProfil" class="font-semibold dark:text-white">${user.alamat || '-'}</p>
         </div>
         <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
           <p class="text-xs text-gray-500 dark:text-gray-400">Tempat, Tanggal Lahir</p>
-          <p id="ttlProfil" class="font-semibold dark:text-white">-</p>
+          <p id="ttlProfil" class="font-semibold dark:text-white">${user.ttl || '-'}</p>
         </div>
         <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
           <p class="text-xs text-gray-500 dark:text-gray-400">Nama Bank</p>
-          <p id="bankProfil" class="font-semibold dark:text-white">-</p>
+          <p id="bankProfil" class="font-semibold dark:text-white">${user.bank || '-'}</p>
         </div>
         <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
           <p class="text-xs text-gray-500 dark:text-gray-400">No Rekening</p>
-          <p id="rekProfil" class="font-semibold dark:text-white">-</p>
+          <p id="rekProfil" class="font-semibold dark:text-white">${user.rekening || '-'}</p>
         </div>
         
         <!-- GANTI PASSWORD -->
@@ -333,16 +334,6 @@ function toggleDark() {
 }
 
 function openProfil() {
-  document.getElementById('fotoProfil').src = user.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nama)}&background=800000&color=fff&size=128`;
-  document.getElementById('namaProfil').textContent = user.nama;
-  document.getElementById('usernameProfil').textContent = '@' + user.username;
-  document.getElementById('ktpProfil').textContent = user.ktp || '-';
-  document.getElementById('hpProfil').textContent = user.hp || '-';
-  document.getElementById('alamatProfil').textContent = user.alamat || '-';
-  document.getElementById('ttlProfil').textContent = user.ttl || '-';
-  document.getElementById('bankProfil').textContent = user.bank || '-';
-  document.getElementById('rekProfil').textContent = user.rekening || '-';
-  
   document.getElementById('modalProfil').classList.remove('hidden');
   document.getElementById('modalProfil').classList.add('flex');
 }
