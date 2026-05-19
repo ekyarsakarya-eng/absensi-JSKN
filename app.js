@@ -124,65 +124,83 @@ function renderDashboard() {
     <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md my-8">
       <div class="text-center mb-4">
         <div class="relative inline-block">
-          <img id="fotoProfil" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=800000&color=fff&size=128'}" 
-               class="w-28 h-28 rounded-full object-cover mx-auto border-4 border-maroon shadow-lg">
+          <img id="fotoProfil" src="" class="w-28 h-28 rounded-full object-cover mx-auto border-4 border-maroon shadow-lg">
           <button onclick="gantiFotoProfil()" class="absolute bottom-0 right-0 bg-maroon text-white p-2 rounded-full shadow-lg hover:bg-maroon-dark">
             <i class="fa-solid fa-camera text-sm"></i>
           </button>
         </div>
-        <h3 class="font-bold text-xl mt-3 text-maroon dark:text-white">${user.nama}</h3>
-        <p class="text-gray-500 dark:text-gray-400 text-sm">@${user.username}</p>
+        <h3 id="namaProfil" class="font-bold text-xl mt-3 text-maroon dark:text-white"></h3>
+        <p id="usernameProfil" class="text-gray-500 dark:text-gray-400 text-sm"></p>
       </div>
       
-      <div class="space-y-2 mb-4 max-h-80 overflow-y-auto pr-2 text-sm">
+      <!-- VIEW MODE -->
+      <div id="viewMode" class="space-y-2 mb-4 max-h-80 overflow-y-auto pr-2 text-sm">
         <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
           <p class="text-xs text-gray-500 dark:text-gray-400">No KTP</p>
-          <p id="ktpProfil" class="font-semibold dark:text-white">${user.ktp || '-'}</p>
+          <p id="viewKtp" class="font-semibold dark:text-white">-</p>
         </div>
         <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
           <p class="text-xs text-gray-500 dark:text-gray-400">No HP</p>
-          <p id="hpProfil" class="font-semibold dark:text-white">${user.hp || '-'}</p>
+          <p id="viewHp" class="font-semibold dark:text-white">-</p>
         </div>
         <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
           <p class="text-xs text-gray-500 dark:text-gray-400">Alamat</p>
-          <p id="alamatProfil" class="font-semibold dark:text-white">${user.alamat || '-'}</p>
+          <p id="viewAlamat" class="font-semibold dark:text-white">-</p>
         </div>
         <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
           <p class="text-xs text-gray-500 dark:text-gray-400">Tempat, Tanggal Lahir</p>
-          <p id="ttlProfil" class="font-semibold dark:text-white">${user.ttl || '-'}</p>
+          <p id="viewTtl" class="font-semibold dark:text-white">-</p>
         </div>
         <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
           <p class="text-xs text-gray-500 dark:text-gray-400">Nama Bank</p>
-          <p id="bankProfil" class="font-semibold dark:text-white">${user.bank || '-'}</p>
+          <p id="viewBank" class="font-semibold dark:text-white">-</p>
         </div>
         <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
           <p class="text-xs text-gray-500 dark:text-gray-400">No Rekening</p>
-          <p id="rekProfil" class="font-semibold dark:text-white">${user.rekening || '-'}</p>
+          <p id="viewRek" class="font-semibold dark:text-white">-</p>
         </div>
+      </div>
+
+      <!-- EDIT MODE -->
+      <div id="editMode" class="space-y-2 mb-4 max-h-80 overflow-y-auto pr-2 text-sm hidden">
+        <input id="editNama" placeholder="Nama Lengkap" class="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+        <input id="editKtp" placeholder="No KTP" class="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+        <input id="editHp" placeholder="No HP" class="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+        <textarea id="editAlamat" placeholder="Alamat" rows="2" class="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+        <input id="editTtl" placeholder="Tempat, Tanggal Lahir" class="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+        <input id="editBank" placeholder="Nama Bank" class="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+        <input id="editRek" placeholder="No Rekening" class="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
         
-        <!-- GANTI PASSWORD -->
         <div class="bg-maroon/10 dark:bg-maroon/20 p-3 rounded-lg border border-maroon/30">
-          <p class="text-xs text-maroon dark:text-red-300 mb-2 font-bold">Ganti Password</p>
+          <p class="text-xs text-maroon dark:text-red-300 mb-2 font-bold">Ganti Password (Opsional)</p>
           <div class="relative mb-2">
             <input id="passLama" type="password" placeholder="Password Lama" class="w-full p-2 border border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white text-sm">
             <i onclick="togglePassProfil('passLama', this)" class="fa-solid fa-eye absolute right-2 top-3 cursor-pointer text-gray-400 text-xs"></i>
           </div>
-          <div class="relative mb-2">
+          <div class="relative">
             <input id="passBaru" type="password" placeholder="Password Baru" class="w-full p-2 border border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white text-sm">
             <i onclick="togglePassProfil('passBaru', this)" class="fa-solid fa-eye absolute right-2 top-3 cursor-pointer text-gray-400 text-xs"></i>
           </div>
-          <button onclick="gantiPassword()" class="w-full bg-maroon hover:bg-maroon-dark text-white p-2 rounded text-sm font-bold">
-            <i class="fa-solid fa-key mr-1"></i>Update Password
-          </button>
         </div>
       </div>
       
-      <div class="flex gap-2">
-        <button onclick="closeProfil()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-lg font-bold">
-          Tutup
+      <!-- TOMBOL VIEW -->
+      <div id="btnView" class="flex gap-2">
+        <button onclick="modeEdit()" class="flex-1 bg-maroon hover:bg-maroon-dark text-white p-3 rounded-lg font-bold">
+          <i class="fa-solid fa-pen mr-1"></i>Edit
         </button>
         <button onclick="logout()" class="flex-1 bg-red-600 hover:bg-red-700 text-white p-3 rounded-lg font-bold">
           <i class="fa-solid fa-right-from-bracket mr-1"></i>Logout
+        </button>
+      </div>
+
+      <!-- TOMBOL EDIT -->
+      <div id="btnEdit" class="flex gap-2 hidden">
+        <button onclick="batalEdit()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-lg font-bold">
+          Batal
+        </button>
+        <button onclick="simpanProfil()" class="flex-1 bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg font-bold">
+          <i class="fa-solid fa-floppy-disk mr-1"></i>Simpan
         </button>
       </div>
       
@@ -334,6 +352,21 @@ function toggleDark() {
 }
 
 function openProfil() {
+  document.getElementById('fotoProfil').src = user.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nama)}&background=800000&color=fff&size=128`;
+  document.getElementById('namaProfil').textContent = user.nama;
+  document.getElementById('usernameProfil').textContent = '@' + user.username;
+  document.getElementById('viewKtp').textContent = user.ktp || '-';
+  document.getElementById('viewHp').textContent = user.hp || '-';
+  document.getElementById('viewAlamat').textContent = user.alamat || '-';
+  document.getElementById('viewTtl').textContent = user.ttl || '-';
+  document.getElementById('viewBank').textContent = user.bank || '-';
+  document.getElementById('viewRek').textContent = user.rekening || '-';
+  
+  document.getElementById('viewMode').classList.remove('hidden');
+  document.getElementById('editMode').classList.add('hidden');
+  document.getElementById('btnView').classList.remove('hidden');
+  document.getElementById('btnEdit').classList.add('hidden');
+  
   document.getElementById('modalProfil').classList.remove('hidden');
   document.getElementById('modalProfil').classList.add('flex');
 }
@@ -341,8 +374,63 @@ function openProfil() {
 function closeProfil() {
   document.getElementById('modalProfil').classList.add('hidden');
   document.getElementById('modalProfil').classList.remove('flex');
+}
+
+function modeEdit() {
+  document.getElementById('editNama').value = user.nama || '';
+  document.getElementById('editKtp').value = user.ktp || '';
+  document.getElementById('editHp').value = user.hp || '';
+  document.getElementById('editAlamat').value = user.alamat || '';
+  document.getElementById('editTtl').value = user.ttl || '';
+  document.getElementById('editBank').value = user.bank || '';
+  document.getElementById('editRek').value = user.rekening || '';
+  
+  document.getElementById('viewMode').classList.add('hidden');
+  document.getElementById('editMode').classList.remove('hidden');
+  document.getElementById('btnView').classList.add('hidden');
+  document.getElementById('btnEdit').classList.remove('hidden');
+}
+
+function batalEdit() {
+  document.getElementById('viewMode').classList.remove('hidden');
+  document.getElementById('editMode').classList.add('hidden');
+  document.getElementById('btnView').classList.remove('hidden');
+  document.getElementById('btnEdit').classList.add('hidden');
   document.getElementById('passLama').value = '';
   document.getElementById('passBaru').value = '';
+}
+
+async function simpanProfil() {
+  const dataUpdate = {
+    username: user.username,
+    nama: document.getElementById('editNama').value.trim(),
+    ktp: document.getElementById('editKtp').value.trim(),
+    hp: document.getElementById('editHp').value.trim(),
+    alamat: document.getElementById('editAlamat').value.trim(),
+    ttl: document.getElementById('editTtl').value.trim(),
+    bank: document.getElementById('editBank').value.trim(),
+    rekening: document.getElementById('editRek').value.trim(),
+    passLama: document.getElementById('passLama').value,
+    passBaru: document.getElementById('passBaru').value
+  };
+  
+  if (!dataUpdate.nama) return alert('Nama wajib diisi');
+  
+  const res = await api('updateProfil', dataUpdate);
+  alert(res.message);
+  
+  if (res.status === 'success') {
+    user.nama = dataUpdate.nama;
+    user.ktp = dataUpdate.ktp;
+    user.hp = dataUpdate.hp;
+    user.alamat = dataUpdate.alamat;
+    user.ttl = dataUpdate.ttl;
+    user.bank = dataUpdate.bank;
+    user.rekening = dataUpdate.rekening;
+    localStorage.setItem('user', JSON.stringify(user));
+    renderDashboard();
+    closeProfil();
+  }
 }
 
 function gantiFotoProfil() {
