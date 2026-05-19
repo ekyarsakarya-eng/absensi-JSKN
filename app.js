@@ -107,8 +107,10 @@ function renderDashboard() {
       <h3 class="font-bold text-lg mb-3 text-maroon dark:text-white text-center">
         <i class="fa-solid fa-camera mr-2"></i>Ambil Foto Selfie
       </h3>
-      <video id="video" class="w-full rounded-lg bg-black" autoplay playsinline></video>
-      <canvas id="canvas" class="hidden"></canvas>
+      <div style="position:relative">
+        <video id="video" class="w-full rounded-lg bg-black" autoplay playsinline></video>
+        <canvas id="canvas" class="hidden"></canvas>
+      </div>
       <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">Pastikan wajah terlihat jelas</p>
       <div class="flex gap-2 mt-4">
         <button onclick="capture()" class="flex-1 bg-maroon hover:bg-maroon-dark text-white p-3 rounded-lg font-bold transition">
@@ -222,89 +224,85 @@ async function openCamera(type) {
     });
     const video = document.getElementById('video');
     video.srcObject = stream;
-    startWatermarkPreview();
+    
+    // WATERMARK LIVE DI CANVAS, BUKAN DIV TERPISAH
+    video.addEventListener('loadedmetadata', () => {
+      startWatermarkCanvas();
+    });
+    
   } catch (err) {
-    alert('Gagal akses kamera: ' + err.message + '\nPastikan sudah izinkan kamera di browser');
+    alert('Gagal akses kamera: ' + err.message);
     closeCam();
   }
 }
 
-function startWatermarkPreview() {
+function startWatermarkCanvas() {
   const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
   
-  if (!document.getElementById('watermarkOverlay')) {
-    const overlay = document.createElement('div');
-    overlay.id = 'watermarkOverlay';
-    overlay.style.cssText = `
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(0, 0, 0, 0.75);
-      color: white;
-      padding: 8px 12px;
-      font-family: Arial;
-      font-size: 12px;
-      border-radius: 6px;
-      pointer-events: none;
-      line-height: 1.5;
-    `;
-    video.parentElement.style.position = 'relative';
-    video.parentElement.appendChild(overlay);
-  }
-  
-  watermarkInterval = setInterval(() => {
+  const drawFrame = () => {
+    if (!stream || !video.videoWidth) {
+      requestAnimationFrame(drawFrame);
+      return;
+    }
+    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+    
+    // WATERMARK KIRI BAWAH
     const now = new Date();
     const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const tgl = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'numeric', year: 'numeric' });
     
-    document.getElementById('watermarkOverlay').innerHTML = `
-      <div style="font-weight:bold;font-size:18px;margin-bottom:2px">${jam}</div>
-      <div>${tgl}</div>
-      <div>${currentLocation.lat.toFixed(6)},${currentLocation.long.toFixed(6)}</div>
-      <div style="font-size:11px">${currentLocation.alamat.substring(0, 40)}</div>
-    `;
-  }, 1000);
+    const boxHeight = 85;
+    const boxWidth = 270;
+    const padding = 15;
+    
+    // Posisi kiri bawah
+    const x = padding;
+    const y = canvas.height - boxHeight - padding;
+    
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+    ctx.fillRect(x, y, boxWidth, boxHeight);
+    
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 22px Arial';
+    ctx.fillText(jam, x + 10, y + 25);
+    
+    ctx.font = '14px Arial';
+    ctx.fillText(tgl, x + 10, y + 44);
+    ctx.fillText(`${currentLocation.lat.toFixed(6)},${currentLocation.long.toFixed(6)}`, x + 10, y + 61);
+    
+    ctx.font = '11px Arial';
+    ctx.fillText(currentLocation.alamat.substring(0, 40), x + 10, y + 77);
+    
+    // Render canvas ke video element
+    video.style.display = 'none';
+    canvas.style.display = 'block';
+    canvas.style.width = '100%';
+    canvas.style.borderRadius = '8px';
+    
+    requestAnimationFrame(drawFrame);
+  };
+  
+  drawFrame();
 }
 
 function closeCam() {
   if (stream) stream.getTracks().forEach(t => t.stop());
   if (watermarkInterval) clearInterval(watermarkInterval);
-  const overlay = document.getElementById('watermarkOverlay');
-  if (overlay) overlay.remove();
   document.getElementById('modalCam').classList.add('hidden');
   document.getElementById('modalCam').classList.remove('flex');
+  document.getElementById('video').style.display = 'block';
+  document.getElementById('canvas').style.display = 'none';
 }
 
 async function capture() {
-  const video = document.getElementById('video');
   const canvas = document.getElementById('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(video, 0, 0);
-  
-  // WATERMARK STYLE TIMEMARK - PERMANEN DI FOTO
-  const now = new Date();
-  const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  const tgl = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'numeric', year: 'numeric' });
-  
-  const boxHeight = 90;
-  const boxWidth = 280;
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
-  ctx.fillRect(15, 15, boxWidth, boxHeight);
-  
-  ctx.fillStyle = 'white';
-  ctx.font = 'bold 26px Arial';
-  ctx.fillText(jam, 25, 45);
-  
-  ctx.font = '15px Arial';
-  ctx.fillText(tgl, 25, 65);
-  ctx.fillText(`${currentLocation.lat.toFixed(6)},${currentLocation.long.toFixed(6)}`, 25, 83);
-  
-  ctx.font = '12px Arial';
-  ctx.fillText(currentLocation.alamat.substring(0, 42), 25, 100);
-  
-  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.9);
+  // Canvas udah ada watermark dari startWatermarkCanvas, langsung pake
+  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.8);
   closeCam();
   
   document.getElementById('statusCard').innerHTML = '<i class="fa-solid fa-spinner fa-spin text-maroon mr-2"></i>Mengirim data absen...';
@@ -320,7 +318,6 @@ async function capture() {
   cekStatus();
 }
 
-// AMBIL NAMA ALAMAT DARI KOORDINAT
 async function getAddress(lat, long) {
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${long}&zoom=18&addressdetails=1`);
