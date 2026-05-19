@@ -242,8 +242,6 @@ function drawLiveWatermark() {
   
   video.style.display = 'none';
   canvas.style.display = 'block';
-  canvas.classList.remove('hidden');
-  canvas.classList.add('w-full', 'rounded-lg');
   
   function draw() {
     if (!stream || video.paused || video.ended) {
@@ -255,8 +253,8 @@ function drawLiveWatermark() {
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0);
     
-    // WATERMARK GEDE - SESUAIKAN SAMA RESOLUSI
-    const scale = canvas.width / 800; // Base 800px
+    // WATERMARK KIRI BAWAH - GEDE
+    const scale = canvas.width / 800;
     const now = new Date();
     const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const tgl = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'numeric', year: 'numeric' });
@@ -264,8 +262,10 @@ function drawLiveWatermark() {
     const boxHeight = 120 * scale;
     const boxWidth = 360 * scale;
     const padding = 20 * scale;
+    
+    // KIRI BAWAH: x = padding, y = canvas.height - boxHeight - padding
     const x = padding;
-    const y = padding;
+    const y = canvas.height - boxHeight - padding;
     
     ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
     ctx.fillRect(x, y, boxWidth, boxHeight);
@@ -286,25 +286,24 @@ function drawLiveWatermark() {
   draw();
 }
 
+function closeCam() {
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  if (animationFrame) cancelAnimationFrame(animationFrame);
+  
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  video.style.display = 'block';
+  canvas.style.display = 'none';
+  
+  document.getElementById('modalCam').classList.add('hidden');
+  document.getElementById('modalCam').classList.remove('flex');
+}
+
 async function capture() {
   const canvas = document.getElementById('canvas');
-  // Foto dikompres 800px max + quality 70%
-  const MAX_WIDTH = 800;
-  let width = canvas.width;
-  let height = canvas.height;
+  // Canvas udah ada watermark, langsung kompres & kirim
+  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
   
-  if (width > MAX_WIDTH) {
-    height = (height * MAX_WIDTH) / width;
-    width = MAX_WIDTH;
-  }
-  
-  const finalCanvas = document.createElement('canvas');
-  finalCanvas.width = width;
-  finalCanvas.height = height;
-  const ctx = finalCanvas.getContext('2d');
-  ctx.drawImage(canvas, 0, 0, width, height);
-  
-  const fotoBase64 = finalCanvas.toDataURL('image/jpeg', 0.7);
   const sizeKB = Math.round((fotoBase64.length * 3/4) / 1024);
   console.log(`Ukuran foto: ${sizeKB} KB`);
   
