@@ -109,11 +109,20 @@ function toggleDark() {
 
 async function cekStatus() {
   const s = await api('getStatus', {username: user.username});
-  document.getElementById('btnIn').disabled =!s.bisaIn;
-  document.getElementById('btnOut').disabled =!s.bisaOut;
-  let txt = 'Silakan absen masuk';
-  if (!s.bisaIn && s.bisaOut) txt = 'Anda sudah absen masuk. Silakan absen pulang';
-  if (!s.bisaIn &&!s.bisaOut) txt = `Semua tombol dikunci. Tunggu ${s.sisaJam} jam lagi`;
+  document.getElementById('btnIn').disabled = !s.bisaIn;
+  document.getElementById('btnOut').disabled = !s.bisaOut;
+  
+  let txt = '';
+  if (s.lock12Jam) {
+    txt = `Semua tombol dikunci. Tunggu ${s.sisaJam} jam lagi`;
+  } else if (s.sudahIn && s.sudahOut) {
+    txt = 'Anda sudah absen masuk & pulang hari ini';
+  } else if (s.sudahIn && !s.sudahOut) {
+    txt = 'Anda sudah absen masuk. Silakan absen pulang';
+  } else {
+    txt = 'Silakan absen masuk untuk memulai';
+  }
+  
   document.getElementById('statusCard').innerHTML = txt;
 }
 
