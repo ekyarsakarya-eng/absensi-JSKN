@@ -6,7 +6,7 @@ let currentType = '';
 let stream = null;
 let animationFrame = null;
 let currentLocation = { lat: 0, long: 0, alamat: 'Mengambil lokasi...' };
-let currentPage = 'home'; // home, rekap, patroli, kejadian, pembinaan
+let currentPage = 'home';
 
 if (isDark) document.documentElement.classList.add('dark');
 
@@ -56,12 +56,13 @@ function renderDashboard() {
         <p class="text-xs opacity-80">${new Date().toLocaleDateString('id-ID', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}</p>
       </div>
     </div>
-    <div class="flex gap-4 items-center">
+    <div class="flex gap-3 items-center">
       <button onclick="toggleDark()" class="hover:bg-maroon-dark p-2 rounded-lg transition">
         <i class="fa-solid ${isDark? 'fa-sun' : 'fa-moon'} text-xl"></i>
       </button>
-      <button onclick="logout()" class="hover:bg-maroon-dark p-2 rounded-lg transition">
-        <i class="fa-solid fa-right-from-bracket text-xl"></i>
+      <button onclick="openProfil()" class="flex items-center gap-2 hover:bg-maroon-dark p-1 pr-3 rounded-full transition">
+        <img id="avatarNav" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=800000&color=fff'}" 
+             class="w-9 h-9 rounded-full object-cover border-2 border-white">
       </button>
     </div>
   </nav>
@@ -96,6 +97,7 @@ function renderDashboard() {
     </div>
   </div>
   
+  <!-- MODAL CAM -->
   <div id="modalCam" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-50">
     <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 w-full max-w-md">
       <h3 class="font-bold text-lg mb-3 text-maroon dark:text-white text-center">
@@ -114,6 +116,45 @@ function renderDashboard() {
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
+    </div>
+  </div>
+  
+  <!-- MODAL PROFIL -->
+  <div id="modalProfil" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-50">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md">
+      <div class="text-center mb-4">
+        <div class="relative inline-block">
+          <img id="fotoProfil" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=800000&color=fff&size=128'}" 
+               class="w-28 h-28 rounded-full object-cover mx-auto border-4 border-maroon shadow-lg">
+          <button onclick="gantiFotoProfil()" class="absolute bottom-0 right-0 bg-maroon text-white p-2 rounded-full shadow-lg hover:bg-maroon-dark">
+            <i class="fa-solid fa-camera text-sm"></i>
+          </button>
+        </div>
+        <h3 class="font-bold text-xl mt-3 text-maroon dark:text-white">${user.nama}</h3>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">@${user.username}</p>
+      </div>
+      
+      <div class="space-y-3 mb-4">
+        <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
+          <p class="text-xs text-gray-500 dark:text-gray-400">Jabatan</p>
+          <p class="font-semibold dark:text-white">${user.jabatan || 'Karyawan'}</p>
+        </div>
+        <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
+          <p class="text-xs text-gray-500 dark:text-gray-400">No. HP</p>
+          <p class="font-semibold dark:text-white">${user.hp || '-'}</p>
+        </div>
+      </div>
+      
+      <div class="flex gap-2">
+        <button onclick="closeProfil()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-lg font-bold">
+          Tutup
+        </button>
+        <button onclick="logout()" class="flex-1 bg-red-600 hover:bg-red-700 text-white p-3 rounded-lg font-bold">
+          <i class="fa-solid fa-right-from-bracket mr-1"></i>Logout
+        </button>
+      </div>
+      
+      <input type="file" id="inputFotoProfil" accept="image/*" class="hidden" onchange="uploadFotoProfil(event)">
     </div>
   </div>`;
   
@@ -211,7 +252,6 @@ function renderPembinaan() {
   `;
 }
 
-// SISA FUNGSI SAMA PERSIS KAYAK SEBELUMNYA
 async function login() {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value.trim();
@@ -259,6 +299,48 @@ function toggleDark() {
   localStorage.setItem('dark', isDark);
   document.documentElement.classList.toggle('dark');
   render();
+}
+
+function openProfil() {
+  document.getElementById('modalProfil').classList.remove('hidden');
+  document.getElementById('modalProfil').classList.add('flex');
+}
+
+function closeProfil() {
+  document.getElementById('modalProfil').classList.add('hidden');
+  document.getElementById('modalProfil').classList.remove('flex');
+}
+
+function gantiFotoProfil() {
+  document.getElementById('inputFotoProfil').click();
+}
+
+async function uploadFotoProfil(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = async (event) => {
+    const fotoBase64 = event.target.result;
+    
+    document.getElementById('fotoProfil').src = fotoBase64;
+    document.getElementById('avatarNav').src = fotoBase64;
+    
+    const res = await api('updateFotoProfil', {
+      username: user.username,
+      fotoBase64: fotoBase64
+    });
+    
+    if (res.status === 'success') {
+      user.foto = res.urlFoto;
+      localStorage.setItem('user', JSON.stringify(user));
+      alert('Foto profil berhasil diupdate');
+    } else {
+      alert('Gagal: ' + res.message);
+      renderDashboard();
+    }
+  };
+  reader.readAsDataURL(file);
 }
 
 async function cekStatus() {
