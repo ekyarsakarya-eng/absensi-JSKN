@@ -46,10 +46,10 @@ function renderDashboard() {
     <div id="statusCard" class="bg-white dark:bg-gray-800 p-4 rounded-xl mb-4 text-center dark:text-white">Loading...</div>
     
     <div class="grid grid-cols-2 gap-4 mb-6">
-      <button id="btnIn" onclick="openCamera('IN')" class="bg-green-600 text-white p-6 rounded-xl shadow-lg disabled:bg-gray-400">
+      <button id="btnIn" onclick="openCamera('IN')" class="bg-green-600 text-white p-6 rounded-xl shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition">
         <i class="fa-solid fa-right-to-bracket text-3xl mb-2"></i><br>Absen Masuk
       </button>
-      <button id="btnOut" onclick="openCamera('OUT')" class="bg-red-600 text-white p-6 rounded-xl shadow-lg disabled:bg-gray-400">
+      <button id="btnOut" onclick="openCamera('OUT')" class="bg-red-600 text-white p-6 rounded-xl shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition">
         <i class="fa-solid fa-right-from-bracket text-3xl mb-2"></i><br>Absen Pulang
       </button>
     </div>
@@ -61,13 +61,12 @@ function renderDashboard() {
     </div>
   </div>
   
-  <!-- Modal Camera -->
-  <div id="modalCam" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4">
+  <div id="modalCam" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50">
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 w-full max-w-md">
-      <video id="video" class="w-full rounded-lg" autoplay></video>
+      <video id="video" class="w-full rounded-lg" autoplay playsinline></video>
       <canvas id="canvas" class="hidden"></canvas>
       <div class="flex gap-2 mt-3">
-        <button onclick="capture()" class="flex-1 bg-maroon text-white p-3 rounded-lg">Ambil Foto</button>
+        <button onclick="capture()" class="flex-1 bg-maroon text-white p-3 rounded-lg font-bold">Ambil Foto</button>
         <button onclick="closeCam()" class="bg-gray-500 text-white p-3 rounded-lg">Batal</button>
       </div>
     </div>
@@ -79,6 +78,8 @@ function renderDashboard() {
 async function login() {
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
+  if (!username || !password) return alert('Isi username & password');
+  
   const res = await api('login', {username, password});
   if (res.status === 'success') {
     user = res;
@@ -97,11 +98,11 @@ function logout() {
 
 function togglePass() {
   const p = document.getElementById('password');
-  p.type = p.type === 'password'? 'text' : 'password';
+  p.type = p.type === 'password' ? 'text' : 'password';
 }
 
 function toggleDark() {
-  isDark =!isDark;
+  isDark = !isDark;
   localStorage.setItem('dark', isDark);
   document.documentElement.classList.toggle('dark');
   render();
@@ -109,6 +110,13 @@ function toggleDark() {
 
 async function cekStatus() {
   const s = await api('getStatus', {username: user.username});
+  console.log('Status:', s);
+  
+  if (s.error) {
+    document.getElementById('statusCard').innerHTML = `<span class="text-red-500">Error: ${s.error}</span>`;
+    return;
+  }
+  
   document.getElementById('btnIn').disabled = !s.bisaIn;
   document.getElementById('btnOut').disabled = !s.bisaOut;
   
@@ -133,13 +141,19 @@ async function openCamera(type) {
   currentType = type;
   document.getElementById('modalCam').classList.remove('hidden');
   document.getElementById('modalCam').classList.add('flex');
-  stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-  document.getElementById('video').srcObject = stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+    document.getElementById('video').srcObject = stream;
+  } catch (err) {
+    alert('Gagal akses kamera: ' + err.message);
+    closeCam();
+  }
 }
 
 function closeCam() {
   if (stream) stream.getTracks().forEach(t => t.stop());
   document.getElementById('modalCam').classList.add('hidden');
+  document.getElementById('modalCam').classList.remove('flex');
 }
 
 async function capture() {
@@ -150,21 +164,32 @@ async function capture() {
   const ctx = canvas.getContext('2d');
   ctx.drawImage(video, 0, 0);
   
-  // Watermark TIMEMARK
+  // WATERMARK TIMEMARK MAROON
   const now = new Date();
-  const timeStr = now.toLocaleString('id-ID');
-  ctx.fillStyle = 'rgba(0,0,0,0.5)';
-  ctx.fillRect(0, canvas.height - 60, canvas.width, 60);
-  ctx.fillStyle = 'white';
-  ctx.font = '20px Arial';
-  ctx.fillText(`TIMEMARK - ${user.nama}`, 10, canvas.height - 35);
-  ctx.fillText(timeStr, 10, canvas.height - 10);
+  const timeStr = now.toLocaleString('id-ID', { 
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
   
-  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+  const barHeight = 90;
+  ctx.fillStyle = 'rgba(128, 0, 0, 0.85)';
+  ctx.fillRect(0, canvas.height - barHeight, canvas.width, barHeight);
+  
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold 28px Arial';
+  ctx.fillText(`TIMEMARK`, 20, canvas.height - 60);
+  ctx.font = 'bold 20px Arial';
+  ctx.fillText(`${user.nama}`, 20, canvas.height - 35);
+  ctx.font = '16px Arial';
+  ctx.fillText(timeStr, 20, canvas.height - 12);
+  
+  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.85);
   closeCam();
   
-  // Get lokasi
+  document.getElementById('statusCard').innerHTML = 'Mengambil lokasi...';
+  
   navigator.geolocation.getCurrentPosition(async pos => {
+    document.getElementById('statusCard').innerHTML = 'Mengirim data...';
     const res = await api('absen', {
       username: user.username,
       type: currentType,
@@ -174,18 +199,24 @@ async function capture() {
     });
     alert(res.message);
     cekStatus();
-  }, () => alert('Gagal ambil lokasi. Aktifkan GPS'));
+  }, (err) => {
+    alert('Gagal ambil lokasi: ' + err.message + '. Aktifkan GPS dan izinkan lokasi');
+    cekStatus();
+  }, { enableHighAccuracy: true, timeout: 10000 });
 }
 
 async function api(action, data) {
-  const res = await fetch(URL_GAS, {
-    method: 'POST',
-    body: JSON.stringify({action,...data})
-  });
-  return await res.json();
+  try {
+    const res = await fetch(URL_GAS, {
+      method: 'POST',
+      body: JSON.stringify({action, ...data})
+    });
+    return await res.json();
+  } catch (err) {
+    return {status: 'error', message: 'Gagal koneksi ke server: ' + err.message};
+  }
 }
 
-// PWA
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
 }
