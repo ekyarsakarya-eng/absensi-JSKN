@@ -242,6 +242,8 @@ function drawLiveWatermark() {
   
   video.style.display = 'none';
   canvas.style.display = 'block';
+  canvas.classList.remove('hidden');
+  canvas.classList.add('w-full', 'rounded-lg');
   
   function draw() {
     if (!stream || video.paused || video.ended) {
@@ -253,55 +255,56 @@ function drawLiveWatermark() {
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0);
     
-    // WATERMARK KIRI BAWAH
+    // WATERMARK GEDE - SESUAIKAN SAMA RESOLUSI
+    const scale = canvas.width / 800; // Base 800px
     const now = new Date();
     const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const tgl = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'numeric', year: 'numeric' });
     
-    const boxHeight = 88;
-    const boxWidth = 280;
-    const padding = 12;
-    
-    // Posisi KIRI BAWAH
+    const boxHeight = 120 * scale;
+    const boxWidth = 360 * scale;
+    const padding = 20 * scale;
     const x = padding;
-    const y = canvas.height - boxHeight - padding;
+    const y = padding;
     
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
     ctx.fillRect(x, y, boxWidth, boxHeight);
     
     ctx.fillStyle = 'white';
-    ctx.font = 'bold 26px Arial';
-    ctx.fillText(jam, x + 10, y + 28);
+    ctx.font = `bold ${34 * scale}px Arial`;
+    ctx.fillText(jam, x + 12, y + 35 * scale);
     
-    ctx.font = '15px Arial';
-    ctx.fillText(tgl, x + 10, y + 47);
-    ctx.fillText(`${currentLocation.lat.toFixed(6)},${currentLocation.long.toFixed(6)}`, x + 10, y + 65);
+    ctx.font = `${18 * scale}px Arial`;
+    ctx.fillText(tgl, x + 12, y + 58 * scale);
+    ctx.fillText(`${currentLocation.lat.toFixed(6)},${currentLocation.long.toFixed(6)}`, x + 12, y + 78 * scale);
     
-    ctx.font = '12px Arial';
-    ctx.fillText(currentLocation.alamat.substring(0, 42), x + 10, y + 81);
+    ctx.font = `${14 * scale}px Arial`;
+    ctx.fillText(currentLocation.alamat.substring(0, 45), x + 12, y + 98 * scale);
     
     animationFrame = requestAnimationFrame(draw);
   }
   draw();
 }
 
-function closeCam() {
-  if (stream) stream.getTracks().forEach(t => t.stop());
-  if (animationFrame) cancelAnimationFrame(animationFrame);
-  
-  const video = document.getElementById('video');
-  const canvas = document.getElementById('canvas');
-  video.style.display = 'block';
-  canvas.style.display = 'none';
-  
-  document.getElementById('modalCam').classList.add('hidden');
-  document.getElementById('modalCam').classList.remove('flex');
-}
-
 async function capture() {
   const canvas = document.getElementById('canvas');
-  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+  // Foto dikompres 800px max + quality 70%
+  const MAX_WIDTH = 800;
+  let width = canvas.width;
+  let height = canvas.height;
   
+  if (width > MAX_WIDTH) {
+    height = (height * MAX_WIDTH) / width;
+    width = MAX_WIDTH;
+  }
+  
+  const finalCanvas = document.createElement('canvas');
+  finalCanvas.width = width;
+  finalCanvas.height = height;
+  const ctx = finalCanvas.getContext('2d');
+  ctx.drawImage(canvas, 0, 0, width, height);
+  
+  const fotoBase64 = finalCanvas.toDataURL('image/jpeg', 0.7);
   const sizeKB = Math.round((fotoBase64.length * 3/4) / 1024);
   console.log(`Ukuran foto: ${sizeKB} KB`);
   
