@@ -120,28 +120,59 @@ function renderDashboard() {
   </div>
   
   <!-- MODAL PROFIL -->
-  <div id="modalProfil" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-50">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md">
+  <div id="modalProfil" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-50 overflow-y-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md my-8">
       <div class="text-center mb-4">
         <div class="relative inline-block">
-          <img id="fotoProfil" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=800000&color=fff&size=128'}" 
-               class="w-28 h-28 rounded-full object-cover mx-auto border-4 border-maroon shadow-lg">
+          <img id="fotoProfil" src="" class="w-28 h-28 rounded-full object-cover mx-auto border-4 border-maroon shadow-lg">
           <button onclick="gantiFotoProfil()" class="absolute bottom-0 right-0 bg-maroon text-white p-2 rounded-full shadow-lg hover:bg-maroon-dark">
             <i class="fa-solid fa-camera text-sm"></i>
           </button>
         </div>
-        <h3 class="font-bold text-xl mt-3 text-maroon dark:text-white">${user.nama}</h3>
-        <p class="text-gray-500 dark:text-gray-400 text-sm">@${user.username}</p>
+        <h3 id="namaProfil" class="font-bold text-xl mt-3 text-maroon dark:text-white"></h3>
+        <p id="usernameProfil" class="text-gray-500 dark:text-gray-400 text-sm"></p>
       </div>
       
-      <div class="space-y-3 mb-4">
-        <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
-          <p class="text-xs text-gray-500 dark:text-gray-400">Jabatan</p>
-          <p class="font-semibold dark:text-white">${user.jabatan || 'Karyawan'}</p>
+      <div class="space-y-2 mb-4 max-h-80 overflow-y-auto pr-2 text-sm">
+        <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
+          <p class="text-xs text-gray-500 dark:text-gray-400">No KTP</p>
+          <p id="ktpProfil" class="font-semibold dark:text-white">-</p>
         </div>
-        <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
-          <p class="text-xs text-gray-500 dark:text-gray-400">No. HP</p>
-          <p class="font-semibold dark:text-white">${user.hp || '-'}</p>
+        <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
+          <p class="text-xs text-gray-500 dark:text-gray-400">No HP</p>
+          <p id="hpProfil" class="font-semibold dark:text-white">-</p>
+        </div>
+        <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
+          <p class="text-xs text-gray-500 dark:text-gray-400">Alamat</p>
+          <p id="alamatProfil" class="font-semibold dark:text-white">-</p>
+        </div>
+        <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
+          <p class="text-xs text-gray-500 dark:text-gray-400">Tempat, Tanggal Lahir</p>
+          <p id="ttlProfil" class="font-semibold dark:text-white">-</p>
+        </div>
+        <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
+          <p class="text-xs text-gray-500 dark:text-gray-400">Nama Bank</p>
+          <p id="bankProfil" class="font-semibold dark:text-white">-</p>
+        </div>
+        <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
+          <p class="text-xs text-gray-500 dark:text-gray-400">No Rekening</p>
+          <p id="rekProfil" class="font-semibold dark:text-white">-</p>
+        </div>
+        
+        <!-- GANTI PASSWORD -->
+        <div class="bg-maroon/10 dark:bg-maroon/20 p-3 rounded-lg border border-maroon/30">
+          <p class="text-xs text-maroon dark:text-red-300 mb-2 font-bold">Ganti Password</p>
+          <div class="relative mb-2">
+            <input id="passLama" type="password" placeholder="Password Lama" class="w-full p-2 border border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white text-sm">
+            <i onclick="togglePassProfil('passLama', this)" class="fa-solid fa-eye absolute right-2 top-3 cursor-pointer text-gray-400 text-xs"></i>
+          </div>
+          <div class="relative mb-2">
+            <input id="passBaru" type="password" placeholder="Password Baru" class="w-full p-2 border border-gray-300 rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white text-sm">
+            <i onclick="togglePassProfil('passBaru', this)" class="fa-solid fa-eye absolute right-2 top-3 cursor-pointer text-gray-400 text-xs"></i>
+          </div>
+          <button onclick="gantiPassword()" class="w-full bg-maroon hover:bg-maroon-dark text-white p-2 rounded text-sm font-bold">
+            <i class="fa-solid fa-key mr-1"></i>Update Password
+          </button>
         </div>
       </div>
       
@@ -302,6 +333,16 @@ function toggleDark() {
 }
 
 function openProfil() {
+  document.getElementById('fotoProfil').src = user.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nama)}&background=800000&color=fff&size=128`;
+  document.getElementById('namaProfil').textContent = user.nama;
+  document.getElementById('usernameProfil').textContent = '@' + user.username;
+  document.getElementById('ktpProfil').textContent = user.ktp || '-';
+  document.getElementById('hpProfil').textContent = user.hp || '-';
+  document.getElementById('alamatProfil').textContent = user.alamat || '-';
+  document.getElementById('ttlProfil').textContent = user.ttl || '-';
+  document.getElementById('bankProfil').textContent = user.bank || '-';
+  document.getElementById('rekProfil').textContent = user.rekening || '-';
+  
   document.getElementById('modalProfil').classList.remove('hidden');
   document.getElementById('modalProfil').classList.add('flex');
 }
@@ -309,6 +350,8 @@ function openProfil() {
 function closeProfil() {
   document.getElementById('modalProfil').classList.add('hidden');
   document.getElementById('modalProfil').classList.remove('flex');
+  document.getElementById('passLama').value = '';
+  document.getElementById('passBaru').value = '';
 }
 
 function gantiFotoProfil() {
@@ -322,7 +365,6 @@ async function uploadFotoProfil(e) {
   const reader = new FileReader();
   reader.onload = async (event) => {
     const fotoBase64 = event.target.result;
-    
     document.getElementById('fotoProfil').src = fotoBase64;
     document.getElementById('avatarNav').src = fotoBase64;
     
@@ -341,6 +383,36 @@ async function uploadFotoProfil(e) {
     }
   };
   reader.readAsDataURL(file);
+}
+
+function togglePassProfil(id, icon) {
+  const p = document.getElementById(id);
+  if (p.type === 'password') {
+    p.type = 'text';
+    icon.classList.replace('fa-eye', 'fa-eye-slash');
+  } else {
+    p.type = 'password';
+    icon.classList.replace('fa-eye-slash', 'fa-eye');
+  }
+}
+
+async function gantiPassword() {
+  const passLama = document.getElementById('passLama').value;
+  const passBaru = document.getElementById('passBaru').value;
+  if (!passLama ||!passBaru) return alert('Password lama & baru wajib diisi');
+  if (passBaru.length < 4) return alert('Password baru minimal 4 karakter');
+  
+  const res = await api('gantiPassword', {
+    username: user.username,
+    passLama: passLama,
+    passBaru: passBaru
+  });
+  
+  alert(res.message);
+  if (res.status === 'success') {
+    document.getElementById('passLama').value = '';
+    document.getElementById('passBaru').value = '';
+  }
 }
 
 async function cekStatus() {
