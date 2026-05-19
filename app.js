@@ -6,6 +6,7 @@ let currentType = '';
 let stream = null;
 let animationFrame = null;
 let currentLocation = { lat: 0, long: 0, alamat: 'Mengambil lokasi...' };
+let currentPage = 'home'; // home, rekap, patroli, kejadian, pembinaan
 
 if (isDark) document.documentElement.classList.add('dark');
 
@@ -65,39 +66,32 @@ function renderDashboard() {
     </div>
   </nav>
   
-  <div class="p-4 max-w-2xl mx-auto pb-20">
-    <div id="statusCard" class="bg-white dark:bg-gray-800 p-4 rounded-xl mb-4 text-center dark:text-white shadow-md border-l-4 border-maroon">
-      <i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading status...
-    </div>
-    
-    <div class="grid grid-cols-2 gap-4 mb-6">
-      <button id="btnIn" onclick="openCamera('IN')" class="bg-gradient-to-br from-green-500 to-green-700 text-white p-6 rounded-xl shadow-lg disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition transform active:scale-95">
-        <i class="fa-solid fa-right-to-bracket text-3xl mb-2"></i><br>
-        <span class="font-bold">Absen Masuk</span>
+  <div id="contentArea" class="p-4 max-w-2xl mx-auto pb-24">
+    ${renderPage()}
+  </div>
+  
+  <!-- BOTTOM NAV -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-20">
+    <div class="grid grid-cols-5 gap-1 max-w-2xl mx-auto">
+      <button onclick="switchPage('home')" class="flex flex-col items-center py-2 ${currentPage==='home'?'text-maroon':'text-gray-500'}">
+        <i class="fa-solid fa-house text-xl mb-1"></i>
+        <span class="text-xs font-semibold">Home</span>
       </button>
-      <button id="btnOut" onclick="openCamera('OUT')" class="bg-gradient-to-br from-red-500 to-red-700 text-white p-6 rounded-xl shadow-lg disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition transform active:scale-95">
-        <i class="fa-solid fa-right-from-bracket text-3xl mb-2"></i><br>
-        <span class="font-bold">Absen Pulang</span>
+      <button onclick="switchPage('rekap')" class="flex flex-col items-center py-2 ${currentPage==='rekap'?'text-maroon':'text-gray-500'}">
+        <img src="icon-rekap.png" class="w-6 h-6 mb-1 ${currentPage!=='rekap'?'opacity-50':''}">
+        <span class="text-xs font-semibold">Rekap</span>
       </button>
-    </div>
-    
-    <h3 class="font-bold text-gray-700 dark:text-gray-300 mb-3 text-sm">MENU LAINNYA</h3>
-    <div class="grid grid-cols-2 gap-3 text-center">
-      <button onclick="alert('Fitur Rekap Absen - Coming Soon')" class="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-5 rounded-xl shadow-md active:scale-95 transition">
-        <i class="fa-solid fa-calendar-check text-2xl mb-1"></i><br>
-        <span class="text-sm font-semibold">Rekap Absen</span>
+      <button onclick="switchPage('patroli')" class="flex flex-col items-center py-2 ${currentPage==='patroli'?'text-maroon':'text-gray-500'}">
+        <img src="icon-patroli.png" class="w-6 h-6 mb-1 ${currentPage!=='patroli'?'opacity-50':''}">
+        <span class="text-xs font-semibold">Patroli</span>
       </button>
-      <button onclick="alert('Fitur Patroli - Coming Soon')" class="bg-gradient-to-br from-amber-500 to-amber-700 text-white p-5 rounded-xl shadow-md active:scale-95 transition">
-        <i class="fa-solid fa-person-walking text-2xl mb-1"></i><br>
-        <span class="text-sm font-semibold">Patroli</span>
+      <button onclick="switchPage('kejadian')" class="flex flex-col items-center py-2 ${currentPage==='kejadian'?'text-maroon':'text-gray-500'}">
+        <img src="icon-kejadian.png" class="w-6 h-6 mb-1 ${currentPage!=='kejadian'?'opacity-50':''}">
+        <span class="text-xs font-semibold">Kejadian</span>
       </button>
-      <button onclick="alert('Fitur Kejadian - Coming Soon')" class="bg-gradient-to-br from-purple-500 to-purple-700 text-white p-5 rounded-xl shadow-md active:scale-95 transition">
-        <i class="fa-solid fa-triangle-exclamation text-2xl mb-1"></i><br>
-        <span class="text-sm font-semibold">Kejadian</span>
-      </button>
-      <button onclick="alert('Fitur Pembinaan Anggota - Coming Soon')" class="bg-gradient-to-br from-teal-500 to-teal-700 text-white p-5 rounded-xl shadow-md active:scale-95 transition">
-        <i class="fa-solid fa-users text-2xl mb-1"></i><br>
-        <span class="text-sm font-semibold">Pembinaan</span>
+      <button onclick="switchPage('pembinaan')" class="flex flex-col items-center py-2 ${currentPage==='pembinaan'?'text-maroon':'text-gray-500'}">
+        <img src="icon-pembinaan.png" class="w-6 h-6 mb-1 ${currentPage!=='pembinaan'?'opacity-50':''}">
+        <span class="text-xs font-semibold">Bina</span>
       </button>
     </div>
   </div>
@@ -123,9 +117,101 @@ function renderDashboard() {
     </div>
   </div>`;
   
-  cekStatus();
+  if (currentPage === 'home') cekStatus();
 }
 
+function switchPage(page) {
+  currentPage = page;
+  renderDashboard();
+}
+
+function renderPage() {
+  switch(currentPage) {
+    case 'home': return renderHome();
+    case 'rekap': return renderRekap();
+    case 'patroli': return renderPatroli();
+    case 'kejadian': return renderKejadian();
+    case 'pembinaan': return renderPembinaan();
+    default: return renderHome();
+  }
+}
+
+function renderHome() {
+  return `
+    <div id="statusCard" class="bg-white dark:bg-gray-800 p-4 rounded-xl mb-4 text-center dark:text-white shadow-md border-l-4 border-maroon">
+      <i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading status...
+    </div>
+    
+    <div class="grid grid-cols-2 gap-4 mb-6">
+      <button id="btnIn" onclick="openCamera('IN')" class="bg-gradient-to-br from-green-500 to-green-700 text-white p-6 rounded-xl shadow-lg disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition transform active:scale-95">
+        <i class="fa-solid fa-right-to-bracket text-3xl mb-2"></i><br>
+        <span class="font-bold">Absen Masuk</span>
+      </button>
+      <button id="btnOut" onclick="openCamera('OUT')" class="bg-gradient-to-br from-red-500 to-red-700 text-white p-6 rounded-xl shadow-lg disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition transform active:scale-95">
+        <i class="fa-solid fa-right-from-bracket text-3xl mb-2"></i><br>
+        <span class="font-bold">Absen Pulang</span>
+      </button>
+    </div>
+  `;
+}
+
+function renderRekap() {
+  return `
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md text-center">
+      <img src="icon-rekap.png" class="w-20 h-20 mx-auto mb-3">
+      <h2 class="text-xl font-bold text-maroon dark:text-white mb-2">Rekap Absen</h2>
+      <p class="text-gray-600 dark:text-gray-400 mb-4">Fitur rekap kehadiran bulanan</p>
+      <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+        <i class="fa-solid fa-tools text-yellow-600 mr-2"></i>
+        <span class="text-sm text-yellow-800 dark:text-yellow-200">Dalam pengembangan</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderPatroli() {
+  return `
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md text-center">
+      <img src="icon-patroli.png" class="w-20 h-20 mx-auto mb-3">
+      <h2 class="text-xl font-bold text-maroon dark:text-white mb-2">Patroli</h2>
+      <p class="text-gray-600 dark:text-gray-400 mb-4">Laporkan kegiatan patroli dengan foto & GPS</p>
+      <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+        <i class="fa-solid fa-tools text-yellow-600 mr-2"></i>
+        <span class="text-sm text-yellow-800 dark:text-yellow-200">Dalam pengembangan</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderKejadian() {
+  return `
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md text-center">
+      <img src="icon-kejadian.png" class="w-20 h-20 mx-auto mb-3">
+      <h2 class="text-xl font-bold text-maroon dark:text-white mb-2">Lapor Kejadian</h2>
+      <p class="text-gray-600 dark:text-gray-400 mb-4">Laporkan kejadian penting di lokasi</p>
+      <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+        <i class="fa-solid fa-tools text-yellow-600 mr-2"></i>
+        <span class="text-sm text-yellow-800 dark:text-yellow-200">Dalam pengembangan</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderPembinaan() {
+  return `
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md text-center">
+      <img src="icon-pembinaan.png" class="w-20 h-20 mx-auto mb-3">
+      <h2 class="text-xl font-bold text-maroon dark:text-white mb-2">Pembinaan Anggota</h2>
+      <p class="text-gray-600 dark:text-gray-400 mb-4">Form penilaian & pembinaan anggota</p>
+      <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+        <i class="fa-solid fa-tools text-yellow-600 mr-2"></i>
+        <span class="text-sm text-yellow-800 dark:text-yellow-200">Dalam pengembangan</span>
+      </div>
+    </div>
+  `;
+}
+
+// SISA FUNGSI SAMA PERSIS KAYAK SEBELUMNYA
 async function login() {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value.trim();
@@ -151,6 +237,7 @@ function logout() {
   if (confirm('Yakin mau logout?')) {
     localStorage.removeItem('user');
     user = null;
+    currentPage = 'home';
     render();
   }
 }
@@ -253,7 +340,6 @@ function drawLiveWatermark() {
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0);
     
-    // WATERMARK KIRI BAWAH - GEDE
     const scale = canvas.width / 800;
     const now = new Date();
     const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -262,8 +348,6 @@ function drawLiveWatermark() {
     const boxHeight = 120 * scale;
     const boxWidth = 360 * scale;
     const padding = 20 * scale;
-    
-    // KIRI BAWAH: x = padding, y = canvas.height - boxHeight - padding
     const x = padding;
     const y = canvas.height - boxHeight - padding;
     
@@ -301,12 +385,9 @@ function closeCam() {
 
 async function capture() {
   const canvas = document.getElementById('canvas');
-  // Canvas udah ada watermark, langsung kompres & kirim
   const fotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
   
   const sizeKB = Math.round((fotoBase64.length * 3/4) / 1024);
-  console.log(`Ukuran foto: ${sizeKB} KB`);
-  
   closeCam();
   
   document.getElementById('statusCard').innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>Mengirim data... (${sizeKB} KB)`;
