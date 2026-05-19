@@ -37,7 +37,6 @@ function renderLogin() {
             <input id="password" type="password" placeholder="Masukkan password" class="w-full p-3 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-maroon outline-none">
             <i id="eyeIcon" onclick="togglePass()" class="fa-solid fa-eye absolute right-3 top-4 cursor-pointer text-gray-400 hover:text-maroon"></i>
           </div>
-        </div>
         <button onclick="login()" id="btnLogin" class="w-full bg-maroon hover:bg-maroon-dark text-white p-3 rounded-lg font-bold transition shadow-lg">
           <i class="fa-solid fa-right-to-bracket mr-2"></i>Masuk
         </button>
@@ -207,7 +206,7 @@ function renderDashboard() {
       <input type="file" id="inputFotoProfil" accept="image/*" class="hidden" onchange="uploadFotoProfil(event)">
     </div>
   </div>`;
-  
+
   if (currentPage === 'home') cekStatus();
 }
 
