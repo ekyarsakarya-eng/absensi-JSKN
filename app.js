@@ -2,6 +2,10 @@ const URL_GAS = 'https://script.google.com/macros/s/AKfycbzTLDlivTgJS3QUIm-qmaHR
 const app = document.getElementById('app');
 let user = JSON.parse(localStorage.getItem('user') || 'null');
 let isDark = localStorage.getItem('dark') === 'true';
+let currentType = '';
+let stream = null;
+let watermarkInterval = null;
+let currentLocation = { lat: 0, long: 0, alamat: 'Mengambil lokasi...' };
 
 if (isDark) document.documentElement.classList.add('dark');
 
@@ -123,7 +127,7 @@ function renderDashboard() {
 async function login() {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value.trim();
-  if (!username || !password) return alert('Username & password wajib diisi');
+  if (!username ||!password) return alert('Username & password wajib diisi');
   
   const btn = document.getElementById('btnLogin');
   btn.disabled = true;
@@ -162,7 +166,7 @@ function togglePass() {
 }
 
 function toggleDark() {
-  isDark = !isDark;
+  isDark =!isDark;
   localStorage.setItem('dark', isDark);
   document.documentElement.classList.toggle('dark');
   render();
@@ -170,15 +174,14 @@ function toggleDark() {
 
 async function cekStatus() {
   const s = await api('getStatus', {username: user.username});
-  console.log('Status:', s);
   
   if (s.error) {
     document.getElementById('statusCard').innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-500 mr-2"></i><span class="text-red-500">Error: ${s.error}</span>`;
     return;
   }
   
-  document.getElementById('btnIn').disabled = !s.bisaIn;
-  document.getElementById('btnOut').disabled = !s.bisaOut;
+  document.getElementById('btnIn').disabled =!s.bisaIn;
+  document.getElementById('btnOut').disabled =!s.bisaOut;
   
   let txt = '';
   let icon = '';
@@ -188,7 +191,7 @@ async function cekStatus() {
   } else if (s.sudahIn && s.sudahOut) {
     icon = '<i class="fa-solid fa-circle-check text-green-500 mr-2"></i>';
     txt = 'Anda sudah absen masuk & pulang hari ini';
-  } else if (s.sudahIn && !s.sudahOut) {
+  } else if (s.sudahIn &&!s.sudahOut) {
     icon = '<i class="fa-solid fa-clock text-blue-500 mr-2"></i>';
     txt = 'Anda sudah absen masuk. Silakan absen pulang';
   } else {
@@ -199,26 +202,75 @@ async function cekStatus() {
   document.getElementById('statusCard').innerHTML = icon + txt;
 }
 
-let currentType = '';
-let stream = null;
-
 async function openCamera(type) {
   currentType = type;
   document.getElementById('modalCam').classList.remove('hidden');
   document.getElementById('modalCam').classList.add('flex');
+  
+  // AMBIL LOKASI DULUAN
+  navigator.geolocation.getCurrentPosition(async pos => {
+    currentLocation.lat = pos.coords.latitude;
+    currentLocation.long = pos.coords.longitude;
+    currentLocation.alamat = await getAddress(pos.coords.latitude, pos.coords.longitude);
+  }, () => {
+    currentLocation.alamat = 'Lokasi tidak ditemukan';
+  }, { enableHighAccuracy: true, timeout: 5000 });
+  
   try {
     stream = await navigator.mediaDevices.getUserMedia({ 
       video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } 
     });
-    document.getElementById('video').srcObject = stream;
+    const video = document.getElementById('video');
+    video.srcObject = stream;
+    startWatermarkPreview();
   } catch (err) {
     alert('Gagal akses kamera: ' + err.message + '\nPastikan sudah izinkan kamera di browser');
     closeCam();
   }
 }
 
+function startWatermarkPreview() {
+  const video = document.getElementById('video');
+  
+  if (!document.getElementById('watermarkOverlay')) {
+    const overlay = document.createElement('div');
+    overlay.id = 'watermarkOverlay';
+    overlay.style.cssText = `
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.75);
+      color: white;
+      padding: 8px 12px;
+      font-family: Arial;
+      font-size: 12px;
+      border-radius: 6px;
+      pointer-events: none;
+      line-height: 1.5;
+    `;
+    video.parentElement.style.position = 'relative';
+    video.parentElement.appendChild(overlay);
+  }
+  
+  watermarkInterval = setInterval(() => {
+    const now = new Date();
+    const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const tgl = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'numeric', year: 'numeric' });
+    
+    document.getElementById('watermarkOverlay').innerHTML = `
+      <div style="font-weight:bold;font-size:18px;margin-bottom:2px">${jam}</div>
+      <div>${tgl}</div>
+      <div>${currentLocation.lat.toFixed(6)},${currentLocation.long.toFixed(6)}</div>
+      <div style="font-size:11px">${currentLocation.alamat.substring(0, 40)}</div>
+    `;
+  }, 1000);
+}
+
 function closeCam() {
   if (stream) stream.getTracks().forEach(t => t.stop());
+  if (watermarkInterval) clearInterval(watermarkInterval);
+  const overlay = document.getElementById('watermarkOverlay');
+  if (overlay) overlay.remove();
   document.getElementById('modalCam').classList.add('hidden');
   document.getElementById('modalCam').classList.remove('flex');
 }
@@ -231,52 +283,59 @@ async function capture() {
   const ctx = canvas.getContext('2d');
   ctx.drawImage(video, 0, 0);
   
-  // WATERMARK TIMEMARK MAROON
+  // WATERMARK STYLE TIMEMARK - PERMANEN DI FOTO
   const now = new Date();
-  const timeStr = now.toLocaleString('id-ID', { 
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-    hour: '2-digit', minute: '2-digit', second: '2-digit'
-  });
+  const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const tgl = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'numeric', year: 'numeric' });
   
-  const barHeight = 100;
-  ctx.fillStyle = 'rgba(128, 0, 0, 0.9)';
-  ctx.fillRect(0, canvas.height - barHeight, canvas.width, barHeight);
+  const boxHeight = 90;
+  const boxWidth = 280;
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+  ctx.fillRect(15, 15, boxWidth, boxHeight);
   
   ctx.fillStyle = 'white';
-  ctx.font = 'bold 32px Arial';
-  ctx.fillText(`TIMEMARK`, 20, canvas.height - 65);
-  ctx.font = 'bold 22px Arial';
-  ctx.fillText(`${user.nama}`, 20, canvas.height - 38);
-  ctx.font = '18px Arial';
-  ctx.fillText(timeStr, 20, canvas.height - 15);
+  ctx.font = 'bold 26px Arial';
+  ctx.fillText(jam, 25, 45);
+  
+  ctx.font = '15px Arial';
+  ctx.fillText(tgl, 25, 65);
+  ctx.fillText(`${currentLocation.lat.toFixed(6)},${currentLocation.long.toFixed(6)}`, 25, 83);
+  
+  ctx.font = '12px Arial';
+  ctx.fillText(currentLocation.alamat.substring(0, 42), 25, 100);
   
   const fotoBase64 = canvas.toDataURL('image/jpeg', 0.9);
   closeCam();
   
-  document.getElementById('statusCard').innerHTML = '<i class="fa-solid fa-location-dot fa-beat text-maroon mr-2"></i>Mengambil lokasi GPS...';
+  document.getElementById('statusCard').innerHTML = '<i class="fa-solid fa-spinner fa-spin text-maroon mr-2"></i>Mengirim data absen...';
   
-  navigator.geolocation.getCurrentPosition(async pos => {
-    document.getElementById('statusCard').innerHTML = '<i class="fa-solid fa-spinner fa-spin text-maroon mr-2"></i>Mengirim data absen...';
-    const res = await api('absen', {
-      username: user.username,
-      type: currentType,
-      lat: pos.coords.latitude,
-      long: pos.coords.longitude,
-      fotoBase64: fotoBase64
-    });
-    alert(res.message);
-    cekStatus();
-  }, (err) => {
-    alert('Gagal ambil lokasi: ' + err.message + '\nAktifkan GPS dan izinkan lokasi di browser');
-    cekStatus();
-  }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+  const res = await api('absen', {
+    username: user.username,
+    type: currentType,
+    lat: currentLocation.lat,
+    long: currentLocation.long,
+    fotoBase64: fotoBase64
+  });
+  alert(res.message);
+  cekStatus();
+}
+
+// AMBIL NAMA ALAMAT DARI KOORDINAT
+async function getAddress(lat, long) {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${long}&zoom=18&addressdetails=1`);
+    const data = await res.json();
+    return data.display_name || `${lat.toFixed(6)}, ${long.toFixed(6)}`;
+  } catch (e) {
+    return `${lat.toFixed(6)}, ${long.toFixed(6)}`;
+  }
 }
 
 async function api(action, data) {
   try {
     const res = await fetch(URL_GAS, {
       method: 'POST',
-      body: JSON.stringify({action, ...data})
+      body: JSON.stringify({action,...data})
     });
     return await res.json();
   } catch (err) {
