@@ -119,100 +119,105 @@ function renderDashboard() {
     </div>
   </div>
   
-  <!-- MODAL PROFIL V5 - FINAL COMPACT -->
-  <div id="modalProfil" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w- max-h- flex flex-col shadow-2xl">
-      <!-- HEADER -->
-      <div class="bg-gradient-to-br from-maroon to-red-800 px-4 py-5 relative rounded-t-2xl shrink-0">
-        <button onclick="closeProfil()" class="absolute top-2.5 right-2.5 bg-white/90 hover:bg-white text-maroon w-7 h-7 rounded-full transition shadow-md hover:rotate-90 flex items-center justify-center">
-          <i class="fa-solid fa-xmark text-xs"></i>
+  <!-- MODAL PROFIL V5 - FIX KEPOTONG + NAMA KELIATAN -->
+  <div id="modalProfil" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
+    <div class="bg-white dark:bg-gray-900 rounded- w-full max-w- shadow-2xl">
+      <!-- HEADER - TINGGIN PB NYA BIAR NAMA NGGAK KETUTUP -->
+      <div class="bg-gradient-to-br from-maroon via-red-800 to-maroon-dark px-5 pt-6 pb-20 relative rounded-t-">
+        <button onclick="closeProfil()" class="absolute top-3 right-3 bg-white/90 hover:bg-white text-maroon w-9 h-9 rounded-full transition shadow-lg hover:rotate-90 hover:scale-110 active:scale-95 flex items-center justify-center z-20">
+          <i class="fa-solid fa-xmark"></i>
         </button>
         <div class="text-center">
-          <div class="relative inline-block mb-2">
-            <img id="fotoProfil" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=fff&color=800000&size=128'}" 
-                 class="w-16 h-16 rounded-xl object-cover mx-auto border-2 border-white/50 shadow-lg">
-            <button onclick="gantiFotoProfil()" class="absolute -bottom-1 -right-1 bg-white text-maroon w-7 h-7 rounded-lg shadow-lg hover:bg-gray-50 transition flex items-center justify-center">
-              <i class="fa-solid fa-camera text-"></i>
+          <div class="relative inline-block">
+            <img id="fotoProfil" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=fff&color=800000&size=256'}"
+                 class="w-24 h-24 rounded-2xl object-cover mx-auto border-4 border-white/30 shadow-2xl ring-2 ring-white/20">
+            <button onclick="gantiFotoProfil()" class="absolute -bottom-1 -right-1 bg-white text-maroon w-9 h-9 rounded-xl shadow-lg hover:bg-gray-50 transition hover:scale-110 active:scale-95 flex items-center justify-center">
+              <i class="fa-solid fa-camera"></i>
             </button>
           </div>
-          <h3 class="font-bold text-base text-white">${user.nama}</h3>
-          <p class="text- text-white/70">@${user.username}</p>
+          <h3 class="font-bold text-xl text-white mt-3 drop-shadow-md">${user.nama}</h3>
+          <p class="text-sm text-white/80">@${user.username}</p>
         </div>
       </div>
       
-      <!-- TABS -->
-      <div class="flex bg-gray-100 dark:bg-gray-800 p-1 mx-3 -mt-4 rounded-xl shadow-md relative z-10 shrink-0">
-        <button onclick="switchProfilTab('info')" id="tabInfo" class="flex-1 py-2 font-bold text- rounded-lg bg-maroon text-white shadow transition-all">
-          <i class="fa-solid fa-user mr-1"></i>Data Diri
+      <!-- TABS - DITURUNIN BIAR NGGAK NABRAK NAMA -->
+      <div class="flex bg-gray-100 dark:bg-gray-800 -mt-12 mx-4 rounded-2xl p-1 relative z-10 shadow-lg">
+        <button onclick="switchProfilTab('info')" id="tabInfo" class="flex-1 py-3 font-bold text-sm rounded-xl bg-maroon text-white shadow-md transition-all hover:scale-[1.02] active:scale-98">
+          <i class="fa-solid fa-user mr-2"></i>Data Diri
         </button>
-        <button onclick="switchProfilTab('password')" id="tabPassword" class="flex-1 py-2 font-bold text- rounded-lg text-gray-500 dark:text-gray-400 transition-all">
-          <i class="fa-solid fa-lock mr-1"></i>Keamanan
+        <button onclick="switchProfilTab('password')" id="tabPassword" class="flex-1 py-3 font-bold text-sm rounded-xl text-gray-500 dark:text-gray-400 hover:text-maroon transition-all">
+          <i class="fa-solid fa-lock mr-2"></i>Keamanan
         </button>
       </div>
       
-      <!-- CONTENT SCROLL -->
-      <div class="flex-1 overflow-y-auto">
-        <!-- TAB INFO -->
-        <div id="profilInfo" class="p-3 space-y-2.5">
-          <div>
-            <label class="text- font-bold text-maroon block mb-1">Nama Lengkap</label>
-            <input id="editNama" value="${user.nama||''}" class="w-full px-2.5 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-gray-900 dark:text-white focus:border-maroon focus:ring-2 focus:ring-maroon/20 outline-none transition">
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="text- font-bold text-maroon block mb-1">No KTP</label>
-              <input id="editKtp" value="${user.ktp||''}" class="w-full px-2.5 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-2 focus:ring-maroon/20 outline-none transition">
-            </div>
-            <div>
-              <label class="text- font-bold text-maroon block mb-1">No HP</label>
-              <input id="editHp" value="${user.hp||''}" class="w-full px-2.5 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-2 focus:ring-maroon/20 outline-none transition">
-            </div>
-          </div>
-          <div>
-            <label class="text- font-bold text-maroon block mb-1">Alamat</label>
-            <textarea id="editAlamat" rows="2" class="w-full px-2.5 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-2 focus:ring-maroon/20 outline-none transition resize-none">${user.alamat||''}</textarea>
-          </div>
-          <div>
-            <label class="text- font-bold text-maroon block mb-1">TTL</label>
-            <input id="editTtl" value="${user.ttl||''}" class="w-full px-2.5 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-2 focus:ring-maroon/20 outline-none transition">
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="text- font-bold text-maroon block mb-1">Bank</label>
-              <input id="editBank" value="${user.bank||''}" class="w-full px-2.5 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-2 focus:ring-maroon/20 outline-none transition">
-            </div>
-            <div>
-              <label class="text- font-bold text-maroon block mb-1">No Rek</label>
-              <input id="editRek" value="${user.rekening||''}" class="w-full px-2.5 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-2 focus:ring-maroon/20 outline-none transition">
-            </div>
-          </div>
-          <button onclick="simpanProfil()" class="w-full bg-maroon hover:bg-maroon-dark text-white py-2.5 rounded-lg font-bold text-sm shadow-lg hover:shadow-maroon/30 transition-all active:scale-95 mt-2">
-            <i class="fa-solid fa-floppy-disk mr-1.5"></i>Simpan Data
-          </button>
+      <!-- TAB INFO - SCROLL YANG BENER -->
+      <div id="profilInfo" class="p-4 pt-3 space-y-3 max-h- overflow-y-auto">
+        <div class="relative group">
+          <input id="editNama" value="${user.nama||''}" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm font-semibold text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all">
+          <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">Nama Lengkap</label>
         </div>
         
-        <!-- TAB PASSWORD -->
-        <div id="profilPassword" class="p-3 space-y-2.5 hidden">
-          <div class="bg-maroon/10 border-l-4 border-maroon rounded-lg p-2.5">
-            <p class="text- text-maroon font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i>Kosongkan jika tidak ganti password</p>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="relative group">
+            <input id="editKtp" value="${user.ktp||''}" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all">
+            <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">No KTP</label>
           </div>
-          <div class="relative">
-            <label class="text- font-bold text-maroon block mb-1">Password Lama</label>
-            <input id="passLama" type="password" class="w-full px-2.5 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-2 focus:ring-maroon/20 outline-none transition pr-9">
-            <i onclick="togglePassProfil('passLama', this)" class="fa-solid fa-eye absolute right-3 top-7 cursor-pointer text-gray-400 hover:text-maroon"></i>
+          <div class="relative group">
+            <input id="editHp" value="${user.hp||''}" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all">
+            <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">No HP</label>
           </div>
-          <div class="relative">
-            <label class="text- font-bold text-maroon block mb-1">Password Baru</label>
-            <input id="passBaru" type="password" class="w-full px-2.5 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-2 focus:ring-maroon/20 outline-none transition pr-9">
-            <i onclick="togglePassProfil('passBaru', this)" class="fa-solid fa-eye absolute right-3 top-7 cursor-pointer text-gray-400 hover:text-maroon"></i>
-          </div>
-          <button onclick="gantiPassword()" class="w-full bg-maroon hover:bg-maroon-dark text-white py-2.5 rounded-lg font-bold text-sm shadow-lg hover:shadow-maroon/30 transition-all active:scale-95">
-            <i class="fa-solid fa-key mr-1.5"></i>Update Password
-          </button>
-          <button onclick="logout()" class="w-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 py-2.5 rounded-lg font-bold text-sm transition-all active:scale-95">
-            <i class="fa-solid fa-right-from-bracket mr-1.5"></i>Logout
-          </button>
         </div>
+        
+        <div class="relative group">
+          <textarea id="editAlamat" rows="2" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all resize-none">${user.alamat||''}</textarea>
+          <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">Alamat</label>
+        </div>
+        
+        <div class="relative group">
+          <input id="editTtl" value="${user.ttl||''}" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all">
+          <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">Tempat, Tgl Lahir</label>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div class="relative group">
+            <input id="editBank" value="${user.bank||''}" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all">
+            <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">Bank</label>
+          </div>
+          <div class="relative group">
+            <input id="editRek" value="${user.rekening||''}" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all">
+            <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">No Rekening</label>
+          </div>
+        </div>
+        
+        <button onclick="simpanProfil()" class="w-full bg-gradient-to-r from-maroon via-red-700 to-maroon-dark hover:shadow-2xl hover:shadow-maroon/30 text-white py-3.5 rounded-2xl font-bold text-sm transition-all hover:scale-[1.02] active:scale-98 mt-2">
+          <i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Perubahan
+        </button>
+      </div>
+      
+      <!-- TAB PASSWORD -->
+      <div id="profilPassword" class="p-4 pt-3 space-y-3 hidden">
+        <div class="bg-maroon/5 border-l-4 border-maroon rounded-xl p-3">
+          <p class="text-xs text-maroon font-semibold"><i class="fa-solid fa-shield-halved mr-2"></i>Kosongkan jika tidak ganti password</p>
+        </div>
+        
+        <div class="relative group">
+          <input id="passLama" type="password" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all">
+          <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">Password Lama</label>
+          <i onclick="togglePassProfil('passLama', this)" class="fa-solid fa-eye absolute right-4 top-4 cursor-pointer text-gray-400 hover:text-maroon transition"></i>
+        </div>
+        
+        <div class="relative group">
+          <input id="passBaru" type="password" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all">
+          <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">Password Baru</label>
+          <i onclick="togglePassProfil('passBaru', this)" class="fa-solid fa-eye absolute right-4 top-4 cursor-pointer text-gray-400 hover:text-maroon transition"></i>
+        </div>
+        
+        <button onclick="gantiPassword()" class="w-full bg-gradient-to-r from-maroon to-red-700 hover:shadow-2xl hover:shadow-maroon/30 text-white py-3.5 rounded-2xl font-bold text-sm transition-all hover:scale-[1.02] active:scale-98">
+          <i class="fa-solid fa-key mr-2"></i>Update Password
+        </button>
+        <button onclick="logout()" class="w-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 py-3.5 rounded-2xl font-bold text-sm transition-all hover:scale-[1.02] active:scale-98">
+          <i class="fa-solid fa-right-from-bracket mr-2"></i>Logout
+        </button>
       </div>
       
       <input type="file" id="inputFotoProfil" accept="image/*" class="hidden" onchange="uploadFotoProfil(event)">
