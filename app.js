@@ -217,7 +217,7 @@ function renderDashboard() {
       
       <input type="file" id="inputFotoProfil" accept="image/*" class="hidden" onchange="uploadFotoProfil(event)">
     </div>
-  </div>
+  </div>`;
   
   if (currentPage === 'home') cekStatus();
 }
