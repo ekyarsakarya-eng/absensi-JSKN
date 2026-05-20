@@ -121,7 +121,7 @@ function renderDashboard() {
   
   <!-- MODAL PROFIL V4 - CLEAN + INTERAKTIF + MAROON -->
   <div id="modalProfil" class="fixed inset-0 bg-black/70 backdrop-blur-md hidden items-center justify-center p-3 z-50">
-    <div class="bg-white dark:bg-gray-900 rounded- w-full max-w- overflow-hidden shadow-2xl animate-[popIn_0.25s_ease]">
+    <div class="bg-white dark:bg-gray-900 rounded- w-full max-w- overflow-hidden shadow-2xl">
       <!-- HEADER -->
       <div class="bg-gradient-to-br from-maroon via-red-700 to-red-900 px-5 pt-6 pb-14 relative">
         <button onclick="closeProfil()" class="absolute top-3 right-3 bg-white/90 hover:bg-white text-maroon w-8 h-8 rounded-full transition shadow-lg hover:rotate-90 hover:scale-110 active:scale-95 flex items-center justify-center">
@@ -226,13 +226,6 @@ function renderDashboard() {
   
   if (currentPage === 'home') cekStatus();
 }
-
-<style>
-@keyframes popIn {
-  0% { transform: scale(0.9) translateY(20px); opacity: 0; }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
-}
-</style>
 
 function switchPage(page) {
   currentPage = page;
