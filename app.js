@@ -230,6 +230,7 @@ function renderDashboard() {
     100% { transform: scale(1) translateY(0); opacity: 1; }
   }
   </style>
+  
 function switchPage(page) {
   currentPage = page;
   renderDashboard();
