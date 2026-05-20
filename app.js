@@ -221,16 +221,19 @@ function renderDashboard() {
       </div>
       
       <input type="file" id="inputFotoProfil" accept="image/*" class="hidden" onchange="uploadFotoProfil(event)">
-    </div>
-  </div>
-
-  <style>
-  @keyframes popIn {
-    0% { transform: scale(0.9) translateY(20px); opacity: 0; }
-    100% { transform: scale(1) translateY(0); opacity: 1; }
-  }
-  </style>
+        </div>
+  </div>`;
   
+  if (currentPage === 'home') cekStatus();
+}
+
+<style>
+@keyframes popIn {
+  0% { transform: scale(0.9) translateY(20px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+</style>
+
 function switchPage(page) {
   currentPage = page;
   renderDashboard();
