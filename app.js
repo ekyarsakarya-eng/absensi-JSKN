@@ -435,6 +435,8 @@ async function uploadFotoProfil(e) {
   const reader = new FileReader();
   reader.onload = async (event) => {
     const fotoBase64 = event.target.result;
+    
+    // Tampil langsung base64 dulu biar user liat
     document.getElementById('fotoProfil').src = fotoBase64;
     document.getElementById('avatarNav').src = fotoBase64;
     
@@ -446,10 +448,18 @@ async function uploadFotoProfil(e) {
     if (res.status === 'success') {
       user.foto = res.urlFoto;
       localStorage.setItem('user', JSON.stringify(user));
+      
+      // Force reload image pake timestamp biar nggak cache
+      const newUrl = res.urlFoto + '?t=' + new Date().getTime();
+      document.getElementById('fotoProfil').src = newUrl;
+      document.getElementById('avatarNav').src = newUrl;
+      
       alert('Foto profil berhasil diupdate');
     } else {
       alert('Gagal: ' + res.message);
-      renderDashboard();
+      // Balikin ke foto lama kalo gagal
+      document.getElementById('fotoProfil').src = user.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nama)}&background=800000&color=fff&size=128`;
+      document.getElementById('avatarNav').src = user.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nama)}&background=800000&color=fff`;
     }
   };
   reader.readAsDataURL(file);
