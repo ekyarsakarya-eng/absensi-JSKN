@@ -119,105 +119,102 @@ function renderDashboard() {
     </div>
   </div>
   
-  <!-- MODAL PROFIL - VERSI STABIL -->
-  <div id="modalProfil" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 z-50">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md max-h- overflow-hidden shadow-2xl">
-      <div class="bg-gradient-to-r from-maroon to-red-700 p-6 text-white relative">
-        <button onclick="closeProfil()" class="absolute top-4 right-4 hover:bg-white/20 p-2 rounded-lg transition">
+  <!-- MODAL PROFIL - FIX KONTRAST + UKURAN -->
+  <div id="modalProfil" class="fixed inset-0 bg-black/60 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-sm max-h- overflow-hidden shadow-2xl">
+      <div class="bg-gradient-to-r from-maroon to-red-700 p-5 text-white relative">
+        <button onclick="closeProfil()" class="absolute top-3 right-3 hover:bg-white/20 p-2 rounded-lg transition">
           <i class="fa-solid fa-xmark"></i>
         </button>
         <div class="text-center">
-          <div class="relative inline-block mb-3">
+          <div class="relative inline-block mb-2">
             <img id="fotoProfil" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=800000&color=fff&size=128'}" 
-                 class="w-24 h-24 rounded-full object-cover mx-auto border-4 border-white shadow-lg">
-            <button onclick="gantiFotoProfil()" class="absolute bottom-0 right-0 bg-white text-maroon p-2 rounded-full shadow-lg hover:bg-gray-100 transition">
-              <i class="fa-solid fa-camera"></i>
+                 class="w-20 h-20 rounded-full object-cover mx-auto border-4 border-white shadow-lg">
+            <button onclick="gantiFotoProfil()" class="absolute bottom-0 right-0 bg-white text-maroon p-1.5 rounded-full shadow-lg hover:bg-gray-100 transition">
+              <i class="fa-solid fa-camera text-xs"></i>
             </button>
           </div>
-          <h3 class="font-bold text-xl">${user.nama}</h3>
-          <p class="text-sm opacity-90">@${user.username}</p>
+          <h3 class="font-bold text-lg">${user.nama}</h3>
+          <p class="text-xs opacity-90">@${user.username}</p>
         </div>
       </div>
       
       <div class="flex border-b dark:border-gray-700">
-        <button onclick="switchProfilTab('info')" id="tabInfo" class="flex-1 py-3 font-bold text-sm border-b-2 border-maroon text-maroon transition">
-          <i class="fa-solid fa-user mr-1"></i>Info
+        <button onclick="switchProfilTab('info')" id="tabInfo" class="flex-1 py-3 font-bold text-xs border-b-2 border-maroon text-maroon transition">
+          <i class="fa-solid fa-user mr-1"></i>Data Diri
         </button>
-        <button onclick="switchProfilTab('password')" id="tabPassword" class="flex-1 py-3 font-bold text-sm text-gray-500 dark:text-gray-400 transition">
-          <i class="fa-solid fa-lock mr-1"></i>Password
-        </button>
-      </div>
-      
-      <div id="profilInfo" class="p-5 space-y-3 max-h-96 overflow-y-auto">
-        <div>
-          <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">Nama Lengkap</label>
-          <input id="editNama" value="${user.nama||''}" class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm font-semibold text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">No KTP</label>
-            <input id="editKtp" value="${user.ktp||''}" class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">No HP</label>
-            <input id="editHp" value="${user.hp||''}" class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-          </div>
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">Alamat</label>
-          <textarea id="editAlamat" rows="2" class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">${user.alamat||''}</textarea>
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">Tempat, Tanggal Lahir</label>
-          <input id="editTtl" value="${user.ttl||''}" class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">Bank</label>
-            <input id="editBank" value="${user.bank||''}" class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">No Rekening</label>
-            <input id="editRek" value="${user.rekening||''}" class="w-full p-3 border border-gray-300 rounded-lg mt-1 text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-          </div>
-        </div>
-        <button onclick="simpanProfil()" class="w-full bg-maroon hover:bg-maroon-dark text-white p-3 rounded-lg font-bold transition mt-2">
-          <i class="fa-solid fa-save mr-2"></i>Simpan Perubahan
+        <button onclick="switchProfilTab('password')" id="tabPassword" class="flex-1 py-3 font-bold text-xs text-gray-500 dark:text-gray-400 transition">
+          <i class="fa-solid fa-lock mr-1"></i>Keamanan
         </button>
       </div>
       
-      <div id="profilPassword" class="p-5 space-y-3 hidden">
-        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-3">
-          <p class="text-xs text-blue-800 dark:text-blue-200"><i class="fa-solid fa-info-circle mr-1"></i>Kosongkan jika tidak ingin ganti password</p>
-        </div>
+      <div id="profilInfo" class="p-4 space-y-3 max-h- overflow-y-auto">
         <div>
-          <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">Password Lama</label>
-          <div class="relative mt-1">
-            <input id="passLama" type="password" class="w-full p-3 border border-gray-300 rounded-lg text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-            <i onclick="togglePassProfil('passLama', this)" class="fa-solid fa-eye absolute right-3 top-4 cursor-pointer text-gray-400"></i>
+          <label class="text-xs font-bold text-gray-700 dark:text-gray-300">Nama Lengkap</label>
+          <input id="editNama" value="${user.nama||''}" class="w-full p-2.5 border border-gray-300 rounded-lg mt-1 text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-maroon outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs font-bold text-gray-700 dark:text-gray-300">No KTP</label>
+            <input id="editKtp" value="${user.ktp||''}" class="w-full p-2.5 border border-gray-300 rounded-lg mt-1 text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-gray-700 dark:text-gray-300">No HP</label>
+            <input id="editHp" value="${user.hp||''}" class="w-full p-2.5 border border-gray-300 rounded-lg mt-1 text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
           </div>
         </div>
         <div>
-          <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">Password Baru</label>
-          <div class="relative mt-1">
-            <input id="passBaru" type="password" class="w-full p-3 border border-gray-300 rounded-lg text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-            <i onclick="togglePassProfil('passBaru', this)" class="fa-solid fa-eye absolute right-3 top-4 cursor-pointer text-gray-400"></i>
+          <label class="text-xs font-bold text-gray-700 dark:text-gray-300">Alamat</label>
+          <textarea id="editAlamat" rows="2" class="w-full p-2.5 border border-gray-300 rounded-lg mt-1 text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">${user.alamat||''}</textarea>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-700 dark:text-gray-300">TTL</label>
+          <input id="editTtl" value="${user.ttl||''}" class="w-full p-2.5 border border-gray-300 rounded-lg mt-1 text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs font-bold text-gray-700 dark:text-gray-300">Bank</label>
+            <input id="editBank" value="${user.bank||''}" class="w-full p-2.5 border border-gray-300 rounded-lg mt-1 text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-gray-700 dark:text-gray-300">No Rek</label>
+            <input id="editRek" value="${user.rekening||''}" class="w-full p-2.5 border border-gray-300 rounded-lg mt-1 text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
           </div>
         </div>
-        <button onclick="gantiPassword()" class="w-full bg-maroon hover:bg-maroon-dark text-white p-3 rounded-lg font-bold transition">
+        <button onclick="simpanProfil()" class="w-full bg-maroon hover:bg-maroon-dark text-white p-2.5 rounded-lg font-bold transition">
+          <i class="fa-solid fa-save mr-2"></i>Simpan
+        </button>
+      </div>
+      
+      <div id="profilPassword" class="p-4 space-y-3 hidden">
+        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-2.5">
+          <p class="text-xs text-blue-800 dark:text-blue-200"><i class="fa-solid fa-info-circle mr-1"></i>Kosongkan jika tidak ganti password</p>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-700 dark:text-gray-300">Password Lama</label>
+          <div class="relative mt-1">
+            <input id="passLama" type="password" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+            <i onclick="togglePassProfil('passLama', this)" class="fa-solid fa-eye absolute right-3 top-3.5 cursor-pointer text-gray-400"></i>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-700 dark:text-gray-300">Password Baru</label>
+          <div class="relative mt-1">
+            <input id="passBaru" type="password" class="w-full p-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+            <i onclick="togglePassProfil('passBaru', this)" class="fa-solid fa-eye absolute right-3 top-3.5 cursor-pointer text-gray-400"></i>
+          </div>
+        </div>
+        <button onclick="gantiPassword()" class="w-full bg-maroon hover:bg-maroon-dark text-white p-2.5 rounded-lg font-bold transition">
           <i class="fa-solid fa-key mr-2"></i>Update Password
         </button>
-        <button onclick="logout()" class="w-full bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold transition">
+        <button onclick="logout()" class="w-full bg-gray-600 hover:bg-gray-700 text-white p-2.5 rounded-lg font-bold transition">
           <i class="fa-solid fa-right-from-bracket mr-2"></i>Logout
         </button>
       </div>
       
       <input type="file" id="inputFotoProfil" accept="image/*" class="hidden" onchange="uploadFotoProfil(event)">
     </div>
-  </div>`;
-  
-  if (currentPage === 'home') cekStatus();
-}
+  </div>
 
 function switchPage(page) {
   currentPage = page;
