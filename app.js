@@ -117,26 +117,33 @@ function renderDashboard() {
     </div>
   </div>
   
+  <!-- MODAL PROFIL V7 - NAMA PASTI KELIATAN -->
   <div id="modalProfil" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
     <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w- overflow-hidden shadow-2xl">
-      <div class="bg-gradient-to-br from-maroon to-red-800 px-5 pt-8 pb-6 relative">
-        <button onclick="closeProfil()" class="absolute top-3 right-3 bg-white/90 hover:bg-white text-maroon w-9 h-9 rounded-full transition shadow-lg hover:rotate-90 hover:scale-110 flex items-center justify-center">
+      <!-- HEADER CUMA AVATAR DOANG -->
+      <div class="bg-maroon px-5 pt-8 pb-6 relative rounded-t-3xl">
+        <button onclick="closeProfil()" class="absolute top-3 right-3 bg-white hover:bg-gray-100 text-maroon w-9 h-9 rounded-full transition shadow-lg hover:rotate-90 hover:scale-110 flex items-center justify-center z-20">
           <i class="fa-solid fa-xmark"></i>
         </button>
         <div class="text-center">
-          <div class="relative inline-block mb-3">
+          <div class="relative inline-block">
             <img id="fotoProfil" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=fff&color=800000&size=256'}"
-                 class="w-24 h-24 rounded-2xl object-cover mx-auto border-4 border-white/40 shadow-xl">
+                 class="w-24 h-24 rounded-2xl object-cover mx-auto border-4 border-white shadow-xl">
             <button onclick="gantiFotoProfil()" class="absolute -bottom-1 -right-1 bg-white text-maroon w-9 h-9 rounded-xl shadow-lg hover:bg-gray-50 transition hover:scale-110 flex items-center justify-center">
               <i class="fa-solid fa-camera"></i>
             </button>
           </div>
-          <h3 class="font-bold text-xl text-white" style="text-shadow: 0 2px 8px rgba(0,0,0,0.5)">${user.nama}</h3>
-          <p class="text-sm text-white/80">@${user.username}</p>
         </div>
       </div>
       
-      <div class="p-4 space-y-2">
+      <!-- NAMA USER DI BODY PUTIH - NGGAK PAKE MINUS MARGIN -->
+      <div class="text-center pt-4 pb-3 px-4 bg-white dark:bg-gray-900">
+        <h3 class="font-bold text-xl text-gray-900 dark:text-white">${user.nama}</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">@${user.username}</p>
+      </div>
+      
+      <!-- MENU LIST -->
+      <div class="p-4 pt-0 space-y-2">
         <button onclick="openEditProfil()" class="w-full flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 hover:bg-maroon/5 dark:hover:bg-maroon/10 rounded-2xl transition-all hover:scale-[1.02] active:scale-98 group">
           <div class="w-12 h-12 bg-maroon/10 text-maroon rounded-xl flex items-center justify-center group-hover:bg-maroon group-hover:text-white transition">
             <i class="fa-solid fa-user-pen text-lg"></i>
@@ -172,85 +179,6 @@ function renderDashboard() {
       </div>
       
       <input type="file" id="inputFotoProfil" accept="image/*" class="hidden" onchange="uploadFotoProfil(event)">
-    </div>
-  </div>
-
-  <div id="modalEditProfil" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
-    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w- max-h- flex flex-col shadow-2xl">
-      <div class="bg-maroon px-5 py-4 rounded-t-3xl flex items-center justify-between shrink-0">
-        <h3 class="font-bold text-lg text-white"><i class="fa-solid fa-user-pen mr-2"></i>Edit Profil</h3>
-        <button onclick="closeEditProfil()" class="text-white/80 hover:text-white">
-          <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
-      </div>
-      <div class="flex-1 overflow-y-auto p-4 space-y-3">
-        <div>
-          <label class="text-xs font-bold text-maroon block mb-1.5">Nama Lengkap</label>
-          <input id="editNama" value="${user.nama||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs font-bold text-maroon block mb-1.5">No KTP</label>
-            <input id="editKtp" value="${user.ktp||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
-          </div>
-          <div>
-            <label class="text-xs font-bold text-maroon block mb-1.5">No HP</label>
-            <input id="editHp" value="${user.hp||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
-          </div>
-        </div>
-        <div>
-          <label class="text-xs font-bold text-maroon block mb-1.5">Alamat</label>
-          <textarea id="editAlamat" rows="2" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition resize-none">${user.alamat||''}</textarea>
-        </div>
-        <div>
-          <label class="text-xs font-bold text-maroon block mb-1.5">Tempat, Tgl Lahir</label>
-          <input id="editTtl" value="${user.ttl||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs font-bold text-maroon block mb-1.5">Bank</label>
-            <input id="editBank" value="${user.bank||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
-          </div>
-          <div>
-            <label class="text-xs font-bold text-maroon block mb-1.5">No Rekening</label>
-            <input id="editRek" value="${user.rekening||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
-          </div>
-        </div>
-      </div>
-      <div class="p-4 pt-2 shrink-0">
-        <button onclick="simpanProfil()" class="w-full bg-gradient-to-r from-maroon to-red-700 hover:shadow-xl hover:shadow-maroon/30 text-white py-3.5 rounded-2xl font-bold transition-all hover:scale-[1.02] active:scale-98">
-          <i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Perubahan
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div id="modalGantiPassword" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
-    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w- overflow-hidden shadow-2xl">
-      <div class="bg-maroon px-5 py-4 flex items-center justify-between">
-        <h3 class="font-bold text-lg text-white"><i class="fa-solid fa-key mr-2"></i>Ganti Password</h3>
-        <button onclick="closeGantiPassword()" class="text-white/80 hover:text-white">
-          <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
-      </div>
-      <div class="p-4 space-y-3">
-        <div class="bg-maroon/5 border-l-4 border-maroon rounded-xl p-3">
-          <p class="text-xs text-maroon font-semibold"><i class="fa-solid fa-shield-halved mr-1.5"></i>Kosongkan jika tidak ganti password</p>
-        </div>
-        <div class="relative">
-          <label class="text-xs font-bold text-maroon block mb-1.5">Password Lama</label>
-          <input id="passLama" type="password" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition pr-11">
-          <i onclick="togglePassProfil('passLama', this)" class="fa-solid fa-eye absolute right-4 top-9 cursor-pointer text-gray-400 hover:text-maroon"></i>
-        </div>
-        <div class="relative">
-          <label class="text-xs font-bold text-maroon block mb-1.5">Password Baru</label>
-          <input id="passBaru" type="password" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition pr-11">
-          <i onclick="togglePassProfil('passBaru', this)" class="fa-solid fa-eye absolute right-4 top-9 cursor-pointer text-gray-400 hover:text-maroon"></i>
-        </div>
-        <button onclick="gantiPassword()" class="w-full bg-gradient-to-r from-maroon to-red-700 hover:shadow-xl hover:shadow-maroon/30 text-white py-3.5 rounded-2xl font-bold transition-all hover:scale-[1.02] active:scale-98">
-          <i class="fa-solid fa-key mr-2"></i>Update Password
-        </button>
-      </div>
     </div>
   </div>`;
   
