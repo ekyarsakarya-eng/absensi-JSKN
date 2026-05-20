@@ -131,7 +131,7 @@ function renderDashboard() {
               <i class="fa-solid fa-camera"></i>
             </button>
           </div>
-          <h3 class="font-bold text-xl text-white drop-shadow-lg">${user.nama}</h3>
+          <h3 class="font-bold text-xl text-white" style="text-shadow: 0 2px 8px rgba(0,0,0,0.5)">${user.nama}</h3>
           <p class="text-sm text-white/80">@${user.username}</p>
         </div>
       </div>
