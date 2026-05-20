@@ -61,7 +61,7 @@ function renderDashboard() {
         <i id="darkIcon" class="fa-solid ${isDark? 'fa-sun' : 'fa-moon'} text-xl"></i>
       </button>
       <button onclick="openProfil()" class="flex items-center gap-2 hover:bg-maroon-dark p-1 pr-3 rounded-full transition">
-        <img id="avatarNav" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=800000&color=fff'}" 
+        <img id="avatarNav" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=800000&color=fff'}"
              class="w-9 h-9 rounded-full object-cover border-2 border-white">
       </button>
     </div>
@@ -71,7 +71,6 @@ function renderDashboard() {
     ${renderPage()}
   </div>
   
-  <!-- BOTTOM NAV -->
   <div class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 shadow-lg z-20">
     <div class="grid grid-cols-5 gap-1 max-w-2xl mx-auto">
       <button onclick="switchPage('home')" class="flex flex-col items-center py-2 ${currentPage==='home'?'text-maroon':'text-gray-500'}">
@@ -97,7 +96,6 @@ function renderDashboard() {
     </div>
   </div>
   
-  <!-- MODAL CAM -->
   <div id="modalCam" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-50">
     <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 w-full max-w-md">
       <h3 class="font-bold text-lg mb-3 text-maroon dark:text-white text-center">
@@ -119,108 +117,140 @@ function renderDashboard() {
     </div>
   </div>
   
-  <!-- MODAL PROFIL V5 - FIX KEPOTONG + NAMA KELIATAN -->
-  <div id="modalProfil" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
-    <div class="bg-white dark:bg-gray-900 rounded- w-full max-w- shadow-2xl">
-      <!-- HEADER - TINGGIN PB NYA BIAR NAMA NGGAK KETUTUP -->
-      <div class="bg-gradient-to-br from-maroon via-red-800 to-maroon-dark px-5 pt-6 pb-20 relative rounded-t-">
-        <button onclick="closeProfil()" class="absolute top-3 right-3 bg-white/90 hover:bg-white text-maroon w-9 h-9 rounded-full transition shadow-lg hover:rotate-90 hover:scale-110 active:scale-95 flex items-center justify-center z-20">
+  <div id="modalProfil" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w- overflow-hidden shadow-2xl">
+      <div class="bg-gradient-to-br from-maroon to-red-800 px-5 pt-8 pb-6 relative">
+        <button onclick="closeProfil()" class="absolute top-3 right-3 bg-white/90 hover:bg-white text-maroon w-9 h-9 rounded-full transition shadow-lg hover:rotate-90 hover:scale-110 flex items-center justify-center">
           <i class="fa-solid fa-xmark"></i>
         </button>
         <div class="text-center">
-          <div class="relative inline-block">
+          <div class="relative inline-block mb-3">
             <img id="fotoProfil" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=fff&color=800000&size=256'}"
-                 class="w-24 h-24 rounded-2xl object-cover mx-auto border-4 border-white/30 shadow-2xl ring-2 ring-white/20">
-            <button onclick="gantiFotoProfil()" class="absolute -bottom-1 -right-1 bg-white text-maroon w-9 h-9 rounded-xl shadow-lg hover:bg-gray-50 transition hover:scale-110 active:scale-95 flex items-center justify-center">
+                 class="w-24 h-24 rounded-2xl object-cover mx-auto border-4 border-white/40 shadow-xl">
+            <button onclick="gantiFotoProfil()" class="absolute -bottom-1 -right-1 bg-white text-maroon w-9 h-9 rounded-xl shadow-lg hover:bg-gray-50 transition hover:scale-110 flex items-center justify-center">
               <i class="fa-solid fa-camera"></i>
             </button>
           </div>
-          <h3 class="font-bold text-xl text-white mt-3 drop-shadow-md">${user.nama}</h3>
+          <h3 class="font-bold text-xl text-white drop-shadow-lg">${user.nama}</h3>
           <p class="text-sm text-white/80">@${user.username}</p>
         </div>
       </div>
       
-      <!-- TABS - DITURUNIN BIAR NGGAK NABRAK NAMA -->
-      <div class="flex bg-gray-100 dark:bg-gray-800 -mt-12 mx-4 rounded-2xl p-1 relative z-10 shadow-lg">
-        <button onclick="switchProfilTab('info')" id="tabInfo" class="flex-1 py-3 font-bold text-sm rounded-xl bg-maroon text-white shadow-md transition-all hover:scale-[1.02] active:scale-98">
-          <i class="fa-solid fa-user mr-2"></i>Data Diri
-        </button>
-        <button onclick="switchProfilTab('password')" id="tabPassword" class="flex-1 py-3 font-bold text-sm rounded-xl text-gray-500 dark:text-gray-400 hover:text-maroon transition-all">
-          <i class="fa-solid fa-lock mr-2"></i>Keamanan
-        </button>
-      </div>
-      
-      <!-- TAB INFO - SCROLL YANG BENER -->
-      <div id="profilInfo" class="p-4 pt-3 space-y-3 max-h- overflow-y-auto">
-        <div class="relative group">
-          <input id="editNama" value="${user.nama||''}" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm font-semibold text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all">
-          <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">Nama Lengkap</label>
-        </div>
-        
-        <div class="grid grid-cols-2 gap-3">
-          <div class="relative group">
-            <input id="editKtp" value="${user.ktp||''}" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all">
-            <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">No KTP</label>
+      <div class="p-4 space-y-2">
+        <button onclick="openEditProfil()" class="w-full flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 hover:bg-maroon/5 dark:hover:bg-maroon/10 rounded-2xl transition-all hover:scale-[1.02] active:scale-98 group">
+          <div class="w-12 h-12 bg-maroon/10 text-maroon rounded-xl flex items-center justify-center group-hover:bg-maroon group-hover:text-white transition">
+            <i class="fa-solid fa-user-pen text-lg"></i>
           </div>
-          <div class="relative group">
-            <input id="editHp" value="${user.hp||''}" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all">
-            <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">No HP</label>
+          <div class="text-left flex-1">
+            <p class="font-bold text-sm text-gray-900 dark:text-white">Edit Profil</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Ubah data diri & bank</p>
           </div>
-        </div>
-        
-        <div class="relative group">
-          <textarea id="editAlamat" rows="2" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all resize-none">${user.alamat||''}</textarea>
-          <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">Alamat</label>
-        </div>
-        
-        <div class="relative group">
-          <input id="editTtl" value="${user.ttl||''}" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all">
-          <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">Tempat, Tgl Lahir</label>
-        </div>
-        
-        <div class="grid grid-cols-2 gap-3">
-          <div class="relative group">
-            <input id="editBank" value="${user.bank||''}" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all">
-            <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">Bank</label>
-          </div>
-          <div class="relative group">
-            <input id="editRek" value="${user.rekening||''}" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all">
-            <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">No Rekening</label>
-          </div>
-        </div>
-        
-        <button onclick="simpanProfil()" class="w-full bg-gradient-to-r from-maroon via-red-700 to-maroon-dark hover:shadow-2xl hover:shadow-maroon/30 text-white py-3.5 rounded-2xl font-bold text-sm transition-all hover:scale-[1.02] active:scale-98 mt-2">
-          <i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Perubahan
+          <i class="fa-solid fa-chevron-right text-gray-400"></i>
         </button>
-      </div>
-      
-      <!-- TAB PASSWORD -->
-      <div id="profilPassword" class="p-4 pt-3 space-y-3 hidden">
-        <div class="bg-maroon/5 border-l-4 border-maroon rounded-xl p-3">
-          <p class="text-xs text-maroon font-semibold"><i class="fa-solid fa-shield-halved mr-2"></i>Kosongkan jika tidak ganti password</p>
-        </div>
         
-        <div class="relative group">
-          <input id="passLama" type="password" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all">
-          <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">Password Lama</label>
-          <i onclick="togglePassProfil('passLama', this)" class="fa-solid fa-eye absolute right-4 top-4 cursor-pointer text-gray-400 hover:text-maroon transition"></i>
-        </div>
-        
-        <div class="relative group">
-          <input id="passBaru" type="password" placeholder=" " class="peer w-full px-4 pt-6 pb-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition-all">
-          <label class="absolute left-4 top-2 text- font-bold text-gray-400 dark:text-gray-500 peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text- peer-focus:font-bold peer-focus:text-maroon transition-all">Password Baru</label>
-          <i onclick="togglePassProfil('passBaru', this)" class="fa-solid fa-eye absolute right-4 top-4 cursor-pointer text-gray-400 hover:text-maroon transition"></i>
-        </div>
-        
-        <button onclick="gantiPassword()" class="w-full bg-gradient-to-r from-maroon to-red-700 hover:shadow-2xl hover:shadow-maroon/30 text-white py-3.5 rounded-2xl font-bold text-sm transition-all hover:scale-[1.02] active:scale-98">
-          <i class="fa-solid fa-key mr-2"></i>Update Password
+        <button onclick="openGantiPassword()" class="w-full flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 hover:bg-maroon/5 dark:hover:bg-maroon/10 rounded-2xl transition-all hover:scale-[1.02] active:scale-98 group">
+          <div class="w-12 h-12 bg-maroon/10 text-maroon rounded-xl flex items-center justify-center group-hover:bg-maroon group-hover:text-white transition">
+            <i class="fa-solid fa-key text-lg"></i>
+          </div>
+          <div class="text-left flex-1">
+            <p class="font-bold text-sm text-gray-900 dark:text-white">Ganti Password</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Ubah kata sandi akun</p>
+          </div>
+          <i class="fa-solid fa-chevron-right text-gray-400"></i>
         </button>
-        <button onclick="logout()" class="w-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 py-3.5 rounded-2xl font-bold text-sm transition-all hover:scale-[1.02] active:scale-98">
-          <i class="fa-solid fa-right-from-bracket mr-2"></i>Logout
+        
+        <button onclick="logout()" class="w-full flex items-center gap-4 p-4 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-2xl transition-all hover:scale-[1.02] active:scale-98 group">
+          <div class="w-12 h-12 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center group-hover:bg-red-600 group-hover:text-white transition">
+            <i class="fa-solid fa-right-from-bracket text-lg"></i>
+          </div>
+          <div class="text-left flex-1">
+            <p class="font-bold text-sm text-red-600 dark:text-red-400">Logout</p>
+            <p class="text-xs text-red-500 dark:text-red-500/70">Keluar dari aplikasi</p>
+          </div>
+          <i class="fa-solid fa-chevron-right text-red-400"></i>
         </button>
       </div>
       
       <input type="file" id="inputFotoProfil" accept="image/*" class="hidden" onchange="uploadFotoProfil(event)">
+    </div>
+  </div>
+
+  <div id="modalEditProfil" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w- max-h- flex flex-col shadow-2xl">
+      <div class="bg-maroon px-5 py-4 rounded-t-3xl flex items-center justify-between shrink-0">
+        <h3 class="font-bold text-lg text-white"><i class="fa-solid fa-user-pen mr-2"></i>Edit Profil</h3>
+        <button onclick="closeEditProfil()" class="text-white/80 hover:text-white">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-4 space-y-3">
+        <div>
+          <label class="text-xs font-bold text-maroon block mb-1.5">Nama Lengkap</label>
+          <input id="editNama" value="${user.nama||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-maroon block mb-1.5">No KTP</label>
+            <input id="editKtp" value="${user.ktp||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-maroon block mb-1.5">No HP</label>
+            <input id="editHp" value="${user.hp||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-maroon block mb-1.5">Alamat</label>
+          <textarea id="editAlamat" rows="2" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition resize-none">${user.alamat||''}</textarea>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-maroon block mb-1.5">Tempat, Tgl Lahir</label>
+          <input id="editTtl" value="${user.ttl||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-maroon block mb-1.5">Bank</label>
+            <input id="editBank" value="${user.bank||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-maroon block mb-1.5">No Rekening</label>
+            <input id="editRek" value="${user.rekening||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
+          </div>
+        </div>
+      </div>
+      <div class="p-4 pt-2 shrink-0">
+        <button onclick="simpanProfil()" class="w-full bg-gradient-to-r from-maroon to-red-700 hover:shadow-xl hover:shadow-maroon/30 text-white py-3.5 rounded-2xl font-bold transition-all hover:scale-[1.02] active:scale-98">
+          <i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Perubahan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalGantiPassword" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w- overflow-hidden shadow-2xl">
+      <div class="bg-maroon px-5 py-4 flex items-center justify-between">
+        <h3 class="font-bold text-lg text-white"><i class="fa-solid fa-key mr-2"></i>Ganti Password</h3>
+        <button onclick="closeGantiPassword()" class="text-white/80 hover:text-white">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+      <div class="p-4 space-y-3">
+        <div class="bg-maroon/5 border-l-4 border-maroon rounded-xl p-3">
+          <p class="text-xs text-maroon font-semibold"><i class="fa-solid fa-shield-halved mr-1.5"></i>Kosongkan jika tidak ganti password</p>
+        </div>
+        <div class="relative">
+          <label class="text-xs font-bold text-maroon block mb-1.5">Password Lama</label>
+          <input id="passLama" type="password" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition pr-11">
+          <i onclick="togglePassProfil('passLama', this)" class="fa-solid fa-eye absolute right-4 top-9 cursor-pointer text-gray-400 hover:text-maroon"></i>
+        </div>
+        <div class="relative">
+          <label class="text-xs font-bold text-maroon block mb-1.5">Password Baru</label>
+          <input id="passBaru" type="password" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition pr-11">
+          <i onclick="togglePassProfil('passBaru', this)" class="fa-solid fa-eye absolute right-4 top-9 cursor-pointer text-gray-400 hover:text-maroon"></i>
+        </div>
+        <button onclick="gantiPassword()" class="w-full bg-gradient-to-r from-maroon to-red-700 hover:shadow-xl hover:shadow-maroon/30 text-white py-3.5 rounded-2xl font-bold transition-all hover:scale-[1.02] active:scale-98">
+          <i class="fa-solid fa-key mr-2"></i>Update Password
+        </button>
+      </div>
     </div>
   </div>`;
   
@@ -370,33 +400,33 @@ function toggleDark() {
 function openProfil() {
   document.getElementById('modalProfil').classList.remove('hidden');
   document.getElementById('modalProfil').classList.add('flex');
-  switchProfilTab('info');
 }
 
 function closeProfil() {
   document.getElementById('modalProfil').classList.add('hidden');
   document.getElementById('modalProfil').classList.remove('flex');
-  document.getElementById('passLama').value = '';
-  document.getElementById('passBaru').value = '';
 }
 
-function switchProfilTab(tab) {
-  const tabInfo = document.getElementById('tabInfo');
-  const tabPass = document.getElementById('tabPassword');
-  const infoDiv = document.getElementById('profilInfo');
-  const passDiv = document.getElementById('profilPassword');
-  
-  if (tab === 'info') {
-    tabInfo.className = 'flex-1 py-2 font-bold text- rounded-lg bg-maroon text-white shadow transition-all';
-    tabPass.className = 'flex-1 py-2 font-bold text- rounded-lg text-gray-500 dark:text-gray-400 transition-all';
-    infoDiv.classList.remove('hidden');
-    passDiv.classList.add('hidden');
-  } else {
-    tabInfo.className = 'flex-1 py-2 font-bold text- rounded-lg text-gray-500 dark:text-gray-400 transition-all';
-    tabPass.className = 'flex-1 py-2 font-bold text- rounded-lg bg-maroon text-white shadow transition-all';
-    infoDiv.classList.add('hidden');
-    passDiv.classList.remove('hidden');
-  }
+function openEditProfil() {
+  document.getElementById('modalEditProfil').classList.remove('hidden');
+  document.getElementById('modalEditProfil').classList.add('flex');
+}
+
+function closeEditProfil() {
+  document.getElementById('modalEditProfil').classList.add('hidden');
+  document.getElementById('modalEditProfil').classList.remove('flex');
+}
+
+function openGantiPassword() {
+  document.getElementById('modalGantiPassword').classList.remove('hidden');
+  document.getElementById('modalGantiPassword').classList.add('flex');
+}
+
+function closeGantiPassword() {
+  document.getElementById('modalGantiPassword').classList.add('hidden');
+  document.getElementById('modalGantiPassword').classList.remove('flex');
+  document.getElementById('passLama').value = '';
+  document.getElementById('passBaru').value = '';
 }
 
 async function simpanProfil() {
@@ -420,7 +450,7 @@ async function simpanProfil() {
     user = {...user,...dataUpdate};
     localStorage.setItem('user', JSON.stringify(user));
     renderDashboard();
-    closeProfil();
+    closeEditProfil();
   }
 }
 
@@ -487,8 +517,7 @@ async function gantiPassword() {
   
   alert(res.message);
   if (res.status === 'success') {
-    document.getElementById('passLama').value = '';
-    document.getElementById('passBaru').value = '';
+    closeGantiPassword();
   }
 }
 
@@ -508,156 +537,254 @@ async function cekStatus() {
   if (s.lock12Jam) {
     icon = '<i class="fa-solid fa-lock text-amber-500 mr-2"></i>';
     txt = `Semua tombol dikunci. Tunggu <b>${s.sisaJam} jam</b> lagi`;
-  } else if (s.sudahIn && s.sudahOut) {
-    icon = '<i class="fa-solid fa-circle-check text-green-500 mr-2"></i>';
-    txt = 'Anda sudah absen masuk & pulang hari ini';
-  } else if (s.sudahIn && !s.sudahOut) {
+  } else if (s.bisaIn) {
+    icon = '<i class="fa-solid fa-door-open text-green-500 mr-2"></i>';
+    txt = 'Anda belum absen masuk hari ini';
+  } else if (s.bisaOut) {
     icon = '<i class="fa-solid fa-clock text-blue-500 mr-2"></i>';
-    txt = 'Anda sudah absen masuk. Silakan absen pulang';
+    txt = `Sudah masuk ${s.jamIn}. Silakan absen pulang`;
   } else {
-    icon = '<i class="fa-solid fa-hand text-maroon mr-2"></i>';
-    txt = 'Silakan absen masuk untuk memulai';
+    icon = '<i class="fa-solid fa-circle-check text-green-500 mr-2"></i>';
+    txt = 'Absensi hari ini selesai';
   }
-  
-  document.getElementById('statusCard').innerHTML = icon + txt;
+  document.getElementById('statusCard').innerHTML = `${icon}${txt}`;
 }
 
 async function openCamera(type) {
   currentType = type;
   document.getElementById('modalCam').classList.remove('hidden');
   document.getElementById('modalCam').classList.add('flex');
-  
-  navigator.geolocation.getCurrentPosition(async pos => {
-    currentLocation.lat = pos.coords.latitude;
-    currentLocation.long = pos.coords.longitude;
-    currentLocation.alamat = await getAddress(pos.coords.latitude, pos.coords.longitude);
-  }, () => {
-    currentLocation.alamat = 'Lokasi tidak ditemukan';
-  }, { enableHighAccuracy: true, timeout: 5000 });
-  
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ 
-      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } 
-    });
-    const video = document.getElementById('video');
-    video.srcObject = stream;
-    
-    video.onloadedmetadata = () => {
-      video.play();
-      drawLiveWatermark();
+    stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'user'}});
+    const v = document.getElementById('video');
+    v.srcObject = stream;
+    v.onloadedmetadata = () => {
+      v.play();
+      detectMotion(v);
     };
-    
-  } catch (err) {
-    alert('Gagal akses kamera: ' + err.message);
+  } catch(e) {
+    alert('Error kamera: ' + e.message);
     closeCam();
   }
 }
 
-function drawLiveWatermark() {
-  const video = document.getElementById('video');
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  
-  video.style.display = 'none';
-  canvas.style.display = 'block';
-  
-  function draw() {
-    if (!stream || video.paused || video.ended) {
-      cancelAnimationFrame(animationFrame);
-      return;
+function detectMotion(v) {
+  const c = document.createElement('canvas');
+  const ctx = c.getContext('2d');
+  let prev = null;
+  let still = 0;
+  const loop = () => {
+    if (!stream) return;
+    c.width = v.videoWidth;
+    c.height = v.videoHeight;
+    ctx.drawImage(v, 0, 0);
+    const curr = ctx.getImageData(0, 0, c.width, c.height).data;
+    if (prev) {
+      let diff = 0;
+      for (let i = 0; i < curr.length; i += 4) {
+        diff += Math.abs(curr[i] - prev[i]);
+      }
+      if (diff < 1000000) {
+        still++;
+        if (still > 10) {
+          console.log('User diam, siap foto');
+        }
+      } else {
+        still = 0;
+      }
     }
-    
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0);
-    
-    const scale = canvas.width / 800;
-    const now = new Date();
-    const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const tgl = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'numeric', year: 'numeric' });
-    
-    const boxHeight = 120 * scale;
-    const boxWidth = 360 * scale;
-    const padding = 20 * scale;
-    const x = padding;
-    const y = canvas.height - boxHeight - padding;
-    
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-    ctx.fillRect(x, y, boxWidth, boxHeight);
-    
-    ctx.fillStyle = 'white';
-    ctx.font = `bold ${34 * scale}px Arial`;
-    ctx.fillText(jam, x + 12, y + 35 * scale);
-    
-    ctx.font = `${18 * scale}px Arial`;
-    ctx.fillText(tgl, x + 12, y + 58 * scale);
-    ctx.fillText(`${currentLocation.lat.toFixed(6)},${currentLocation.long.toFixed(6)}`, x + 12, y + 78 * scale);
-    
-    ctx.font = `${14 * scale}px Arial`;
-    ctx.fillText(currentLocation.alamat.substring(0, 45), x + 12, y + 98 * scale);
-    
-    animationFrame = requestAnimationFrame(draw);
-  }
-  draw();
+    prev = curr;
+    animationFrame = requestAnimationFrame(loop);
+  };
+  loop();
 }
 
 function closeCam() {
-  if (stream) stream.getTracks().forEach(t => t.stop());
-  if (animationFrame) cancelAnimationFrame(animationFrame);
-  
-  const video = document.getElementById('video');
-  const canvas = document.getElementById('canvas');
-  video.style.display = 'block';
-  canvas.style.display = 'none';
-  
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop());
+    stream = null;
+  }
+  if (animationFrame) {
+    cancelAnimationFrame(animationFrame);
+    animationFrame = null;
+  }
   document.getElementById('modalCam').classList.add('hidden');
   document.getElementById('modalCam').classList.remove('flex');
+  document.getElementById('video').style.display = 'block';
+  document.getElementById('canvas').classList.add('hidden');
 }
 
-async function capture() {
-  const canvas = document.getElementById('canvas');
-  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+function capture() {
+  const v = document.getElementById('video');
+  const c = document.getElementById('canvas');
+  const ctx = c.getContext('2d');
+  c.width = v.videoWidth;
+  c.height = v.videoHeight;
+  ctx.drawImage(v, 0, 0);
+  v.style.display = 'none';
+  c.classList.remove('hidden');
   
-  const sizeKB = Math.round((fotoBase64.length * 3/4) / 1024);
+  setTimeout(() => {
+    const fotoBase64 = c.toDataURL('image/jpeg', 0.7);
+    absen(fotoBase64);
+  }, 500);
+}
+
+async function absen(fotoBase64) {
   closeCam();
   
-  document.getElementById('statusCard').innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>Mengirim data... (${sizeKB} KB)`;
+  if (!navigator.geolocation) {
+    return alert('Browser tidak support GPS');
+  }
   
-  const res = await api('absen', {
-    username: user.username,
-    type: currentType,
-    lat: currentLocation.lat,
-    long: currentLocation.long,
-    fotoBase64: fotoBase64
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    currentLocation.lat = pos.coords.latitude;
+    currentLocation.long = pos.coords.longitude;
+    
+    const res = await api('absen', {
+      username: user.username,
+      fotoBase64: fotoBase64,
+      type: currentType,
+      lat: currentLocation.lat,
+      long: currentLocation.long,
+      alamat: 'Lokasi terdeteksi'
+    });
+    
+    alert(res.message);
+    if (res.status === 'success') {
+      cekStatus();
+    }
+  }, (err) => {
+    alert('Error GPS: ' + err.message);
   });
-  alert(res.message);
-  cekStatus();
 }
 
-async function getAddress(lat, long) {
-  try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${long}&zoom=18&addressdetails=1`);
-    const data = await res.json();
-    return data.display_name || `${lat.toFixed(6)}, ${long.toFixed(6)}`;
-  } catch (e) {
-    return `${lat.toFixed(6)}, ${long.toFixed(6)}`;
+// MODAL EDIT PROFIL
+function openEditProfil() {
+  document.getElementById('modalEditProfil').classList.remove('hidden');
+  document.getElementById('modalEditProfil').classList.add('flex');
+}
+
+function closeEditProfil() {
+  document.getElementById('modalEditProfil').classList.add('hidden');
+  document.getElementById('modalEditProfil').classList.remove('flex');
+}
+
+// MODAL GANTI PASSWORD
+function openGantiPassword() {
+  document.getElementById('modalGantiPassword').classList.remove('hidden');
+  document.getElementById('modalGantiPassword').classList.add('flex');
+}
+
+function closeGantiPassword() {
+  document.getElementById('modalGantiPassword').classList.add('hidden');
+  document.getElementById('modalGantiPassword').classList.remove('flex');
+  document.getElementById('passLama').value = '';
+  document.getElementById('passBaru').value = '';
+}
+
+async function simpanProfil() {
+  const dataUpdate = {
+    username: user.username,
+    nama: document.getElementById('editNama').value.trim(),
+    ktp: document.getElementById('editKtp').value.trim(),
+    hp: document.getElementById('editHp').value.trim(),
+    alamat: document.getElementById('editAlamat').value.trim(),
+    ttl: document.getElementById('editTtl').value.trim(),
+    bank: document.getElementById('editBank').value.trim(),
+    rekening: document.getElementById('editRek').value.trim()
+  };
+  
+  if (!dataUpdate.nama) return alert('Nama wajib diisi');
+  
+  const res = await api('updateProfil', dataUpdate);
+  alert(res.message);
+  
+  if (res.status === 'success') {
+    user = {...user,...dataUpdate};
+    localStorage.setItem('user', JSON.stringify(user));
+    closeEditProfil();
+    renderDashboard();
   }
 }
 
-async function api(action, data) {
+function gantiFotoProfil() {
+  document.getElementById('inputFotoProfil').click();
+}
+
+async function uploadFotoProfil(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = async (event) => {
+    const fotoBase64 = event.target.result;
+    
+    document.getElementById('fotoProfil').src = fotoBase64;
+    document.getElementById('avatarNav').src = fotoBase64;
+    
+    const res = await api('updateFotoProfil', {
+      username: user.username,
+      fotoBase64: fotoBase64
+    });
+    
+    if (res.status === 'success') {
+      user.foto = res.urlFoto;
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      const newUrl = res.urlFoto + '?t=' + new Date().getTime();
+      document.getElementById('fotoProfil').src = newUrl;
+      document.getElementById('avatarNav').src = newUrl;
+      
+      alert('Foto profil berhasil diupdate');
+    } else {
+      alert('Gagal: ' + res.message);
+      document.getElementById('fotoProfil').src = user.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nama)}&background=800000&color=fff&size=128`;
+      document.getElementById('avatarNav').src = user.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nama)}&background=800000&color=fff`;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function togglePassProfil(id, icon) {
+  const p = document.getElementById(id);
+  if (p.type === 'password') {
+    p.type = 'text';
+    icon.classList.replace('fa-eye', 'fa-eye-slash');
+  } else {
+    p.type = 'password';
+    icon.classList.replace('fa-eye-slash', 'fa-eye');
+  }
+}
+
+async function gantiPassword() {
+  const passLama = document.getElementById('passLama').value;
+  const passBaru = document.getElementById('passBaru').value;
+  if (!passLama || !passBaru) return alert('Password lama & baru wajib diisi');
+  if (passBaru.length < 4) return alert('Password baru minimal 4 karakter');
+  
+  const res = await api('gantiPassword', {
+    username: user.username,
+    passLama: passLama,
+    passBaru: passBaru
+  });
+  
+  alert(res.message);
+  if (res.status === 'success') {
+    closeGantiPassword();
+  }
+}
+
+async function api(action, body) {
   try {
     const res = await fetch(URL_GAS, {
       method: 'POST',
-      body: JSON.stringify({action,...data})
+      body: JSON.stringify({action, ...body})
     });
     return await res.json();
-  } catch (err) {
-    return {status: 'error', message: 'Gagal koneksi ke server: ' + err.message};
+  } catch (e) {
+    return {status: 'error', message: 'Koneksi error: ' + e.message};
   }
-}
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
 }
 
 render();
