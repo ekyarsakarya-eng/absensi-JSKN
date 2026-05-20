@@ -7,7 +7,6 @@ let stream = null;
 let animationFrame = null;
 let currentLocation = { lat: 0, long: 0, alamat: 'Mengambil lokasi...' };
 let currentPage = 'home';
-let timemarkInterval = null;
 
 if (isDark) document.documentElement.classList.add('dark');
 
@@ -50,7 +49,7 @@ function renderLogin() {
 async function login() {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value.trim();
-  if (!username ||!password) return alert('Username & password wajib diisi');
+  if (!username || !password) return alert('Username & password wajib diisi');
   
   const btn = document.getElementById('btnLogin');
   btn.disabled = true;
@@ -90,7 +89,7 @@ function togglePass() {
 }
 
 function toggleDark() {
-  isDark =!isDark;
+  isDark = !isDark;
   localStorage.setItem('dark', isDark);
   document.documentElement.classList.toggle('dark');
   document.getElementById('darkIcon').className = `fa-solid ${isDark? 'fa-sun' : 'fa-moon'} text-xl`;
@@ -155,10 +154,10 @@ function renderDashboard() {
       <div style="position:relative">
         <video id="video" class="w-full rounded-lg bg-black" autoplay playsinline></video>
         <canvas id="canvas" class="hidden w-full rounded-lg"></canvas>
-        <div id="timemarkPreview" class="absolute bottom-2 left-2 bg-black/70 border-l-4 border-maroon px-3 py-2 rounded text-white text-xs font-semibold">
+        <div id="timemarkPreview" class="absolute bottom-2 left-2 bg-black/70 border-l-4 border-maroon px-3 py-2 rounded text-white text-xs font-semibold z-10">
           <div id="previewHari"></div>
           <div id="previewJam" class="text-yellow-400 text-sm font-bold"></div>
-          <div id="previewNama" class="text-white/80"></div>
+          <div id="previewNama" class="text-white opacity-80"></div>
         </div>
       </div>
       <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">Pastikan wajah terlihat jelas</p>
@@ -234,7 +233,7 @@ function renderDashboard() {
 
   <!-- MODAL EDIT PROFIL -->
   <div id="modalEditProfil" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
-    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- flex flex-col shadow-2xl">
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl">
       <div class="bg-maroon px-5 py-4 rounded-t-3xl flex items-center justify-between shrink-0">
         <h3 class="font-bold text-lg text-white"><i class="fa-solid fa-user-pen mr-2"></i>Edit Profil</h3>
         <button onclick="closeEditProfil()" class="text-white/80 hover:text-white">
@@ -285,7 +284,7 @@ function renderDashboard() {
 
   <!-- MODAL GANTI PASSWORD -->
   <div id="modalGantiPassword" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
-    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md overflow-y-auto max-h- shadow-2xl">
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
       <div class="bg-maroon px-5 py-4 flex items-center justify-between">
         <h3 class="font-bold text-lg text-white"><i class="fa-solid fa-key mr-2"></i>Ganti Password</h3>
         <button onclick="closeGantiPassword()" class="text-white/80 hover:text-white">
@@ -328,7 +327,7 @@ function closeProfil() {
 }
 
 function openEditProfil() {
-  closeProfil();
+  closeProfil(); 
   document.getElementById('modalEditProfil').classList.remove('hidden');
   document.getElementById('modalEditProfil').classList.add('flex');
 }
@@ -339,7 +338,7 @@ function closeEditProfil() {
 }
 
 function openGantiPassword() {
-  closeProfil();
+  closeProfil(); 
   document.getElementById('modalGantiPassword').classList.remove('hidden');
   document.getElementById('modalGantiPassword').classList.add('flex');
 }
@@ -385,6 +384,61 @@ async function uploadFotoProfil(event) {
     }
   };
   reader.readAsDataURL(file);
+}
+
+// ==================== LIVE WATERMARK UPDATE LOGIC ====================
+function startTimemark() {
+  if (animationFrame) cancelAnimationFrame(animationFrame);
+  
+  function update() {
+    const hariEl = document.getElementById('previewHari');
+    const jamEl = document.getElementById('previewJam');
+    const namaEl = document.getElementById('previewNama');
+    
+    if (hariEl && jamEl && namaEl) {
+      const now = new Date();
+      hariEl.innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      jamEl.innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      namaEl.innerText = user ? user.nama : '';
+    }
+    
+    const modalCam = document.getElementById('modalCam');
+    if (modalCam && !modalCam.classList.contains('hidden')) {
+      animationFrame = requestAnimationFrame(update);
+    }
+  }
+  update();
+}
+
+// Pastikan pemicu kamera kamu memanggil startTimemark() agar waktu ter-update secara berkala
+function openCam(type) {
+  currentType = type;
+  const modal = document.getElementById('modalCam');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  
+  startTimemark(); // Mengaktifkan fungsi update teks timemark secara berkala
+  
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
+    .then(s => {
+      stream = s;
+      document.getElementById('video').srcObject = s;
+    })
+    .catch(err => {
+      alert('Gagal mengakses kamera: ' + err.message);
+      closeCam();
+    });
+}
+
+function closeCam() {
+  const modal = document.getElementById('modalCam');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    stream = null;
+  }
+  if (animationFrame) cancelAnimationFrame(animationFrame);
 }
 
 async function simpanProfil() {
@@ -440,74 +494,3 @@ async function gantiPassword() {
     closeGantiPassword();
   }
 }
-
-// ==================== FUNCTION KAMERA + TIMEMARK ====================
-function openCam(type) {
-  currentType = type;
-  document.getElementById('modalCam').classList.remove('hidden');
-  document.getElementById('modalCam').classList.add('flex');
-
-  updateTimemark();
-  timemarkInterval = setInterval(updateTimemark, 1000);
-
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-  .then(s => {
-      stream = s;
-      document.getElementById('video').srcObject = s;
-    })
-  .catch(err => alert('Gagal buka kamera: ' + err));
-}
-
-function updateTimemark() {
-  const now = new Date();
-  const hari = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-  document.getElementById('previewHari').textContent = hari;
-  document.getElementById('previewJam').textContent = jam;
-  document.getElementById('previewNama').textContent = user.nama;
-}
-
-function closeCam() {
-  if (timemarkInterval) clearInterval(timemarkInterval);
-  if (stream) stream.getTracks().forEach(track => track.stop());
-  document.getElementById('modalCam').classList.add('hidden');
-  document.getElementById('modalCam').classList.remove('flex');
-}
-
-function capture() {
-  const video = document.getElementById('video');
-  const canvas = document.getElementById('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0);
-
-  closeCam();
-
-  const fotoBase64 = canvas.toDataURL('image/jpeg');
-  // kirimAbsen(fotoBase64); // sesuaikan dengan fungsi kamu
-}
-
-// Dummy function, ganti dengan fungsi kamu
-function renderPage() {
-  return `<div class="text-center py-8">
-    <button onclick="openCam('masuk')" class="bg-maroon text-white px-6 py-3 rounded-xl font-bold">
-      <i class="fa-solid fa-camera mr-2"></i>Absen Masuk
-    </button>
-  </div>`;
-}
-function switchPage(page) {
-  currentPage = page;
-  renderDashboard();
-}
-function cekStatus() {}
-async function api(action, data) {
-  const res = await fetch(URL_GAS, {
-    method: 'POST',
-    body: JSON.stringify({action,...data})
-  });
-  return await res.json();
-}
-
-// Init
-render();
