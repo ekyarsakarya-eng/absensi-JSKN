@@ -46,6 +46,55 @@ function renderLogin() {
   </div>`;
 }
 
+async function login() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  if (!username || !password) return alert('Username & password wajib diisi');
+  
+  const btn = document.getElementById('btnLogin');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Memproses...';
+  
+  const res = await api('login', {username, password});
+  if (res.status === 'success') {
+    user = res;
+    localStorage.setItem('user', JSON.stringify(user));
+    render();
+  } else {
+    alert(res.message);
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i>Masuk';
+  }
+}
+
+function logout() {
+  if (confirm('Yakin mau logout?')) {
+    localStorage.removeItem('user');
+    user = null;
+    currentPage = 'home';
+    render();
+  }
+}
+
+function togglePass() {
+  const p = document.getElementById('password');
+  const icon = document.getElementById('eyeIcon');
+  if (p.type === 'password') {
+    p.type = 'text';
+    icon.classList.replace('fa-eye', 'fa-eye-slash');
+  } else {
+    p.type = 'password';
+    icon.classList.replace('fa-eye-slash', 'fa-eye');
+  }
+}
+
+function toggleDark() {
+  isDark = !isDark;
+  localStorage.setItem('dark', isDark);
+  document.documentElement.classList.toggle('dark');
+  document.getElementById('darkIcon').className = `fa-solid ${isDark? 'fa-sun' : 'fa-moon'} text-xl`;
+}
+
 function renderDashboard() {
   app.innerHTML = `
   <nav class="bg-maroon text-white p-4 flex justify-between items-center shadow-lg sticky top-0 z-10">
@@ -96,6 +145,7 @@ function renderDashboard() {
     </div>
   </div>
   
+  <!-- MODAL KAMERA + TIMEMARK -->
   <div id="modalCam" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-50">
     <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 w-full max-w-md">
       <h3 class="font-bold text-lg mb-3 text-maroon dark:text-white text-center">
@@ -104,6 +154,11 @@ function renderDashboard() {
       <div style="position:relative">
         <video id="video" class="w-full rounded-lg bg-black" autoplay playsinline></video>
         <canvas id="canvas" class="hidden w-full rounded-lg"></canvas>
+        <div id="timemarkPreview" class="absolute bottom-2 left-2 bg-black/70 border-l-4 border-maroon px-3 py-2 rounded text-white text-xs font-semibold">
+          <div id="previewHari"></div>
+          <div id="previewJam" class="text-yellow-400 text-sm font-bold"></div>
+          <div id="previewNama" class="text- opacity-80"></div>
+        </div>
       </div>
       <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">Pastikan wajah terlihat jelas</p>
       <div class="flex gap-2 mt-4">
@@ -117,10 +172,9 @@ function renderDashboard() {
     </div>
   </div>
   
-  <!-- MODAL PROFIL - NAMA BALIK KE HEADER + KELIATAN -->
+  <!-- MODAL PROFIL -->
   <div id="modalProfil" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
     <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w- overflow-hidden shadow-2xl">
-      <!-- HEADER MAROON SOLID + NAMA PUTIH TEBEL -->
       <div class="bg-maroon px-5 pt-8 pb-6 relative">
         <button onclick="closeProfil()" class="absolute top-3 right-3 bg-white/95 hover:bg-white text-maroon w-9 h-9 rounded-full transition shadow-xl hover:rotate-90 hover:scale-110 flex items-center justify-center z-20">
           <i class="fa-solid fa-xmark"></i>
@@ -133,13 +187,11 @@ function renderDashboard() {
               <i class="fa-solid fa-camera"></i>
             </button>
           </div>
-          <!-- NAMA BALIK KE SINI - PUTIH TEBEL + SHADOW KUAT -->
           <h3 class="font-extrabold text-xl text-white mb-1" style="text-shadow: 0 2px 10px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)">${user.nama}</h3>
           <p class="text-sm text-white/90 font-medium" style="text-shadow: 0 1px 6px rgba(0,0,0,0.6)">@${user.username}</p>
         </div>
       </div>
       
-      <!-- MENU LIST -->
       <div class="p-4 space-y-2">
         <button onclick="openEditProfil()" class="w-full flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 hover:bg-maroon/5 dark:hover:bg-maroon/10 rounded-2xl transition-all hover:scale-[1.02] active:scale-98 group">
           <div class="w-12 h-12 bg-maroon/10 text-maroon rounded-xl flex items-center justify-center group-hover:bg-maroon group-hover:text-white transition">
@@ -263,146 +315,7 @@ function renderDashboard() {
   if (currentPage === 'home') cekStatus();
 }
 
-function switchPage(page) {
-  currentPage = page;
-  renderDashboard();
-}
-
-function renderPage() {
-  switch(currentPage) {
-    case 'home': return renderHome();
-    case 'rekap': return renderRekap();
-    case 'patroli': return renderPatroli();
-    case 'kejadian': return renderKejadian();
-    case 'pembinaan': return renderPembinaan();
-    default: return renderHome();
-  }
-}
-
-function renderHome() {
-  return `
-    <div id="statusCard" class="bg-white dark:bg-gray-800 p-4 rounded-xl mb-4 text-center dark:text-white shadow-md border-l-4 border-maroon">
-      <i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading status...
-    </div>
-    
-    <div class="grid grid-cols-2 gap-4 mb-6">
-      <button id="btnIn" onclick="openCamera('IN')" class="bg-gradient-to-br from-green-500 to-green-700 text-white p-6 rounded-xl shadow-lg disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition transform active:scale-95">
-        <i class="fa-solid fa-right-to-bracket text-3xl mb-2"></i><br>
-        <span class="font-bold">Absen Masuk</span>
-      </button>
-      <button id="btnOut" onclick="openCamera('OUT')" class="bg-gradient-to-br from-red-500 to-red-700 text-white p-6 rounded-xl shadow-lg disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition transform active:scale-95">
-        <i class="fa-solid fa-right-from-bracket text-3xl mb-2"></i><br>
-        <span class="font-bold">Absen Pulang</span>
-      </button>
-    </div>
-  `;
-}
-
-function renderRekap() {
-  return `
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md text-center">
-      <img src="icon-rekap.png" class="w-20 h-20 mx-auto mb-3">
-      <h2 class="text-xl font-bold text-maroon dark:text-white mb-2">Rekap Absen</h2>
-      <p class="text-gray-600 dark:text-gray-400 mb-4">Fitur rekap kehadiran bulanan</p>
-      <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-        <i class="fa-solid fa-tools text-yellow-600 mr-2"></i>
-        <span class="text-sm text-yellow-800 dark:text-yellow-200">Dalam pengembangan</span>
-      </div>
-    </div>
-  `;
-}
-
-function renderPatroli() {
-  return `
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md text-center">
-      <img src="icon-patroli.png" class="w-20 h-20 mx-auto mb-3">
-      <h2 class="text-xl font-bold text-maroon dark:text-white mb-2">Patroli</h2>
-      <p class="text-gray-600 dark:text-gray-400 mb-4">Laporkan kegiatan patroli dengan foto & GPS</p>
-      <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-        <i class="fa-solid fa-tools text-yellow-600 mr-2"></i>
-        <span class="text-sm text-yellow-800 dark:text-yellow-200">Dalam pengembangan</span>
-      </div>
-    </div>
-  `;
-}
-
-function renderKejadian() {
-  return `
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md text-center">
-      <img src="icon-kejadian.png" class="w-20 h-20 mx-auto mb-3">
-      <h2 class="text-xl font-bold text-maroon dark:text-white mb-2">Lapor Kejadian</h2>
-      <p class="text-gray-600 dark:text-gray-400 mb-4">Laporkan kejadian penting di lokasi</p>
-      <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-        <i class="fa-solid fa-tools text-yellow-600 mr-2"></i>
-        <span class="text-sm text-yellow-800 dark:text-yellow-200">Dalam pengembangan</span>
-      </div>
-    </div>
-  `;
-}
-
-function renderPembinaan() {
-  return `
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md text-center">
-      <img src="icon-pembinaan.png" class="w-20 h-20 mx-auto mb-3">
-      <h2 class="text-xl font-bold text-maroon dark:text-white mb-2">Pembinaan Anggota</h2>
-      <p class="text-gray-600 dark:text-gray-400 mb-4">Form penilaian & pembinaan anggota</p>
-      <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-        <i class="fa-solid fa-tools text-yellow-600 mr-2"></i>
-        <span class="text-sm text-yellow-800 dark:text-yellow-200">Dalam pengembangan</span>
-      </div>
-    </div>
-  `;
-}
-
-async function login() {
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value.trim();
-  if (!username || !password) return alert('Username & password wajib diisi');
-  
-  const btn = document.getElementById('btnLogin');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Memproses...';
-  
-  const res = await api('login', {username, password});
-  if (res.status === 'success') {
-    user = res;
-    localStorage.setItem('user', JSON.stringify(user));
-    render();
-  } else {
-    alert(res.message);
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i>Masuk';
-  }
-}
-
-function logout() {
-  if (confirm('Yakin mau logout?')) {
-    localStorage.removeItem('user');
-    user = null;
-    currentPage = 'home';
-    render();
-  }
-}
-
-function togglePass() {
-  const p = document.getElementById('password');
-  const icon = document.getElementById('eyeIcon');
-  if (p.type === 'password') {
-    p.type = 'text';
-    icon.classList.replace('fa-eye', 'fa-eye-slash');
-  } else {
-    p.type = 'password';
-    icon.classList.replace('fa-eye-slash', 'fa-eye');
-  }
-}
-
-function toggleDark() {
-  isDark = !isDark;
-  localStorage.setItem('dark', isDark);
-  document.documentElement.classList.toggle('dark');
-  document.getElementById('darkIcon').className = `fa-solid ${isDark? 'fa-sun' : 'fa-moon'} text-xl`;
-}
-
+// ==================== FUNCTION MODAL PROFIL ====================
 function openProfil() {
   document.getElementById('modalProfil').classList.remove('hidden');
   document.getElementById('modalProfil').classList.add('flex');
@@ -414,6 +327,7 @@ function closeProfil() {
 }
 
 function openEditProfil() {
+  closeProfil(); // Tutup modal profil dulu
   document.getElementById('modalEditProfil').classList.remove('hidden');
   document.getElementById('modalEditProfil').classList.add('flex');
 }
@@ -424,6 +338,7 @@ function closeEditProfil() {
 }
 
 function openGantiPassword() {
+  closeProfil(); // Tutup modal profil dulu
   document.getElementById('modalGantiPassword').classList.remove('hidden');
   document.getElementById('modalGantiPassword').classList.add('flex');
 }
@@ -433,261 +348,127 @@ function closeGantiPassword() {
   document.getElementById('modalGantiPassword').classList.remove('flex');
   document.getElementById('passLama').value = '';
   document.getElementById('passBaru').value = '';
-}
-
-async function simpanProfil() {
-  const dataUpdate = {
-    username: user.username,
-    nama: document.getElementById('editNama').value.trim(),
-    ktp: document.getElementById('editKtp').value.trim(),
-    hp: document.getElementById('editHp').value.trim(),
-    alamat: document.getElementById('editAlamat').value.trim(),
-    ttl: document.getElementById('editTtl').value.trim(),
-    bank: document.getElementById('editBank').value.trim(),
-    rekening: document.getElementById('editRek').value.trim()
-  };
-  
-  if (!dataUpdate.nama) return alert('Nama wajib diisi');
-  
-  const res = await api('updateProfil', dataUpdate);
-  alert(res.message);
-  
-  if (res.status === 'success') {
-    user = {...user,...dataUpdate};
-    localStorage.setItem('user', JSON.stringify(user));
-    renderDashboard();
-    closeEditProfil();
-  }
 }
 
 function gantiFotoProfil() {
   document.getElementById('inputFotoProfil').click();
 }
 
-async function uploadFotoProfil(e) {
-  const file = e.target.files[0];
+async function uploadFotoProfil(event) {
+  const file = event.target.files[0];
   if (!file) return;
   
+  if (file.size > 5000000) {
+    return alert('Ukuran foto maksimal 5MB');
+  }
+  
   const reader = new FileReader();
-  reader.onload = async (event) => {
-    const fotoBase64 = event.target.result;
+  reader.onload = async (e) => {
+    const fotoBase64 = e.target.result;
     
+    // Preview dulu
     document.getElementById('fotoProfil').src = fotoBase64;
     document.getElementById('avatarNav').src = fotoBase64;
     
-    const res = await api('updateFotoProfil', {
+    // Upload ke server
+    const res = await api('uploadFoto', {
       username: user.username,
       fotoBase64: fotoBase64
     });
     
     if (res.status === 'success') {
-      user.foto = res.urlFoto;
+      user.foto = fotoBase64;
       localStorage.setItem('user', JSON.stringify(user));
-      
-      const newUrl = res.urlFoto + '?t=' + new Date().getTime();
-      document.getElementById('fotoProfil').src = newUrl;
-      document.getElementById('avatarNav').src = newUrl;
-      
-      alert('Foto profil berhasil diupdate');
+      alert('Foto profil berhasil diubah!');
     } else {
-      alert('Gagal: ' + res.message);
-      document.getElementById('fotoProfil').src = user.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nama)}&background=800000&color=fff&size=128`;
-      document.getElementById('avatarNav').src = user.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nama)}&background=800000&color=fff`;
+      alert('Gagal upload: ' + res.message);
+      // Balikin foto lama
+      document.getElementById('fotoProfil').src = user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=800000&color=fff';
     }
   };
   reader.readAsDataURL(file);
 }
 
-function togglePassProfil(id, icon) {
-  const p = document.getElementById(id);
-  if (p.type === 'password') {
-    p.type = 'text';
-    icon.classList.replace('fa-eye', 'fa-eye-slash');
-  } else {
-    p.type = 'password';
-    icon.classList.replace('fa-eye-slash', 'fa-eye');
-  }
-}
+<!-- MODAL EDIT PROFIL -->
+  <div id="modalEditProfil" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w- max-h- flex flex-col shadow-2xl">
+      <div class="bg-maroon px-5 py-4 rounded-t-3xl flex items-center justify-between shrink-0">
+        <h3 class="font-bold text-lg text-white"><i class="fa-solid fa-user-pen mr-2"></i>Edit Profil</h3>
+        <button onclick="closeEditProfil()" class="text-white/80 hover:text-white">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-4 space-y-3">
+        <div>
+          <label class="text-xs font-bold text-maroon block mb-1.5">Nama Lengkap</label>
+          <input id="editNama" value="${user.nama||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-maroon block mb-1.5">No KTP</label>
+            <input id="editKtp" value="${user.ktp||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-maroon block mb-1.5">No HP</label>
+            <input id="editHp" value="${user.hp||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-maroon block mb-1.5">Alamat</label>
+          <textarea id="editAlamat" rows="2" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition resize-none">${user.alamat||''}</textarea>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-maroon block mb-1.5">Tempat, Tgl Lahir</label>
+          <input id="editTtl" value="${user.ttl||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-maroon block mb-1.5">Bank</label>
+            <input id="editBank" value="${user.bank||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-maroon block mb-1.5">No Rekening</label>
+            <input id="editRek" value="${user.rekening||''}" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition">
+          </div>
+        </div>
+      </div>
+      <div class="p-4 pt-2 shrink-0">
+        <button onclick="simpanProfil()" class="w-full bg-gradient-to-r from-maroon to-red-700 hover:shadow-xl hover:shadow-maroon/30 text-white py-3.5 rounded-2xl font-bold transition-all hover:scale-[1.02] active:scale-98">
+          <i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Perubahan
+        </button>
+      </div>
+    </div>
+  </div>
 
-async function gantiPassword() {
-  const passLama = document.getElementById('passLama').value;
-  const passBaru = document.getElementById('passBaru').value;
-  if (!passLama || !passBaru) return alert('Password lama & baru wajib diisi');
-  if (passBaru.length < 4) return alert('Password baru minimal 4 karakter');
-  
-  const res = await api('gantiPassword', {
-    username: user.username,
-    passLama: passLama,
-    passBaru: passBaru
-  });
-  
-  alert(res.message);
-  if (res.status === 'success') {
-    closeGantiPassword();
-  }
-}
-
-async function cekStatus() {
-  const s = await api('getStatus', {username: user.username});
-  
-  if (s.error) {
-    document.getElementById('statusCard').innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-500 mr-2"></i><span class="text-red-500">Error: ${s.error}</span>`;
-    return;
-  }
-  
-  document.getElementById('btnIn').disabled = !s.bisaIn;
-  document.getElementById('btnOut').disabled = !s.bisaOut;
-  
-  let txt = '';
-  let icon = '';
-  if (s.lock12Jam) {
-    icon = '<i class="fa-solid fa-lock text-amber-500 mr-2"></i>';
-    txt = `Semua tombol dikunci. Tunggu <b>${s.sisaJam} jam</b> lagi`;
-  } else if (s.bisaIn) {
-    icon = '<i class="fa-solid fa-door-open text-green-500 mr-2"></i>';
-    txt = 'Anda belum absen masuk hari ini';
-  } else if (s.bisaOut) {
-    icon = '<i class="fa-solid fa-clock text-blue-500 mr-2"></i>';
-    txt = `Sudah masuk ${s.jamIn}. Silakan absen pulang`;
-  } else {
-    icon = '<i class="fa-solid fa-circle-check text-green-500 mr-2"></i>';
-    txt = 'Absensi hari ini selesai';
-  }
-  document.getElementById('statusCard').innerHTML = `${icon}${txt}`;
-}
-
-async function openCamera(type) {
-  currentType = type;
-  document.getElementById('modalCam').classList.remove('hidden');
-  document.getElementById('modalCam').classList.add('flex');
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'user'}});
-    const v = document.getElementById('video');
-    v.srcObject = stream;
-    v.onloadedmetadata = () => {
-      v.play();
-      detectMotion(v);
-    };
-  } catch(e) {
-    alert('Error kamera: ' + e.message);
-    closeCam();
-  }
-}
-
-function detectMotion(v) {
-  const c = document.createElement('canvas');
-  const ctx = c.getContext('2d');
-  let prev = null;
-  let still = 0;
-  const loop = () => {
-    if (!stream) return;
-    c.width = v.videoWidth;
-    c.height = v.videoHeight;
-    ctx.drawImage(v, 0, 0);
-    const curr = ctx.getImageData(0, 0, c.width, c.height).data;
-    if (prev) {
-      let diff = 0;
-      for (let i = 0; i < curr.length; i += 4) {
-        diff += Math.abs(curr[i] - prev[i]);
-      }
-      if (diff < 1000000) {
-        still++;
-        if (still > 10) {
-          console.log('User diam, siap foto');
-        }
-      } else {
-        still = 0;
-      }
-    }
-    prev = curr;
-    animationFrame = requestAnimationFrame(loop);
-  };
-  loop();
-}
-
-function closeCam() {
-  if (stream) {
-    stream.getTracks().forEach(t => t.stop());
-    stream = null;
-  }
-  if (animationFrame) {
-    cancelAnimationFrame(animationFrame);
-    animationFrame = null;
-  }
-  document.getElementById('modalCam').classList.add('hidden');
-  document.getElementById('modalCam').classList.remove('flex');
-  document.getElementById('video').style.display = 'block';
-  document.getElementById('canvas').classList.add('hidden');
-}
-
-function capture() {
-  const v = document.getElementById('video');
-  const c = document.getElementById('canvas');
-  const ctx = c.getContext('2d');
-  c.width = v.videoWidth;
-  c.height = v.videoHeight;
-  ctx.drawImage(v, 0, 0);
-  v.style.display = 'none';
-  c.classList.remove('hidden');
-  
-  setTimeout(() => {
-    const fotoBase64 = c.toDataURL('image/jpeg', 0.7);
-    absen(fotoBase64);
-  }, 500);
-}
-
-async function absen(fotoBase64) {
-  closeCam();
-  
-  if (!navigator.geolocation) {
-    return alert('Browser tidak support GPS');
-  }
-  
-  navigator.geolocation.getCurrentPosition(async (pos) => {
-    currentLocation.lat = pos.coords.latitude;
-    currentLocation.long = pos.coords.longitude;
-    
-    const res = await api('absen', {
-      username: user.username,
-      fotoBase64: fotoBase64,
-      type: currentType,
-      lat: currentLocation.lat,
-      long: currentLocation.long,
-      alamat: 'Lokasi terdeteksi'
-    });
-    
-    alert(res.message);
-    if (res.status === 'success') {
-      cekStatus();
-    }
-  }, (err) => {
-    alert('Error GPS: ' + err.message);
-  });
-}
-
-// MODAL EDIT PROFIL
-function openEditProfil() {
-  document.getElementById('modalEditProfil').classList.remove('hidden');
-  document.getElementById('modalEditProfil').classList.add('flex');
-}
-
-function closeEditProfil() {
-  document.getElementById('modalEditProfil').classList.add('hidden');
-  document.getElementById('modalEditProfil').classList.remove('flex');
-}
-
-// MODAL GANTI PASSWORD
-function openGantiPassword() {
-  document.getElementById('modalGantiPassword').classList.remove('hidden');
-  document.getElementById('modalGantiPassword').classList.add('flex');
-}
-
-function closeGantiPassword() {
-  document.getElementById('modalGantiPassword').classList.add('hidden');
-  document.getElementById('modalGantiPassword').classList.remove('flex');
-  document.getElementById('passLama').value = '';
-  document.getElementById('passBaru').value = '';
-}
+  <!-- MODAL GANTI PASSWORD -->
+  <div id="modalGantiPassword" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w- overflow-hidden shadow-2xl">
+      <div class="bg-maroon px-5 py-4 flex items-center justify-between">
+        <h3 class="font-bold text-lg text-white"><i class="fa-solid fa-key mr-2"></i>Ganti Password</h3>
+        <button onclick="closeGantiPassword()" class="text-white/80 hover:text-white">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+      <div class="p-4 space-y-3">
+        <div class="bg-maroon/5 border-l-4 border-maroon rounded-xl p-3">
+          <p class="text-xs text-maroon font-semibold"><i class="fa-solid fa-shield-halved mr-1.5"></i>Kosongkan jika tidak ganti password</p>
+        </div>
+        <div class="relative">
+          <label class="text-xs font-bold text-maroon block mb-1.5">Password Lama</label>
+          <input id="passLama" type="password" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition pr-11">
+          <i onclick="togglePassProfil('passLama', this)" class="fa-solid fa-eye absolute right-4 top-9 cursor-pointer text-gray-400 hover:text-maroon"></i>
+        </div>
+        <div class="relative">
+          <label class="text-xs font-bold text-maroon block mb-1.5">Password Baru</label>
+          <input id="passBaru" type="password" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-maroon focus:ring-4 focus:ring-maroon/10 outline-none transition pr-11">
+          <i onclick="togglePassProfil('passBaru', this)" class="fa-solid fa-eye absolute right-4 top-9 cursor-pointer text-gray-400 hover:text-maroon"></i>
+        </div>
+        <button onclick="gantiPassword()" class="w-full bg-gradient-to-r from-maroon to-red-700 hover:shadow-xl hover:shadow-maroon/30 text-white py-3.5 rounded-2xl font-bold transition-all hover:scale-[1.02] active:scale-98">
+          <i class="fa-solid fa-key mr-2"></i>Update Password
+        </button>
+      </div>
+    </div>
+  </div>`;
 
 async function simpanProfil() {
   const dataUpdate = {
@@ -714,44 +495,6 @@ async function simpanProfil() {
   }
 }
 
-function gantiFotoProfil() {
-  document.getElementById('inputFotoProfil').click();
-}
-
-async function uploadFotoProfil(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  
-  const reader = new FileReader();
-  reader.onload = async (event) => {
-    const fotoBase64 = event.target.result;
-    
-    document.getElementById('fotoProfil').src = fotoBase64;
-    document.getElementById('avatarNav').src = fotoBase64;
-    
-    const res = await api('updateFotoProfil', {
-      username: user.username,
-      fotoBase64: fotoBase64
-    });
-    
-    if (res.status === 'success') {
-      user.foto = res.urlFoto;
-      localStorage.setItem('user', JSON.stringify(user));
-      
-      const newUrl = res.urlFoto + '?t=' + new Date().getTime();
-      document.getElementById('fotoProfil').src = newUrl;
-      document.getElementById('avatarNav').src = newUrl;
-      
-      alert('Foto profil berhasil diupdate');
-    } else {
-      alert('Gagal: ' + res.message);
-      document.getElementById('fotoProfil').src = user.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nama)}&background=800000&color=fff&size=128`;
-      document.getElementById('avatarNav').src = user.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.nama)}&background=800000&color=fff`;
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
 function togglePassProfil(id, icon) {
   const p = document.getElementById(id);
   if (p.type === 'password') {
@@ -766,7 +509,7 @@ function togglePassProfil(id, icon) {
 async function gantiPassword() {
   const passLama = document.getElementById('passLama').value;
   const passBaru = document.getElementById('passBaru').value;
-  if (!passLama || !passBaru) return alert('Password lama & baru wajib diisi');
+  if (!passLama ||!passBaru) return alert('Password lama & baru wajib diisi');
   if (passBaru.length < 4) return alert('Password baru minimal 4 karakter');
   
   const res = await api('gantiPassword', {
@@ -780,17 +523,3 @@ async function gantiPassword() {
     closeGantiPassword();
   }
 }
-
-async function api(action, body) {
-  try {
-    const res = await fetch(URL_GAS, {
-      method: 'POST',
-      body: JSON.stringify({action, ...body})
-    });
-    return await res.json();
-  } catch (e) {
-    return {status: 'error', message: 'Koneksi error: ' + e.message};
-  }
-}
-
-render();
