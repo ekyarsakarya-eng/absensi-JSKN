@@ -51,11 +51,11 @@ async function login() {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value.trim();
   if (!username ||!password) return alert('Username & password wajib diisi');
-
+  
   const btn = document.getElementById('btnLogin');
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Memproses...';
-
+  
   const res = await api('login', {username, password});
   if (res.status === 'success') {
     user = res;
@@ -105,6 +105,7 @@ function renderDashboard() {
         <h1 class="font-bold text-lg leading-tight">Hi, ${user.nama}</h1>
         <p class="text-xs opacity-80">${new Date().toLocaleDateString('id-ID', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}</p>
       </div>
+    </div>
     <div class="flex gap-3 items-center">
       <button onclick="toggleDark()" class="hover:bg-maroon-dark p-2 rounded-lg transition">
         <i id="darkIcon" class="fa-solid ${isDark? 'fa-sun' : 'fa-moon'} text-xl"></i>
@@ -115,11 +116,11 @@ function renderDashboard() {
       </button>
     </div>
   </nav>
-
+  
   <div id="contentArea" class="p-4 max-w-2xl mx-auto pb-24">
     ${renderPage()}
   </div>
-
+  
   <div class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 shadow-lg z-20">
     <div class="grid grid-cols-5 gap-1 max-w-2xl mx-auto">
       <button onclick="switchPage('home')" class="flex flex-col items-center py-2 ${currentPage==='home'?'text-maroon':'text-gray-500'}">
@@ -144,7 +145,7 @@ function renderDashboard() {
       </button>
     </div>
   </div>
-
+  
   <!-- MODAL KAMERA + TIMEMARK -->
   <div id="modalCam" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-50">
     <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 w-full max-w-md">
@@ -171,7 +172,7 @@ function renderDashboard() {
       </div>
     </div>
   </div>
-
+  
   <!-- MODAL PROFIL -->
   <div id="modalProfil" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
     <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
@@ -191,7 +192,7 @@ function renderDashboard() {
           <p class="text-sm text-white/90 font-medium" style="text-shadow: 0 1px 6px rgba(0,0,0,0.6)">@${user.username}</p>
         </div>
       </div>
-
+      
       <div class="p-4 space-y-2">
         <button onclick="openEditProfil()" class="w-full flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 hover:bg-maroon/5 dark:hover:bg-maroon/10 rounded-2xl transition-all hover:scale-[1.02] active:scale-98 group">
           <div class="w-12 h-12 bg-maroon/10 text-maroon rounded-xl flex items-center justify-center group-hover:bg-maroon group-hover:text-white transition">
@@ -203,7 +204,7 @@ function renderDashboard() {
           </div>
           <i class="fa-solid fa-chevron-right text-gray-400"></i>
         </button>
-
+        
         <button onclick="openGantiPassword()" class="w-full flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 hover:bg-maroon/5 dark:hover:bg-maroon/10 rounded-2xl transition-all hover:scale-[1.02] active:scale-98 group">
           <div class="w-12 h-12 bg-maroon/10 text-maroon rounded-xl flex items-center justify-center group-hover:bg-maroon group-hover:text-white transition">
             <i class="fa-solid fa-key text-lg"></i>
@@ -214,7 +215,7 @@ function renderDashboard() {
           </div>
           <i class="fa-solid fa-chevron-right text-gray-400"></i>
         </button>
-
+        
         <button onclick="logout()" class="w-full flex items-center gap-4 p-4 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-2xl transition-all hover:scale-[1.02] active:scale-98 group">
           <div class="w-12 h-12 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center group-hover:bg-red-600 group-hover:text-white transition">
             <i class="fa-solid fa-right-from-bracket text-lg"></i>
@@ -226,7 +227,7 @@ function renderDashboard() {
           <i class="fa-solid fa-chevron-right text-red-400"></i>
         </button>
       </div>
-
+      
       <input type="file" id="inputFotoProfil" accept="image/*" class="hidden" onchange="uploadFotoProfil(event)">
     </div>
   </div>
@@ -311,7 +312,7 @@ function renderDashboard() {
       </div>
     </div>
   </div>`;
-
+  
   if (currentPage === 'home') cekStatus();
 }
 
@@ -357,23 +358,23 @@ function gantiFotoProfil() {
 async function uploadFotoProfil(event) {
   const file = event.target.files[0];
   if (!file) return;
-
+  
   if (file.size > 5000000) {
     return alert('Ukuran foto maksimal 5MB');
   }
-
+  
   const reader = new FileReader();
   reader.onload = async (e) => {
     const fotoBase64 = e.target.result;
-
+    
     document.getElementById('fotoProfil').src = fotoBase64;
     document.getElementById('avatarNav').src = fotoBase64;
-
+    
     const res = await api('uploadFoto', {
       username: user.username,
       fotoBase64: fotoBase64
     });
-
+    
     if (res.status === 'success') {
       user.foto = fotoBase64;
       localStorage.setItem('user', JSON.stringify(user));
@@ -397,12 +398,12 @@ async function simpanProfil() {
     bank: document.getElementById('editBank').value.trim(),
     rekening: document.getElementById('editRek').value.trim()
   };
-
+  
   if (!dataUpdate.nama) return alert('Nama wajib diisi');
-
+  
   const res = await api('updateProfil', dataUpdate);
   alert(res.message);
-
+  
   if (res.status === 'success') {
     user = {...user,...dataUpdate};
     localStorage.setItem('user', JSON.stringify(user));
@@ -427,13 +428,13 @@ async function gantiPassword() {
   const passBaru = document.getElementById('passBaru').value;
   if (!passLama ||!passBaru) return alert('Password lama & baru wajib diisi');
   if (passBaru.length < 4) return alert('Password baru minimal 4 karakter');
-
+  
   const res = await api('gantiPassword', {
     username: user.username,
     passLama: passLama,
     passBaru: passBaru
   });
-
+  
   alert(res.message);
   if (res.status === 'success') {
     closeGantiPassword();
@@ -481,17 +482,19 @@ function capture() {
   canvas.height = video.videoHeight;
   canvas.getContext('2d').drawImage(video, 0, 0);
 
-  // Setelah capture, tutup kamera
   closeCam();
 
-  // Lanjut proses foto dari canvas.toDataURL()
   const fotoBase64 = canvas.toDataURL('image/jpeg');
   // kirimAbsen(fotoBase64); // sesuaikan dengan fungsi kamu
 }
 
 // Dummy function, ganti dengan fungsi kamu
 function renderPage() {
-  return `<div class="text-center">Konten Home</div>`;
+  return `<div class="text-center py-8">
+    <button onclick="openCam('masuk')" class="bg-maroon text-white px-6 py-3 rounded-xl font-bold">
+      <i class="fa-solid fa-camera mr-2"></i>Absen Masuk
+    </button>
+  </div>`;
 }
 function switchPage(page) {
   currentPage = page;
