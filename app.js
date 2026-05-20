@@ -393,13 +393,13 @@ function switchProfilTab(tab) {
   const passDiv = document.getElementById('profilPassword');
   
   if (tab === 'info') {
-    tabInfo.className = 'flex-1 py-3 font-semibold text-sm transition border-b-2 border-maroon text-maroon';
-    tabPass.className = 'flex-1 py-3 font-semibold text-sm transition border-b-2 border-transparent text-gray-500';
+    tabInfo.className = 'flex-1 py-3.5 font-bold text-sm transition-all rounded-t-2xl bg-white dark:bg-gray-900 text-maroon shadow-sm';
+    tabPass.className = 'flex-1 py-3.5 font-bold text-sm transition-all text-gray-400 hover:text-gray-600 dark:hover:text-gray-300';
     infoDiv.classList.remove('hidden');
     passDiv.classList.add('hidden');
   } else {
-    tabInfo.className = 'flex-1 py-3 font-semibold text-sm transition border-b-2 border-transparent text-gray-500';
-    tabPass.className = 'flex-1 py-3 font-semibold text-sm transition border-b-2 border-maroon text-maroon';
+    tabInfo.className = 'flex-1 py-3.5 font-bold text-sm transition-all text-gray-400 hover:text-gray-600 dark:hover:text-gray-300';
+    tabPass.className = 'flex-1 py-3.5 font-bold text-sm transition-all rounded-t-2xl bg-white dark:bg-gray-900 text-maroon shadow-sm';
     infoDiv.classList.add('hidden');
     passDiv.classList.remove('hidden');
   }
