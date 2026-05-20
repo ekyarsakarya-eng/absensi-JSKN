@@ -119,10 +119,9 @@ function renderDashboard() {
     </div>
   </div>
   
-<!-- MODAL PROFIL V3 - COMPACT + MAROON + INTERAKTIF -->
+  <!-- MODAL PROFIL V3 - FIXED -->
   <div id="modalProfil" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
     <div class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-xs max-h- overflow-hidden shadow-2xl border border-maroon/20">
-      <!-- HEADER MAROON -->
       <div class="bg-gradient-to-br from-maroon via-red-800 to-maroon-dark px-4 pt-5 pb-16 relative">
         <button onclick="closeProfil()" class="absolute top-3 right-3 bg-white/90 hover:bg-white text-maroon p-2 rounded-full transition shadow-md hover:scale-110 active:scale-95">
           <i class="fa-solid fa-xmark text-sm"></i>
@@ -140,7 +139,6 @@ function renderDashboard() {
         </div>
       </div>
       
-      <!-- TABS MAROON -->
       <div class="flex bg-gray-50 dark:bg-gray-900 -mt-10 relative z-10 mx-3 rounded-xl overflow-hidden shadow-md">
         <button onclick="switchProfilTab('info')" id="tabInfo" class="flex-1 py-2.5 font-bold text-xs bg-maroon text-white transition-all">
           <i class="fa-solid fa-user mr-1"></i>Info
@@ -150,7 +148,6 @@ function renderDashboard() {
         </button>
       </div>
       
-      <!-- TAB INFO -->
       <div id="profilInfo" class="p-3 space-y-2.5 max-h- overflow-y-auto">
         <div class="group">
           <label class="text- font-bold text-maroon uppercase tracking-wide">Nama Lengkap</label>
@@ -189,7 +186,6 @@ function renderDashboard() {
         </button>
       </div>
       
-      <!-- TAB PASSWORD -->
       <div id="profilPassword" class="p-3 space-y-2.5 hidden">
         <div class="bg-maroon/10 border-l-4 border-maroon rounded-lg p-2">
           <p class="text-xs text-maroon font-semibold"><i class="fa-solid fa-circle-info mr-1"></i>Kosongkan jika tidak ganti password</p>
@@ -218,7 +214,10 @@ function renderDashboard() {
       
       <input type="file" id="inputFotoProfil" accept="image/*" class="hidden" onchange="uploadFotoProfil(event)">
     </div>
-  </div>
+  </div>`;
+  
+  if (currentPage === 'home') cekStatus();
+}
 
 function switchPage(page) {
   currentPage = page;
