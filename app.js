@@ -18,27 +18,28 @@ function render() {
 
 function renderLogin() {
   app.innerHTML = `
-  <div class="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-maroon to-red-900">
+  <div class="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-red-800 to-red-900">
     <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md">
       <div class="text-center mb-6">
-        <div class="bg-maroon w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-3 shadow-lg">
+        <div class="bg-red-800 w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-3 shadow-lg">
           <i class="fa-solid fa-fingerprint text-white text-2xl"></i>
         </div>
-        <h1 class="text-2xl font-bold text-maroon dark:text-white">Absensi Karyawan</h1>
+        <h1 class="text-2xl font-bold text-red-800 dark:text-white">Absensi Karyawan</h1>
         <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Silakan login untuk absen</p>
       </div>
       <div class="space-y-4">
         <div>
           <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
-          <input id="username" placeholder="Masukkan username" class="w-full p-3 border border-gray-300 rounded-lg mt-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-maroon outline-none">
+          <input id="username" placeholder="Masukkan username" class="w-full p-3 border border-gray-300 rounded-lg mt-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-red-800 outline-none">
         </div>
         <div>
           <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
           <div class="relative mt-1">
-            <input id="password" type="password" placeholder="Masukkan password" class="w-full p-3 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-maroon outline-none">
-            <i id="eyeIcon" onclick="togglePass()" class="fa-solid fa-eye absolute right-3 top-4 cursor-pointer text-gray-400 hover:text-maroon"></i>
+            <input id="password" type="password" placeholder="Masukkan password" class="w-full p-3 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-red-800 outline-none">
+            <i id="eyeIcon" onclick="togglePass()" class="fa-solid fa-eye absolute right-3 top-4 cursor-pointer text-gray-400 hover:text-red-800"></i>
           </div>
-        <button onclick="login()" id="btnLogin" class="w-full bg-maroon hover:bg-maroon-dark text-white p-3 rounded-lg font-bold transition shadow-lg">
+        </div>
+        <button onclick="login()" id="btnLogin" class="w-full bg-red-800 hover:bg-red-900 text-white p-3 rounded-lg font-bold transition shadow-lg">
           <i class="fa-solid fa-right-to-bracket mr-2"></i>Masuk
         </button>
       </div>
@@ -97,7 +98,7 @@ function toggleDark() {
 
 function renderDashboard() {
   app.innerHTML = `
-  <nav class="bg-maroon text-white p-4 flex justify-between items-center shadow-lg sticky top-0 z-10">
+  <nav class="bg-red-800 text-white p-4 flex justify-between items-center shadow-lg sticky top-0 z-10">
     <div class="flex items-center gap-3">
       <i class="fa-solid fa-user-shield text-xl"></i>
       <div>
@@ -106,10 +107,10 @@ function renderDashboard() {
       </div>
     </div>
     <div class="flex gap-3 items-center">
-      <button onclick="toggleDark()" class="hover:bg-maroon-dark p-2 rounded-lg transition">
+      <button onclick="toggleDark()" class="hover:bg-red-900 p-2 rounded-lg transition">
         <i id="darkIcon" class="fa-solid ${isDark? 'fa-sun' : 'fa-moon'} text-xl"></i>
       </button>
-      <button onclick="openProfil()" class="flex items-center gap-2 hover:bg-maroon-dark p-1 pr-3 rounded-full transition">
+      <button onclick="openProfil()" class="flex items-center gap-2 hover:bg-red-900 p-1 pr-3 rounded-full transition">
         <img id="avatarNav" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=800000&color=fff'}"
              class="w-9 h-9 rounded-full object-cover border-2 border-white">
       </button>
@@ -122,47 +123,48 @@ function renderDashboard() {
 
   <div class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 shadow-lg z-20">
     <div class="grid grid-cols-5 gap-1 max-w-2xl mx-auto">
-      <button onclick="switchPage('home')" class="flex flex-col items-center py-2 ${currentPage==='home'?'text-maroon':'text-gray-500'}">
+      <button onclick="switchPage('home')" class="flex flex-col items-center py-2 ${currentPage==='home'?'text-red-800':'text-gray-500'}">
         <i class="fa-solid fa-house text-xl mb-1"></i>
         <span class="text-xs font-semibold">Home</span>
       </button>
-      <button onclick="switchPage('rekap')" class="flex flex-col items-center py-2 ${currentPage==='rekap'?'text-maroon':'text-gray-500'}">
+      <button onclick="switchPage('rekap')" class="flex flex-col items-center py-2 ${currentPage==='rekap'?'text-red-800':'text-gray-500'}">
         <i class="fa-solid fa-calendar-days text-xl mb-1"></i>
         <span class="text-xs font-semibold">Rekap</span>
       </button>
-      <button onclick="switchPage('patroli')" class="flex flex-col items-center py-2 ${currentPage==='patroli'?'text-maroon':'text-gray-500'}">
+      <button onclick="switchPage('patroli')" class="flex flex-col items-center py-2 ${currentPage==='patroli'?'text-red-800':'text-gray-500'}">
         <i class="fa-solid fa-route text-xl mb-1"></i>
         <span class="text-xs font-semibold">Patroli</span>
       </button>
-      <button onclick="switchPage('kejadian')" class="flex flex-col items-center py-2 ${currentPage==='kejadian'?'text-maroon':'text-gray-500'}">
+      <button onclick="switchPage('kejadian')" class="flex flex-col items-center py-2 ${currentPage==='kejadian'?'text-red-800':'text-gray-500'}">
         <i class="fa-solid fa-triangle-exclamation text-xl mb-1"></i>
         <span class="text-xs font-semibold">Kejadian</span>
       </button>
-      <button onclick="switchPage('pembinaan')" class="flex flex-col items-center py-2 ${currentPage==='pembinaan'?'text-maroon':'text-gray-500'}">
+      <button onclick="switchPage('pembinaan')" class="flex flex-col items-center py-2 ${currentPage==='pembinaan'?'text-red-800':'text-gray-500'}">
         <i class="fa-solid fa-user-graduate text-xl mb-1"></i>
         <span class="text-xs font-semibold">Bina</span>
       </button>
     </div>
   </div>
 
-  <!-- MODAL KAMERA + TIMEMARK -->
+  <!-- MODAL KAMERA -->
   <div id="modalCam" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-50">
     <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 w-full max-w-md">
-      <h3 class="font-bold text-lg mb-3 text-maroon dark:text-white text-center">
+      <h3 class="font-bold text-lg mb-3 text-red-800 dark:text-white text-center">
         <i class="fa-solid fa-camera mr-2"></i>Ambil Foto Selfie
       </h3>
       <div style="position:relative">
         <video id="video" class="w-full rounded-lg bg-black" autoplay playsinline></video>
         <canvas id="canvas" class="hidden w-full rounded-lg"></canvas>
-        <div id="timemarkPreview" class="absolute bottom-2 left-2 bg-black/70 border-l-4 border-maroon px-3 py-2 rounded text-white text- font-semibold z-10 space-y-0.5">
+        <div id="timemarkPreview" class="absolute bottom-2 left-2 bg-black/70 border-l-4 border-red-800 px-3 py-2 rounded text-white text- font-semibold z-10 space-y-0.5">
           <div id="previewHari"></div>
           <div id="previewJam" class="text-yellow-400 font-bold text-xs"></div>
           <div id="previewNama" class="text-white opacity-90"></div>
           <div id="previewGps" class="text-green-400 font-mono"></div>
         </div>
+      </div>
       <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">Pastikan wajah terlihat jelas</p>
       <div class="flex gap-2 mt-4">
-        <button onclick="capture()" id="btnCapture" class="flex-1 bg-maroon hover:bg-maroon-dark text-white p-3 rounded-lg font-bold transition">
+        <button onclick="capture()" id="btnCapture" class="flex-1 bg-red-800 hover:bg-red-900 text-white p-3 rounded-lg font-bold transition">
           <i class="fa-solid fa-camera mr-1"></i>Kirim Absen
         </button>
         <button onclick="closeCam()" class="bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-lg transition">
@@ -175,22 +177,22 @@ function renderDashboard() {
   <!-- MODAL PROFIL -->
   <div id="modalProfil" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
     <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
-      <div class="bg-maroon px-5 pt-8 pb-6 relative">
-        <button onclick="closeProfil()" class="absolute top-3 right-3 bg-white/95 hover:bg-white text-maroon w-9 h-9 rounded-full transition flex items-center justify-center z-20">
+      <div class="bg-red-800 px-5 pt-8 pb-6 relative">
+        <button onclick="closeProfil()" class="absolute top-3 right-3 bg-white/95 hover:bg-white text-red-800 w-9 h-9 rounded-full transition flex items-center justify-center z-20">
           <i class="fa-solid fa-xmark"></i>
         </button>
         <div class="text-center">
           <div class="relative inline-block mb-3">
             <img id="fotoProfil" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=fff&color=800000&size=256'}" class="w-24 h-24 rounded-2xl object-cover mx-auto border-4 border-white shadow-2xl">
-            <button onclick="gantiFotoProfil()" class="absolute -bottom-1 -right-1 bg-white text-maroon w-9 h-9 rounded-xl shadow-xl flex items-center justify-center"><i class="fa-solid fa-camera"></i></button>
+            <button onclick="gantiFotoProfil()" class="absolute -bottom-1 -right-1 bg-white text-red-800 w-9 h-9 rounded-xl shadow-xl flex items-center justify-center"><i class="fa-solid fa-camera"></i></button>
           </div>
           <h3 class="font-extrabold text-xl text-white mb-1">${user.nama}</h3>
           <p class="text-sm text-white/90 font-medium">@${user.username}</p>
         </div>
       </div>
       <div class="p-4 space-y-2">
-        <button onclick="openEditProfil()" class="w-full flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl transition"><div class="w-12 h-12 bg-maroon/10 text-maroon rounded-xl flex items-center justify-center"><i class="fa-solid fa-user-pen"></i></div><div class="text-left flex-1"><p class="font-bold text-sm text-gray-900 dark:text-white">Edit Profil</p></div><i class="fa-solid fa-chevron-right text-gray-400"></i></button>
-        <button onclick="openGantiPassword()" class="w-full flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl transition"><div class="w-12 h-12 bg-maroon/10 text-maroon rounded-xl flex items-center justify-center"><i class="fa-solid fa-key"></i></div><div class="text-left flex-1"><p class="font-bold text-sm text-gray-900 dark:text-white">Ganti Password</p></div><i class="fa-solid fa-chevron-right text-gray-400"></i></button>
+        <button onclick="openEditProfil()" class="w-full flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl transition"><div class="w-12 h-12 bg-red-800/10 text-red-800 rounded-xl flex items-center justify-center"><i class="fa-solid fa-user-pen"></i></div><div class="text-left flex-1"><p class="font-bold text-sm text-gray-900 dark:text-white">Edit Profil</p></div><i class="fa-solid fa-chevron-right text-gray-400"></i></button>
+        <button onclick="openGantiPassword()" class="w-full flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl transition"><div class="w-12 h-12 bg-red-800/10 text-red-800 rounded-xl flex items-center justify-center"><i class="fa-solid fa-key"></i></div><div class="text-left flex-1"><p class="font-bold text-sm text-gray-900 dark:text-white">Ganti Password</p></div><i class="fa-solid fa-chevron-right text-gray-400"></i></button>
         <button onclick="logout()" class="w-full flex items-center gap-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl transition"><div class="w-12 h-12 bg-red-100 text-red-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-right-from-bracket"></i></div><div class="text-left flex-1"><p class="font-bold text-sm text-red-600">Logout</p></div><i class="fa-solid fa-chevron-right text-gray-400"></i></button>
       </div>
       <input type="file" id="inputFotoProfil" accept="image/*" class="hidden" onchange="uploadFotoProfil(event)">
@@ -200,30 +202,30 @@ function renderDashboard() {
   <!-- MODAL EDIT PROFIL -->
   <div id="modalEditProfil" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
     <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- flex flex-col shadow-2xl">
-      <div class="bg-maroon px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Edit Profil</h3><button onclick="closeEditProfil()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
+      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Edit Profil</h3><button onclick="closeEditProfil()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
       <div class="flex-1 overflow-y-auto p-4 space-y-3">
-        <div><label class="text-xs font-bold text-maroon block mb-1">Nama Lengkap</label><input id="editNama" value="${user.nama||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-maroon outline-none"></div>
-        <div><label class="text-xs font-bold text-maroon block mb-1">No KTP</label><input id="editKtp" value="${user.ktp||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-maroon outline-none"></div>
-        <div><label class="text-xs font-bold text-maroon block mb-1">No HP</label><input id="editHp" value="${user.hp||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-maroon outline-none"></div>
-        <div><label class="text-xs font-bold text-maroon block mb-1">Alamat</label><textarea id="editAlamat" rows="2" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-maroon outline-none resize-none">${user.alamat||''}</textarea></div>
-        <div><label class="text-xs font-bold text-maroon block mb-1">Tempat, Tgl Lahir</label><input id="editTtl" value="${user.ttl||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-maroon outline-none"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Nama Lengkap</label><input id="editNama" value="${user.nama||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">No KTP</label><input id="editKtp" value="${user.ktp||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">No HP</label><input id="editHp" value="${user.hp||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Alamat</label><textarea id="editAlamat" rows="2" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white">${user.alamat||''}</textarea></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Tempat, Tgl Lahir</label><input id="editTtl" value="${user.ttl||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
         <div class="grid grid-cols-2 gap-3">
-          <div><label class="text-xs font-bold text-maroon block mb-1">Bank</label><input id="editBank" value="${user.bank||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-maroon outline-none"></div>
-          <div><label class="text-xs font-bold text-maroon block mb-1">No Rekening</label><input id="editRek" value="${user.rekening||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-maroon outline-none"></div>
+          <div><label class="text-xs font-bold text-red-800 block mb-1">Bank</label><input id="editBank" value="${user.bank||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+          <div><label class="text-xs font-bold text-red-800 block mb-1">No Rekening</label><input id="editRek" value="${user.rekening||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
         </div>
       </div>
-      <div class="p-4"><button onclick="simpanProfil()" id="btnSimpanProfil" class="w-full bg-maroon text-white py-3 rounded-2xl font-bold">Simpan</button></div>
+      <div class="p-4"><button onclick="simpanProfil()" id="btnSimpanProfil" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Simpan</button></div>
     </div>
   </div>
 
-    <!-- MODAL GANTI PASSWORD -->
+  <!-- MODAL GANTI PASSWORD -->
   <div id="modalGantiPassword" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
     <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
-      <div class="bg-maroon px-5 py-4 flex items-center justify-between"><h3 class="font-bold text-lg text-white">Ganti Password</h3><button onclick="closeGantiPassword()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
+      <div class="bg-red-800 px-5 py-4 flex items-center justify-between"><h3 class="font-bold text-lg text-white">Ganti Password</h3><button onclick="closeGantiPassword()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
       <div class="p-4 space-y-3">
-        <div><label class="text-xs font-bold text-maroon block mb-1">Password Lama</label><input id="passLama" type="password" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm outline-none focus:border-maroon"></div>
-        <div><label class="text-xs font-bold text-maroon block mb-1">Password Baru</label><input id="passBaru" type="password" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm outline-none focus:border-maroon"></div>
-        <button onclick="gantiPassword()" id="btnGantiPass" class="w-full bg-maroon text-white py-3 rounded-2xl font-bold">Update</button>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Password Lama</label><input id="passLama" type="password" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm outline-none focus:border-red-800 dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Password Baru</label><input id="passBaru" type="password" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm outline-none focus:border-red-800 dark:text-white"></div>
+        <button onclick="gantiPassword()" id="btnGantiPass" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Update</button>
       </div>
     </div>
   </div>`;
@@ -243,7 +245,6 @@ function renderPage() {
   const { bisaIn = false, bisaOut = false, lock12Jam = false, sisaJam = 0, jamMasuk = '--:--', jamPulang = '--:--' } = statusServer;
 
   return `
-  <!-- Info Log Jam Kerja Hari Ini -->
   <div class="grid grid-cols-2 gap-4 mb-6">
     <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-2xl border border-green-200 dark:border-green-800 text-center">
       <p class="text-xs text-green-600 dark:text-green-400 font-medium">Jam Masuk</p>
@@ -264,7 +265,6 @@ function renderPage() {
     </div>
   ` : ''}
 
-  <!-- Tombol Aksi Utama -->
   <div class="space-y-4">
     <button onclick="bukaKameraAbsen('Masuk')" ${!bisaIn? 'disabled' : ''}
       class="w-full py-4 rounded-2xl font-bold text-white transition flex items-center justify-center gap-3 shadow-lg
@@ -274,7 +274,7 @@ function renderPage() {
 
     <button onclick="bukaKameraAbsen('Pulang')" ${!bisaOut? 'disabled' : ''}
       class="w-full py-4 rounded-2xl font-bold text-white transition flex items-center justify-center gap-3 shadow-lg
-      ${!bisaOut? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed shadow-none text-gray-500' : 'bg-gradient-to-r from-red-600 to-maroon hover:scale-[1.02]'}">
+      ${!bisaOut? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed shadow-none text-gray-500' : 'bg-gradient-to-r from-red-600 to-red-800 hover:scale-[1.02]'}">
       <i class="fa-solid fa-sign-out-alt text-xl"></i> Absen Pulang Kerja
     </button>
   </div>
@@ -359,11 +359,11 @@ function openCam() {
   startTimemark();
 
   navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
-   .then(s => {
+  .then(s => {
       stream = s;
       document.getElementById('video').srcObject = s;
     })
-   .catch(err => {
+  .catch(err => {
       alert('Gagal mengakses kamera: ' + err.message);
       closeCam();
     });
