@@ -1,6 +1,29 @@
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open('absensi-v1').then(c => c.addAll(['/', '/index.html', '/app.js'])));
+const CACHE_NAME = 'absensi-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/app.js',
+  'https://cdn.tailwindcss.com',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+  );
+  self.skipWaiting();
 });
-self.addEventListener('fetch', e => {
-  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(response => response || fetch(event.request))
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys => Promise.all(
+      keys.filter(key => key!== CACHE_NAME).map(key => caches.delete(key))
+    ))
+  );
 });
