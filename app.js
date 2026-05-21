@@ -243,11 +243,11 @@ function renderDashboard() {
   <!-- MODAL INPUT PATROLI -->
   <div id="modalPatroli" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
     <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- flex flex-col shadow-2xl">
-      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Input Patroli</h3><button onclick="closeModalPatroli()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
+      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Input Patroli</h3><button onclick="closeFormPatroli()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
       <div class="flex-1 overflow-y-auto p-4 space-y-3">
-        <div><label class="text-xs font-bold text-red-800 block mb-1">Lokasi Patroli</label><input id="patroliLokasi" placeholder="Contoh: Pos A, Gudang B" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
-        <div><label class="text-xs font-bold text-red-800 block mb-1">Keterangan</label><textarea id="patroliKet" rows="3" placeholder="Kondisi aman, ada kendala, dll" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea></div>
-        <div><label class="text-xs font-bold text-red-800 block mb-1">Foto Bukti</label><input type="file" id="patroliFoto" accept="image/*" class="w-full text-sm dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Lokasi Patroli</label><input id="patroliLokasi" placeholder="Contoh: Pos 1, Lantai 2" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Keterangan</label><textarea id="patroliKet" rows="3" placeholder="Situasi aman, dll" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Foto Bukti</label><input id="patroliFoto" type="file" accept="image/*" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm dark:text-white"></div>
       </div>
       <div class="p-4"><button onclick="simpanPatroli()" id="btnSimpanPatroli" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Simpan Patroli</button></div>
     </div>
@@ -256,35 +256,35 @@ function renderDashboard() {
   <!-- MODAL INPUT KEJADIAN -->
   <div id="modalKejadian" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
     <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- flex flex-col shadow-2xl">
-      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Lapor Kejadian</h3><button onclick="closeModalKejadian()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
+      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Lapor Kejadian</h3><button onclick="closeFormKejadian()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
       <div class="flex-1 overflow-y-auto p-4 space-y-3">
         <div><label class="text-xs font-bold text-red-800 block mb-1">Jenis Kejadian</label>
           <select id="kejadianJenis" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white">
             <option value="">Pilih Jenis</option>
-            <option value="Kebakaran">Kebakaran</option>
-            <option value="Pencurian">Pencurian</option>
-            <option value="Kecelakaan">Kecelakaan</option>
+            <option value="Kehilangan">Kehilangan</option>
             <option value="Kerusakan">Kerusakan</option>
+            <option value="Kecelakaan">Kecelakaan</option>
+            <option value="Mencurigakan">Mencurigakan</option>
             <option value="Lainnya">Lainnya</option>
           </select>
         </div>
         <div><label class="text-xs font-bold text-red-800 block mb-1">Lokasi</label><input id="kejadianLokasi" placeholder="Lokasi kejadian" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
-        <div><label class="text-xs font-bold text-red-800 block mb-1">Kronologi</label><textarea id="kejadianKronologi" rows="4" placeholder="Jelaskan kronologi kejadian" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea></div>
-        <div><label class="text-xs font-bold text-red-800 block mb-1">Foto Bukti</label><input type="file" id="kejadianFoto" accept="image/*" class="w-full text-sm dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Kronologi</label><textarea id="kejadianKronologi" rows="4" placeholder="Jelaskan kejadian..." class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Foto Bukti</label><input id="kejadianFoto" type="file" accept="image/*" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm dark:text-white"></div>
       </div>
-      <div class="p-4"><button onclick="simpanKejadian()" id="btnSimpanKejadian" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Laporkan</button></div>
+      <div class="p-4"><button onclick="simpanKejadian()" id="btnSimpanKejadian" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Kirim Laporan</button></div>
     </div>
   </div>
 
   <!-- MODAL INPUT PEMBINAAN -->
   <div id="modalPembinaan" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
     <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- flex flex-col shadow-2xl">
-      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Input Pembinaan</h3><button onclick="closeModalPembinaan()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
+      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Input Pembinaan</h3><button onclick="closeFormPembinaan()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
       <div class="flex-1 overflow-y-auto p-4 space-y-3">
-        <div><label class="text-xs font-bold text-red-800 block mb-1">Materi Pembinaan</label><input id="binaMateri" placeholder="Contoh: Safety Induction, SOP" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
-        <div><label class="text-xs font-bold text-red-800 block mb-1">Nama Pelatih</label><input id="binaPelatih" placeholder="Nama pelatih/instruktur" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
-        <div><label class="text-xs font-bold text-red-800 block mb-1">Nilai (0-100)</label><input id="binaNilai" type="number" min="0" max="100" placeholder="80" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
-        <div><label class="text-xs font-bold text-red-800 block mb-1">Keterangan</label><textarea id="binaKet" rows="2" placeholder="Catatan tambahan" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Materi Pembinaan</label><input id="pembinaanMateri" placeholder="Contoh: SOP Keamanan" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Nama Pelatih</label><input id="pembinaanPelatih" placeholder="Nama pelatih/instruktur" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Nilai</label><input id="pembinaanNilai" type="number" min="0" max="100" placeholder="0-100" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Keterangan</label><textarea id="pembinaanKet" rows="3" placeholder="Catatan tambahan..." class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea></div>
       </div>
       <div class="p-4"><button onclick="simpanPembinaan()" id="btnSimpanPembinaan" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Simpan</button></div>
     </div>
@@ -382,8 +382,8 @@ function renderRekap() {
       <p class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Riwayat 7 Hari Terakhir</p>
       <div class="space-y-2" id="listRekap">
         <div class="text-center text-gray-400 py-8">
-          <i class="fa-solid fa-calendar-xmark text-3xl mb-2"></i>
-          <p class="text-sm">Klik Refresh untuk load data</p>
+          <i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i>
+          <p class="text-sm">Loading data...</p>
         </div>
       </div>
     </div>
@@ -391,45 +391,40 @@ function renderRekap() {
 }
 
 async function loadRekap() {
-  const btn = event.target;
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i>Loading...';
+  const listEl = document.getElementById('listRekap');
+  if (listEl) listEl.innerHTML = '<div class="text-center text-gray-400 py-8"><i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i><p class="text-sm">Loading...</p></div>';
 
   const res = await api('getRekap', { username: user.username });
   
   if (res.status === 'success') {
     dataRekap = res.data || [];
     
-    // Hitung total
     let hadir = 0, izin = 0, alpha = 0;
     dataRekap.forEach(r => {
-      if (r.keterangan === 'IN') hadir++;
-      // Nanti bisa tambah logic izin/alpha
+      if (r.keterangan === 'IN' && r.jam) hadir++;
     });
     
     document.getElementById('totalHadir').textContent = hadir;
     document.getElementById('totalIzin').textContent = izin;
     document.getElementById('totalAlpha').textContent = alpha;
     
-    // Render list 7 hari terakhir
-    const listEl = document.getElementById('listRekap');
     if (dataRekap.length > 0) {
-      const last7 = dataRekap.slice(-7).reverse();
+      const last7 = dataRekap.slice(-14).reverse().filter((v,i) => i % 2 === 0).slice(0, 7);
       listEl.innerHTML = last7.map(r => {
         const isMasuk = r.keterangan === 'IN';
-        const tgl = new Date(r.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: 'short'});
+        const tgl = new Date(r.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: 'short', weekday: 'short'});
         return `
           <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 ${isMasuk ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'} rounded-lg flex items-center justify-center">
-                <i class="fa-solid ${isMasuk ? 'fa-sign-in-alt' : 'fa-sign-out-alt'}"></i>
+              <div class="w-10 h-10 ${isMasuk? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'} rounded-lg flex items-center justify-center">
+                <i class="fa-solid ${isMasuk? 'fa-sign-in-alt' : 'fa-sign-out-alt'}"></i>
               </div>
               <div>
-                <p class="text-sm font-semibold text-gray-800 dark:text-white">${isMasuk ? 'Masuk' : 'Pulang'}</p>
+                <p class="text-sm font-semibold text-gray-800 dark:text-white">${isMasuk? 'Masuk' : 'Pulang'}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">${tgl}</p>
               </div>
             </div>
-            <p class="text-sm font-bold text-gray-700 dark:text-gray-300">${r.jam}</p>
+            <p class="text-sm font-bold text-gray-700 dark:text-gray-300">${r.jam || '--:--'}</p>
           </div>
         `;
       }).join('');
@@ -443,10 +438,13 @@ async function loadRekap() {
     }
   } else {
     alert('Gagal load rekap: ' + res.message);
+    listEl.innerHTML = `
+      <div class="text-center text-red-400 py-8">
+        <i class="fa-solid fa-circle-exclamation text-3xl mb-2"></i>
+        <p class="text-sm">Gagal memuat data</p>
+      </div>
+    `;
   }
-  
-  btn.disabled = false;
-  btn.innerHTML = '<i class="fa-solid fa-refresh mr-1"></i>Refresh';
 }
 
 // ========== HALAMAN PATROLI ==========
@@ -463,37 +461,9 @@ function renderPatroli() {
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
       <div id="listPatroli" class="space-y-2">
         <div class="text-center text-gray-400 py-8">
-          <i class="fa-solid fa-route text-3xl mb-2"></i>
-          <p class="text-sm">Klik Refresh untuk load data</p>
+          <i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i>
+          <p class="text-sm">Loading data...</p>
         </div>
-      </div>
-      <button onclick="loadPatroli()" class="w-full mt-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg text-sm">
-        <i class="fa-solid fa-refresh mr-1"></i>Muat Data
-      </button>
-    </div>
-  </div>
-  
-  <!-- MODAL FORM PATROLI -->
-  <div id="modalPatroli" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
-    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
-      <div class="bg-red-800 px-5 py-4 flex items-center justify-between">
-        <h3 class="font-bold text-lg text-white">Input Patroli</h3>
-        <button onclick="closeFormPatroli()"><i class="fa-solid fa-xmark text-xl text-white"></i></button>
-      </div>
-      <div class="p-4 space-y-3">
-        <div>
-          <label class="text-xs font-bold text-red-800 block mb-1">Lokasi Patroli</label>
-          <input id="patroliLokasi" placeholder="Contoh: Pos 1, Lantai 2" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white">
-        </div>
-        <div>
-          <label class="text-xs font-bold text-red-800 block mb-1">Keterangan</label>
-          <textarea id="patroliKet" rows="3" placeholder="Situasi aman, dll" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea>
-        </div>
-        <div>
-          <label class="text-xs font-bold text-red-800 block mb-1">Foto (Opsional)</label>
-          <input id="patroliFoto" type="file" accept="image/*" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm dark:text-white">
-        </div>
-        <button onclick="simpanPatroli()" id="btnSimpanPatroli" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Simpan</button>
       </div>
     </div>
   </div>`;
@@ -510,13 +480,13 @@ async function loadPatroli() {
       return `
         <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
           <div class="flex justify-between items-start mb-2">
-            <div>
+            <div class="flex-1">
               <p class="text-sm font-bold text-gray-800 dark:text-white">${p.lokasi}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">${tgl}</p>
             </div>
-            ${p.foto ? `<img src="${p.foto}" class="w-12 h-12 rounded-lg object-cover">` : ''}
+            ${p.foto? `<img src="${p.foto}" class="w-12 h-12 rounded-lg object-cover ml-2">` : ''}
           </div>
-          <p class="text-xs text-gray-600 dark:text-gray-300">${p.keterangan}</p>
+          <p class="text-xs text-gray-600 dark:text-gray-300">${p.keterangan || '-'}</p>
         </div>
       `;
     }).join('');
@@ -553,7 +523,7 @@ async function simpanPatroli() {
   if (!lokasi) {
     alert('Lokasi wajib diisi');
     btn.disabled = false;
-    btn.innerHTML = 'Simpan';
+    btn.innerHTML = 'Simpan Patroli';
     return;
   }
 
@@ -582,7 +552,7 @@ async function simpanPatroli() {
   }
 
   btn.disabled = false;
-  btn.innerHTML = 'Simpan';
+  btn.innerHTML = 'Simpan Patroli';
 }
 
 // ========== HALAMAN KEJADIAN ==========
@@ -599,48 +569,9 @@ function renderKejadian() {
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
       <div id="listKejadian" class="space-y-2">
         <div class="text-center text-gray-400 py-8">
-          <i class="fa-solid fa-triangle-exclamation text-3xl mb-2"></i>
-          <p class="text-sm">Klik Refresh untuk load data</p>
+          <i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i>
+          <p class="text-sm">Loading data...</p>
         </div>
-      </div>
-      <button onclick="loadKejadian()" class="w-full mt-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg text-sm">
-        <i class="fa-solid fa-refresh mr-1"></i>Muat Data
-      </button>
-    </div>
-  </div>
-
-  <!-- MODAL FORM KEJADIAN -->
-  <div id="modalKejadian" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
-    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- overflow-y-auto shadow-2xl">
-      <div class="bg-red-800 px-5 py-4 flex items-center justify-between sticky top-0">
-        <h3 class="font-bold text-lg text-white">Lapor Kejadian</h3>
-        <button onclick="closeFormKejadian()"><i class="fa-solid fa-xmark text-xl text-white"></i></button>
-      </div>
-      <div class="p-4 space-y-3">
-        <div>
-          <label class="text-xs font-bold text-red-800 block mb-1">Jenis Kejadian</label>
-          <select id="kejadianJenis" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white">
-            <option value="">Pilih Jenis</option>
-            <option value="Kehilangan">Kehilangan</option>
-            <option value="Kerusakan">Kerusakan</option>
-            <option value="Kecelakaan">Kecelakaan</option>
-            <option value="Mencurigakan">Mencurigakan</option>
-            <option value="Lainnya">Lainnya</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-xs font-bold text-red-800 block mb-1">Lokasi</label>
-          <input id="kejadianLokasi" placeholder="Contoh: Parkir A, Lantai 3" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white">
-        </div>
-        <div>
-          <label class="text-xs font-bold text-red-800 block mb-1">Kronologi</label>
-          <textarea id="kejadianKronologi" rows="4" placeholder="Jelaskan kejadian..." class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea>
-        </div>
-        <div>
-          <label class="text-xs font-bold text-red-800 block mb-1">Foto Bukti</label>
-          <input id="kejadianFoto" type="file" accept="image/*" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm dark:text-white">
-        </div>
-        <button onclick="simpanKejadian()" id="btnSimpanKejadian" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Kirim Laporan</button>
       </div>
     </div>
   </div>`;
@@ -657,11 +588,11 @@ async function loadKejadian() {
       return `
         <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
           <div class="flex justify-between items-start mb-2">
-            <div>
+            <div class="flex-1">
               <p class="text-sm font-bold text-red-600">${k.jenis}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">${tgl} - ${k.lokasi}</p>
             </div>
-            ${k.foto ? `<img src="${k.foto}" class="w-12 h-12 rounded-lg object-cover">` : ''}
+            ${k.foto? `<img src="${k.foto}" class="w-12 h-12 rounded-lg object-cover ml-2">` : ''}
           </div>
           <p class="text-xs text-gray-600 dark:text-gray-300">${k.kronologi}</p>
         </div>
@@ -699,7 +630,7 @@ async function simpanKejadian() {
   const kronologi = document.getElementById('kejadianKronologi').value.trim();
   const fotoFile = document.getElementById('kejadianFoto').files[0];
   
-  if (!jenis || !lokasi || !kronologi) {
+  if (!jenis ||!lokasi ||!kronologi) {
     alert('Jenis, Lokasi, dan Kronologi wajib diisi');
     btn.disabled = false;
     btn.innerHTML = 'Kirim Laporan';
@@ -749,41 +680,9 @@ function renderPembinaan() {
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
       <div id="listPembinaan" class="space-y-2">
         <div class="text-center text-gray-400 py-8">
-          <i class="fa-solid fa-user-graduate text-3xl mb-2"></i>
-          <p class="text-sm">Klik Refresh untuk load data</p>
+          <i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i>
+          <p class="text-sm">Loading data...</p>
         </div>
-      </div>
-      <button onclick="loadPembinaan()" class="w-full mt-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg text-sm">
-        <i class="fa-solid fa-refresh mr-1"></i>Muat Data
-      </button>
-    </div>
-  </div>
-
-  <!-- MODAL FORM PEMBINAAN -->
-  <div id="modalPembinaan" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
-    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- overflow-y-auto shadow-2xl">
-      <div class="bg-red-800 px-5 py-4 flex items-center justify-between sticky top-0">
-        <h3 class="font-bold text-lg text-white">Input Pembinaan</h3>
-        <button onclick="closeFormPembinaan()"><i class="fa-solid fa-xmark text-xl text-white"></i></button>
-      </div>
-      <div class="p-4 space-y-3">
-        <div>
-          <label class="text-xs font-bold text-red-800 block mb-1">Materi Pembinaan</label>
-          <input id="pembinaanMateri" placeholder="Contoh: SOP Keamanan" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white">
-        </div>
-        <div>
-          <label class="text-xs font-bold text-red-800 block mb-1">Nama Pelatih</label>
-          <input id="pembinaanPelatih" placeholder="Contoh: Pak Budi" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white">
-        </div>
-        <div>
-          <label class="text-xs font-bold text-red-800 block mb-1">Nilai</label>
-          <input id="pembinaanNilai" type="number" min="0" max="100" placeholder="0-100" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white">
-        </div>
-        <div>
-          <label class="text-xs font-bold text-red-800 block mb-1">Keterangan</label>
-          <textarea id="pembinaanKet" rows="3" placeholder="Catatan tambahan..." class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea>
-        </div>
-        <button onclick="simpanPembinaan()" id="btnSimpanPembinaan" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Simpan</button>
       </div>
     </div>
   </div>`;
@@ -800,7 +699,7 @@ async function loadPembinaan() {
       return `
         <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
           <div class="flex justify-between items-start mb-2">
-            <div>
+            <div class="flex-1">
               <p class="text-sm font-bold text-gray-800 dark:text-white">${p.materi}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">${tgl} - ${p.pelatih}</p>
             </div>
@@ -808,7 +707,7 @@ async function loadPembinaan() {
               <p class="text-sm font-bold">${p.nilai}</p>
             </div>
           </div>
-          <p class="text-xs text-gray-600 dark:text-gray-300">${p.keterangan}</p>
+          <p class="text-xs text-gray-600 dark:text-gray-300">${p.keterangan || '-'}</p>
         </div>
       `;
     }).join('');
@@ -844,7 +743,7 @@ async function simpanPembinaan() {
   const nilai = document.getElementById('pembinaanNilai').value;
   const ket = document.getElementById('pembinaanKet').value.trim();
   
-  if (!materi || !pelatih || !nilai) {
+  if (!materi ||!pelatih ||!nilai) {
     alert('Materi, Pelatih, dan Nilai wajib diisi');
     btn.disabled = false;
     btn.innerHTML = 'Simpan';
@@ -936,6 +835,7 @@ function startTimemark() {
     if (modalCam &&!modalCam.classList.contains('hidden')) {
       animationFrame = requestAnimationFrame(update);
     }
+  }
   update();
 }
 
@@ -954,11 +854,11 @@ function openCam() {
   startTimemark();
 
   navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
- .then(s => {
+.then(s => {
       stream = s;
       document.getElementById('video').srcObject = s;
     })
- .catch(err => {
+.catch(err => {
       alert('Gagal mengakses kamera: ' + err.message);
       closeCam();
     });
@@ -1026,3 +926,113 @@ async function capture() {
     lat: currentLocation.lat,
     long: currentLocation.long
   };
+
+  const res = await api('absen', kirimData);
+  alert(res.message);
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Kirim Absen';
+
+  if (res.status === 'success') {
+    closeCam();
+    cekStatus();
+  }
+}
+
+async function api(aksi, payload = {}) {
+  try {
+    console.log('API call:', aksi, payload);
+    const response = await fetch(URL_GAS, {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ aksi, data: payload })
+    });
+    const data = await response.json();
+    console.log('API response:', data);
+    return data;
+  } catch (error) {
+    console.error('API error:', error);
+    return { status: 'error', message: 'Koneksi internet bermasalah / GAS Error: ' + error.message };
+  }
+}
+
+function openProfil() { document.getElementById('modalProfil').classList.replace('hidden', 'flex'); }
+function closeProfil() { document.getElementById('modalProfil').classList.replace('flex', 'hidden'); }
+function openEditProfil() { closeProfil(); document.getElementById('modalEditProfil').classList.replace('hidden', 'flex'); }
+function closeEditProfil() { document.getElementById('modalEditProfil').classList.replace('flex', 'hidden'); }
+function openGantiPassword() { closeProfil(); document.getElementById('modalGantiPassword').classList.replace('hidden', 'flex'); }
+function closeGantiPassword() { document.getElementById('modalGantiPassword').classList.replace('flex', 'hidden'); }
+function gantiFotoProfil() { document.getElementById('inputFotoProfil').click(); }
+
+async function uploadFotoProfil(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const base64 = e.target.result;
+    document.getElementById('fotoProfil').src = base64;
+    const res = await api('uploadFoto', { username: user.username, fotoBase64: base64 });
+    if (res.status === 'success') {
+      user.foto = res.urlFoto;
+      localStorage.setItem('user', JSON.stringify(user));
+      document.getElementById('avatarNav').src = res.urlFoto;
+      alert('Foto profil berhasil diupdate');
+    } else {
+      alert(res.message);
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+async function simpanProfil() {
+  const btn = document.getElementById('btnSimpanProfil');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyimpan...';
+
+  const d = {
+    username: user.username,
+    nama: document.getElementById('editNama').value,
+    ktp: document.getElementById('editKtp').value,
+    hp: document.getElementById('editHp').value,
+    alamat: document.getElementById('editAlamat').value,
+    ttl: document.getElementById('editTtl').value,
+    bank: document.getElementById('editBank').value,
+    rekening: document.getElementById('editRek').value
+  };
+  const res = await api('updateProfil', d);
+  if(res.status==='success') {
+    user={...user,...d};
+    localStorage.setItem('user', JSON.stringify(user));
+    closeEditProfil();
+    renderDashboard();
+    alert(res.message);
+  } else {
+    alert(res.message);
+  }
+  btn.disabled = false;
+  btn.innerHTML = 'Simpan';
+}
+
+async function gantiPassword() {
+  const btn = document.getElementById('btnGantiPass');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Update...';
+
+  const res = await api('gantiPassword', {
+    username: user.username,
+    passLama: document.getElementById('passLama').value,
+    passBaru: document.getElementById('passBaru').value
+  });
+  alert(res.message);
+  if(res.status==='success') {
+    document.getElementById('passLama').value = '';
+    document.getElementById('passBaru').value = '';
+    closeGantiPassword();
+  }
+  btn.disabled = false;
+  btn.innerHTML = 'Update';
+}
+
+console.log('Starting app...');
+render();
