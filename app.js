@@ -379,7 +379,7 @@ function renderRekap() {
     </div>
 
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-      <p class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Riwayat 7 Hari Terakhir</p>
+      <p class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Riwayat Absensi Anda</p>
       <div class="space-y-2" id="listRekap">
         <div class="text-center text-gray-400 py-8">
           <i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i>
