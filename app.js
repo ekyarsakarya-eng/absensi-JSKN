@@ -399,32 +399,84 @@ async function loadRekap() {
   if (res.status === 'success') {
     dataRekap = res.data || [];
     
-    let hadir = 0, izin = 0, alpha = 0;
+    let hadir = 0;
     dataRekap.forEach(r => {
       if (r.keterangan === 'IN' && r.jam) hadir++;
     });
     
     document.getElementById('totalHadir').textContent = hadir;
-    document.getElementById('totalIzin').textContent = izin;
-    document.getElementById('totalAlpha').textContent = alpha;
+    document.getElementById('totalIzin').textContent = 0;
+    document.getElementById('totalAlpha').textContent = 0;
     
     if (dataRekap.length > 0) {
-      const last7 = dataRekap.slice(-14).reverse().filter((v,i) => i % 2 === 0).slice(0, 7);
-      listEl.innerHTML = last7.map(r => {
-        const isMasuk = r.keterangan === 'IN';
-        const tgl = new Date(r.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: 'short', weekday: 'short'});
+      // Ambil 7 record terakhir, pisah IN/OUT jadi 7 hari
+      const grouped = {};
+      dataRekap.forEach(r => {
+        // Fix tanggal: kalau dari Sheets cuma jam, pakai tanggal dari header
+        let tglObj;
+        if (r.tanggal.includes('1899-12-30')) {
+          // Ini jam doang, ambil tanggal hari ini sebagai fallback
+          tglObj = new Date();
+        } else {
+          tglObj = new Date(r.tanggal);
+        }
+        
+        const tglKey = Utilities.formatDate? 
+          Utilities.formatDate(tglObj, 'GMT+7', 'dd/MM/yyyy') : 
+          tglObj.toLocaleDateString('id-ID');
+        
+        if (!grouped[tglKey]) grouped[tglKey] = [];
+        grouped[tglKey].push(r);
+      });
+      
+      const last7 = Object.keys(grouped).slice(-7).reverse();
+      
+      listEl.innerHTML = last7.map(tglKey => {
+        const records = grouped[tglKey];
+        const masuk = records.find(r => r.keterangan === 'IN');
+        const pulang = records.find(r => r.keterangan === 'OUT');
+        
+        // Parse jam biar gak 1899
+        const formatJam = (jamStr) => {
+          if (!jamStr) return '--:--';
+          if (jamStr.includes('1899-12-30')) {
+            // Ambil jam aja dari string ISO
+            const timePart = jamStr.split('T')[1].split('.')[0];
+            return timePart.substring(0, 5); // HH:mm
+          }
+          try {
+            const d = new Date(jamStr);
+            return d.toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'});
+          } catch {
+            return jamStr;
+          }
+        };
+        
+        const tglFormat = new Date(masuk?.tanggal || pulang?.tanggal).toLocaleDateString('id-ID', {
+          weekday: 'short', day: '2-digit', month: 'short'
+        });
+        
         return `
-          <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 ${isMasuk? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'} rounded-lg flex items-center justify-center">
-                <i class="fa-solid ${isMasuk? 'fa-sign-in-alt' : 'fa-sign-out-alt'}"></i>
+          <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <p class="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">${tglFormat}</p>
+            <div class="flex justify-between items-center mb-1">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
+                  <i class="fa-solid fa-sign-in-alt text-xs"></i>
+                </div>
+                <span class="text-sm text-gray-700 dark:text-gray-300">Masuk</span>
               </div>
-              <div>
-                <p class="text-sm font-semibold text-gray-800 dark:text-white">${isMasuk? 'Masuk' : 'Pulang'}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">${tgl}</p>
-              </div>
+              <p class="text-sm font-bold text-gray-800 dark:text-white">${formatJam(masuk?.jam)}</p>
             </div>
-            <p class="text-sm font-bold text-gray-700 dark:text-gray-300">${r.jam || '--:--'}</p>
+            <div class="flex justify-between items-center">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-red-100 text-red-600 rounded-lg flex items-center justify-center">
+                  <i class="fa-solid fa-sign-out-alt text-xs"></i>
+                </div>
+                <span class="text-sm text-gray-700 dark:text-gray-300">Pulang</span>
+              </div>
+              <p class="text-sm font-bold text-gray-800 dark:text-white">${formatJam(pulang?.jam)}</p>
+            </div>
           </div>
         `;
       }).join('');
@@ -437,7 +489,6 @@ async function loadRekap() {
       `;
     }
   } else {
-    alert('Gagal load rekap: ' + res.message);
     listEl.innerHTML = `
       <div class="text-center text-red-400 py-8">
         <i class="fa-solid fa-circle-exclamation text-3xl mb-2"></i>
