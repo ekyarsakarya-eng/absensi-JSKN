@@ -924,41 +924,53 @@ async function capture() {
   if (!video ||!canvas) return;
 
   btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Mengirim Absen...';
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Proses...';
 
   const ctx = canvas.getContext('2d');
+  const MAX_WIDTH = 1280; // Turunin kalau mau lebih hemat lagi. 800px udah cukup buat selfie
+  let width = video.videoWidth;
+  let height = video.videoHeight;
 
-  canvas.width = video.videoWidth || 640;
-  canvas.height = video.videoHeight || 480;
+  // Resize proporsional
+  if (width > MAX_WIDTH) {
+    height = height * (MAX_WIDTH / width);
+    width = MAX_WIDTH;
+  }
 
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  canvas.width = width;
+  canvas.height = height;
 
+  ctx.drawImage(video, 0, 0, width, height);
+
+  // Timemark - ukuran font disesuaikan canvas
+  const scale = width / 640;
   ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-  ctx.fillRect(10, canvas.height - 110, 320, 100);
+  ctx.fillRect(10 * scale, height - 110 * scale, 320 * scale, 100 * scale);
 
   ctx.strokeStyle = "#800000";
-  ctx.lineWidth = 4;
-  ctx.strokeRect(10, canvas.height - 110, 4, 100);
+  ctx.lineWidth = 4 * scale;
+  ctx.strokeRect(10 * scale, height - 110 * scale, 4 * scale, 100 * scale);
 
   ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 14px Arial";
+  ctx.font = `bold ${14 * scale}px Arial`;
   const tglTeks = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  ctx.fillText(tglTeks, 25, canvas.height - 85);
+  ctx.fillText(tglTeks, 25 * scale, height - 85 * scale);
 
   ctx.fillStyle = "#facc15";
-  ctx.font = "bold 16px Arial";
+  ctx.font = `bold ${16 * scale}px Arial`;
   const jamTeks = new Date().toLocaleTimeString('id-ID');
-  ctx.fillText(jamTeks, 25, canvas.height - 65);
+  ctx.fillText(jamTeks, 25 * scale, height - 65 * scale);
 
   ctx.fillStyle = "#ffffff";
-  ctx.font = "13px Arial";
-  ctx.fillText(`Nama: ${user.nama}`, 25, canvas.height - 45);
+  ctx.font = `${13 * scale}px Arial`;
+  ctx.fillText(`Nama: ${user.nama}`, 25 * scale, height - 45 * scale);
 
   ctx.fillStyle = "#4ade80";
-  ctx.font = "mono 11px Courier New";
-  ctx.fillText(`GPS: ${currentLocation.lat}, ${currentLocation.long}`, 25, canvas.height - 20);
+  ctx.font = `mono ${11 * scale}px Courier New`;
+  ctx.fillText(`GPS: ${currentLocation.lat}, ${currentLocation.long}`, 25 * scale, height - 20 * scale);
 
-  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.8);
+  // Kompres jadi 0.7, ukuran turun drastis
+  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
 
   const kirimData = {
     username: user.username,
@@ -968,14 +980,17 @@ async function capture() {
     long: currentLocation.long
   };
 
-  const res = await api('absen', kirimData);
-  alert(res.message);
-
+  // Optimasi: tutup kamera dulu biar user ngerasa cepet
+  closeCam();
+  
   btn.disabled = false;
   btn.innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Kirim Absen';
 
+  // Kirim di background
+  const res = await api('absen', kirimData);
+  alert(res.message);
+
   if (res.status === 'success') {
-    closeCam();
     cekStatus();
   }
 }
