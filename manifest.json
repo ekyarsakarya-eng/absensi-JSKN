@@ -1,12 +1,24 @@
 {
-  "name": "Absensi Karyawan Terpadu",
-  "short_name": "AKT-JSKN",
-  "start_url": ".",
+  "name": "Absensi Karyawan JSKN",
+  "short_name": "Absensi",
+  "description": "Aplikasi Absensi Karyawan dengan GPS & Selfie",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#800000",
   "theme_color": "#800000",
+  "orientation": "portrait",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
