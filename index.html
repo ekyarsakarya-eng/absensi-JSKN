@@ -1,28 +1,31 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Absensi Karyawan</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#800000">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  <style>
-  :root { 
-    --maroon: #800000; 
-    --maroon-dark: #5c0000; 
-  }
-  .bg-maroon { background-color: var(--maroon); }
-  .bg-maroon-dark { background-color: var(--maroon-dark); }
-  .text-maroon { color: var(--maroon); }
-  .border-maroon { border-color: var(--maroon); }
-  .focus\:ring-maroon:focus { --tw-ring-color: var(--maroon); }
-  .dark.dark\:bg-gray-900 { background-color: #111827; }
-</style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            maroon: '#800000',
+            'maroon-dark': '#600000'
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-  <div id="app" class="min-h-screen"></div>
+<body class="bg-gray-50 dark:bg-gray-900">
+  <div id="app">
+    <div class="flex items-center justify-center min-h-screen">
+      <i class="fa-solid fa-spinner fa-spin text-3xl text-red-800"></i>
+    </div>
+  </div>
   <script src="app.js"></script>
 </body>
 </html>
