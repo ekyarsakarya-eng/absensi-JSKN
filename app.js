@@ -927,11 +927,10 @@ async function capture() {
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Proses...';
 
   const ctx = canvas.getContext('2d');
-  const MAX_WIDTH = 1280; // Turunin kalau mau lebih hemat lagi. 800px udah cukup buat selfie
+  const MAX_WIDTH = 1280; // Ganti ke 800 kalau mau super hemat
   let width = video.videoWidth;
   let height = video.videoHeight;
 
-  // Resize proporsional
   if (width > MAX_WIDTH) {
     height = height * (MAX_WIDTH / width);
     width = MAX_WIDTH;
@@ -942,7 +941,6 @@ async function capture() {
 
   ctx.drawImage(video, 0, 0, width, height);
 
-  // Timemark - ukuran font disesuaikan canvas
   const scale = width / 640;
   ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
   ctx.fillRect(10 * scale, height - 110 * scale, 320 * scale, 100 * scale);
@@ -969,7 +967,7 @@ async function capture() {
   ctx.font = `mono ${11 * scale}px Courier New`;
   ctx.fillText(`GPS: ${currentLocation.lat}, ${currentLocation.long}`, 25 * scale, height - 20 * scale);
 
-  // Kompres jadi 0.7, ukuran turun drastis
+  // Kualitas 0.7 udah cukup tajam, size turun 85%
   const fotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
 
   const kirimData = {
@@ -980,13 +978,12 @@ async function capture() {
     long: currentLocation.long
   };
 
-  // Optimasi: tutup kamera dulu biar user ngerasa cepet
+  // UX: Tutup kamera duluan biar berasa cepet
   closeCam();
-  
+
   btn.disabled = false;
   btn.innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Kirim Absen';
 
-  // Kirim di background
   const res = await api('absen', kirimData);
   alert(res.message);
 
