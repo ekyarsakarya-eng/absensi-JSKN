@@ -20,7 +20,6 @@ let dataPembinaan = [];
 if (isDark) document.documentElement.classList.add('dark');
 
 function render() {
-  console.log('Render called, user:', user);
   if (!user) return renderLogin();
   renderDashboard();
 }
@@ -60,13 +59,10 @@ async function login() {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value.trim();
   if (!username ||!password) return alert('Username & password wajib diisi');
-
   const btn = document.getElementById('btnLogin');
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Memproses...';
-
   const res = await api('login', {username, password});
-  console.log('Login response:', res);
   if (res.status === 'success') {
     user = res;
     localStorage.setItem('user', JSON.stringify(user));
@@ -127,11 +123,11 @@ function renderDashboard() {
     </div>
   </nav>
 
-  <div id="contentArea" class="p-4 max-w-2xl mx-auto pb-24">
+  <div id="contentArea" class="p-4 max-w-2xl mx-auto pb-32">
     ${renderPage()}
   </div>
 
-  <div class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 shadow-lg z-20">
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 dark:bg-gray-800 dark:border-gray-700 shadow-lg z-20">
     <div class="grid grid-cols-5 gap-1 max-w-2xl mx-auto">
       <button onclick="switchPage('home')" class="flex flex-col items-center py-2 ${currentPage==='home'?'text-red-800':'text-gray-500'}">
         <i class="fa-solid fa-house text-xl mb-1"></i>
@@ -290,7 +286,10 @@ function renderDashboard() {
     </div>
   </div>`;
 
-  if (currentPage === 'home') cekStatus();
+  if (currentPage === 'home') {
+    cekStatus();
+    dapatkanLokasiGPS();
+  }
   if (currentPage === 'rekap') loadRekap();
   if (currentPage === 'patroli') loadPatroli();
   if (currentPage === 'kejadian') loadKejadian();
@@ -308,48 +307,202 @@ function renderPage() {
   }
 }
 
-// ========== HALAMAN HOME ==========
 function renderHome() {
   const { bisaIn = false, bisaOut = false, lock12Jam = false, sisaJam = 0, jamMasuk = '--:--', jamPulang = '--:--' } = statusServer;
 
   return `
-  <div class="grid grid-cols-2 gap-4 mb-6">
-    <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-2xl border border-green-200 dark:border-green-800 text-center">
-      <p class="text-xs text-green-600 dark:text-green-400 font-medium">Jam Masuk</p>
-      <p class="text-2xl font-black text-green-700 dark:text-green-300 mt-1">${jamMasuk}</p>
+  <div class="bg-gradient-to-br from-red-800 to-red-900 text-white p-5 rounded-3xl shadow-2xl mb-5 relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20"></div>
+    <div class="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full -ml-12 -mb-12"></div>
+    <div class="relative z-10">
+      <p class="text-sm opacity-90 mb-1" id="statusKerja">${getStatusText(jamMasuk, jamPulang)}</p>
+      <p class="text-5xl font-black mb-2 tracking-tight" id="jamRealtime">00:00:00</p>
+      <div class="flex items-center gap-2 text-xs bg-white/20 w-fit px-3 py-1 rounded-full">
+        <i class="fa-solid fa-location-dot animate-pulse"></i>
+        <span id="lokasiStatus">Mendeteksi lokasi...</span>
+      </div>
     </div>
-    <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-2xl border border-red-200 dark:border-red-800 text-center">
-      <p class="text-xs text-red-600 dark:text-red-400 font-medium">Jam Pulang</p>
-      <p class="text-2xl font-black text-red-700 dark:text-red-300 mt-1">${jamPulang}</p>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4 mb-5">
+    <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 p-4 rounded-3xl border-2 border-green-200 dark:border-green-800 text-center relative overflow-hidden">
+      <div class="absolute top-2 right-2 w-8 h-8 bg-green-500/20 rounded-full"></div>
+      <i class="fa-solid fa-right-to-bracket text-green-600 dark:text-green-400 text-xl mb-2"></i>
+      <p class="text-xs text-green-700 dark:text-green-400 font-bold uppercase">Jam Masuk</p>
+      <p class="text-3xl font-black text-green-800 dark:text-green-300 mt-1">${jamMasuk}</p>
+    </div>
+    <div class="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/30 dark:to-rose-900/30 p-4 rounded-3xl border-2 border-red-200 dark:border-red-800 text-center relative overflow-hidden">
+      <div class="absolute top-2 right-2 w-8 h-8 bg-red-500/20 rounded-full"></div>
+      <i class="fa-solid fa-right-from-bracket text-red-600 dark:text-red-400 text-xl mb-2"></i>
+      <p class="text-xs text-red-700 dark:text-red-400 font-bold uppercase">Jam Pulang</p>
+      <p class="text-3xl font-black text-red-800 dark:text-red-300 mt-1">${jamPulang}</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-3 gap-3 mb-5">
+    <div class="bg-white dark:bg-gray-800 p-3 rounded-2xl text-center border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition">
+      <i class="fa-solid fa-calendar-check text-red-800 text-lg mb-1"></i>
+      <p class="text-2xl font-black text-gray-800 dark:text-white" id="statHadir">-</p>
+      <p class="text-xs text-gray-500">Hadir</p>
+    </div>
+    <div class="bg-white dark:bg-gray-800 p-3 rounded-2xl text-center border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition">
+      <i class="fa-solid fa-business-time text-amber-600 text-lg mb-1"></i>
+      <p class="text-2xl font-black text-gray-800 dark:text-white" id="statTelat">-</p>
+      <p class="text-xs text-gray-500">Telat</p>
+    </div>
+    <div class="bg-white dark:bg-gray-800 p-3 rounded-2xl text-center border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition">
+      <i class="fa-solid fa-route text-blue-600 text-lg mb-1"></i>
+      <p class="text-2xl font-black text-gray-800 dark:text-white" id="statPatroli">-</p>
+      <p class="text-xs text-gray-500">Patroli</p>
+    </div>
+  </div>
+
+  <div id="gpsCard" class="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 p-4 rounded-2xl mb-5 flex items-center gap-3 transition-all">
+    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-800 rounded-2xl flex items-center justify-center">
+      <i class="fa-solid fa-satellite-dish text-blue-600 dark:text-blue-300 text-xl"></i>
+    </div>
+    <div class="flex-1">
+      <p class="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase">Status Lokasi</p>
+      <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold" id="gpsText">Mengunci GPS...</p>
     </div>
   </div>
 
   ${lock12Jam? `
-    <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4 rounded-xl mb-6 text-center">
-      <p class="text-xs text-yellow-700 dark:text-yellow-400 font-bold">
-        <i class="fa-solid fa-clock-rotate-left mr-1"></i> Terkunci 12 jam.
-        Sisa <b>${sisaJam} jam</b> lagi.
-      </p>
+    <div class="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 rounded-2xl mb-5">
+      <div class="flex gap-3">
+        <i class="fa-solid fa-clock-rotate-left text-amber-600 text-xl mt-0.5"></i>
+        <div>
+          <p class="text-sm font-bold text-amber-800 dark:text-amber-300">Terkunci 12 Jam</p>
+          <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">Sisa <b>${sisaJam} jam</b> lagi sebelum bisa absen masuk</p>
+        </div>
+      </div>
     </div>
   ` : ''}
 
-  <div class="space-y-4">
+  <div class="space-y-3 mb-5">
     <button onclick="bukaKameraAbsen('Masuk')" ${!bisaIn? 'disabled' : ''}
-      class="w-full py-4 rounded-2xl font-bold text-white transition flex items-center justify-center gap-3 shadow-lg
-      ${!bisaIn? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed shadow-none text-gray-500' : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:scale-[1.02]'}">
-      <i class="fa-solid fa-sign-in-alt text-xl"></i> Absen Masuk Kerja
+      class="w-full py-5 rounded-3xl font-bold text-white transition-all duration-300 flex items-center gap-4 shadow-xl
+      ${!bisaIn? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed shadow-none text-gray-500' : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:scale-[1.02] active:scale-[0.98] hover:shadow-green-500/50'}">
+      <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center ml-1">
+        <i class="fa-solid fa-fingerprint text-3xl"></i>
+      </div>
+      <div class="text-left flex-1">
+        <p class="text-xl">Absen Masuk</p>
+        <p class="text-xs opacity-80">Tap untuk scan wajah & GPS</p>
+      </div>
+      ${bisaIn? '<div class="w-3 h-3 bg-white rounded-full animate-ping mr-4"></div>' : ''}
     </button>
 
     <button onclick="bukaKameraAbsen('Pulang')" ${!bisaOut? 'disabled' : ''}
-      class="w-full py-4 rounded-2xl font-bold text-white transition flex items-center justify-center gap-3 shadow-lg
-      ${!bisaOut? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed shadow-none text-gray-500' : 'bg-gradient-to-r from-red-600 to-red-800 hover:scale-[1.02]'}">
-      <i class="fa-solid fa-sign-out-alt text-xl"></i> Absen Pulang Kerja
+      class="w-full py-5 rounded-3xl font-bold text-white transition-all duration-300 flex items-center gap-4 shadow-xl
+      ${!bisaOut? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed shadow-none text-gray-500' : 'bg-gradient-to-r from-red-800 to-red-900 hover:scale-[1.02] active:scale-[0.98] hover:shadow-red-800/50'}">
+      <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center ml-1">
+        <i class="fa-solid fa-door-open text-3xl"></i>
+      </div>
+      <div class="text-left flex-1">
+        <p class="text-xl">Absen Pulang</p>
+        <p class="text-xs opacity-80">Selesaikan shift hari ini</p>
+      </div>
+      ${bisaOut? '<div class="w-3 h-3 bg-white rounded-full animate-ping mr-4"></div>' : ''}
     </button>
+  </div>
+
+  <div class="bg-white dark:bg-gray-800 p-4 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm">
+    <p class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+      <i class="fa-solid fa-clock-rotate-left text-red-800"></i> Aktivitas Terakhir
+    </p>
+    <div id="aktivitasTerakhir">
+      <div class="text-center text-gray-400 py-4">
+        <i class="fa-solid fa-spinner fa-spin"></i>
+      </div>
+    </div>
   </div>
   `;
 }
 
-// ========== HALAMAN REKAP ==========
+function getStatusText(jamMasuk, jamPulang) {
+  if (jamMasuk === '--:--') return 'Belum Absen Masuk';
+  if (jamMasuk!== '--:--' && jamPulang === '--:--') return 'Sedang Bekerja';
+  return 'Shift Selesai 👍';
+}
+
+function updateJamRealtime() {
+  const el = document.getElementById('jamRealtime');
+  const statusEl = document.getElementById('statusKerja');
+  if (!el ||!statusServer) return;
+
+  const now = new Date();
+  el.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+  if (statusServer.jamMasuk!== '--:--' && statusServer.jamPulang === '--:--') {
+    const [jam, menit] = statusServer.jamMasuk.split(':');
+    const masuk = new Date();
+    masuk.setHours(parseInt(jam), parseInt(menit), 0);
+    const durasi = Math.floor((now - masuk) / 60000);
+    const jamKerja = Math.floor(durasi / 60);
+    const menitKerja = durasi % 60;
+    if (statusEl) statusEl.textContent = `Sudah kerja ${jamKerja}j ${menitKerja}m`;
+  }
+}
+setInterval(updateJamRealtime, 1000);
+
+async function loadHomeStats() {
+  try {
+    const [rekap, patroli] = await Promise.all([
+      api('getRekap', { username: user.username }),
+      api('getPatroli', { username: user.username })
+    ]);
+
+    if (rekap.status === 'success') {
+      const hadir = rekap.data.filter(r => r.keterangan === 'IN' && r.jam).length;
+      document.getElementById('statHadir').textContent = hadir;
+      document.getElementById('statTelat').textContent = 0;
+    }
+
+    if (patroli.status === 'success') {
+      document.getElementById('statPatroli').textContent = patroli.data.length;
+
+      const aktivitasEl = document.getElementById('aktivitasTerakhir');
+      if (patroli.data.length > 0) {
+        const last = patroli.data[0];
+        const waktu = new Date(last.timestamp);
+        const selisih = Math.floor((new Date() - waktu) / 60000);
+        const waktuText = selisih < 60? `${selisih} menit lalu` : `${Math.floor(selisih/60)} jam lalu`;
+
+        aktivitasEl.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-xl flex items-center justify-center">
+              <i class="fa-solid fa-route"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-gray-800 dark:text-white">Patroli ${last.lokasi}</p>
+              <p class="text-xs text-gray-500">${waktuText}</p>
+            </div>
+          </div>
+        `;
+      } else {
+        aktivitasEl.innerHTML = `<p class="text-xs text-gray-400 text-center py-2">Belum ada aktivitas</p>`;
+      }
+    }
+  } catch(e) {
+    console.error('Load stats error:', e);
+  }
+}
+
+function updateGpsCard(jarak, radius) {
+  const gpsText = document.getElementById('gpsText');
+  const gpsCard = document.getElementById('gpsCard');
+  if (!gpsText ||!gpsCard) return;
+
+  if (jarak <= radius) {
+    gpsText.innerHTML = `<span class="text-green-600 dark:text-green-400 font-bold">Dalam radius ${Math.round(jarak)}m ✓</span>`;
+    gpsCard.className = 'bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 p-4 rounded-2xl mb-5 flex items-center gap-3 transition-all';
+  } else {
+    gpsText.innerHTML = `<span class="text-red-600 dark:text-red-400 font-bold">Diluar radius ${Math.round(jarak)}m</span>`;
+    gpsCard.className = 'bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 p-4 rounded-2xl mb-5 flex items-center gap-3 transition-all';
+  }
+}
+
 function renderRekap() {
   return `
   <div class="space-y-4">
@@ -395,7 +548,7 @@ async function loadRekap() {
   if (listEl) listEl.innerHTML = '<div class="text-center text-gray-400 py-8"><i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i><p class="text-sm">Loading...</p></div>';
 
   try {
-    const res = await api('getRekap', { username: user.username }); // <-- WAJIB PAKE INI
+    const res = await api('getRekap', { username: user.username });
     
     if (res.status === 'success') {
       dataRekap = res.data || [];
@@ -486,7 +639,7 @@ async function loadRekap() {
     `;
   }
 }
-// ========== HALAMAN PATROLI ==========
+
 function renderPatroli() {
   return `
   <div class="space-y-4">
@@ -580,7 +733,9 @@ async function simpanPatroli() {
     username: user.username,
     lokasi: lokasi,
     keterangan: ket,
-    foto: fotoBase64
+    foto: fotoBase64,
+    lat: currentLocation.lat,
+    long: currentLocation.long
   });
 
   if (res.status === 'success') {
@@ -595,7 +750,6 @@ async function simpanPatroli() {
   btn.innerHTML = 'Simpan Patroli';
 }
 
-// ========== HALAMAN KEJADIAN ==========
 function renderKejadian() {
   return `
   <div class="space-y-4">
@@ -692,7 +846,9 @@ async function simpanKejadian() {
     jenis: jenis,
     lokasi: lokasi,
     kronologi: kronologi,
-    foto: fotoBase64
+    foto: fotoBase64,
+    lat: currentLocation.lat,
+    long: currentLocation.long
   });
 
   if (res.status === 'success') {
@@ -707,7 +863,6 @@ async function simpanKejadian() {
   btn.innerHTML = 'Kirim Laporan';
 }
 
-// ========== HALAMAN PEMBINAAN ==========
 function renderPembinaan() {
   return `
   <div class="space-y-4">
@@ -811,23 +966,6 @@ async function simpanPembinaan() {
   btn.innerHTML = 'Simpan';
 }
 
-// ========== FUNGSI ABSEN LAMA - JANGAN DIUBAH ==========
-async function cekStatus() {
-  try {
-    const res = await api('cekStatus', { username: user.username });
-    console.log('Cek status:', res);
-    if (res.status === 'success') {
-      statusServer = res;
-      const contentArea = document.getElementById('contentArea');
-      if (contentArea && currentPage === 'home') {
-        contentArea.innerHTML = renderPage();
-      }
-    }
-  } catch(e) {
-    console.error('Cek status error:', e);
-  }
-}
-
 function switchPage(page) {
   currentPage = page;
   renderDashboard();
@@ -836,23 +974,34 @@ function switchPage(page) {
 function dapatkanLokasiGPS() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         currentLocation.lat = position.coords.latitude.toFixed(6);
         currentLocation.long = position.coords.longitude.toFixed(6);
         currentLocation.alamat = `Lat: ${currentLocation.lat}, Long: ${currentLocation.long}`;
-        const gpsEl = document.getElementById('previewGps');
-        if (gpsEl) gpsEl.innerText = `📍 ${currentLocation.alamat}`;
+        document.getElementById('lokasiStatus').textContent = 'Lokasi terkunci';
+        
+        const setting = await api('getSetting', {});
+        if (setting.lat) {
+          const jarak = hitungJarak(currentLocation.lat, currentLocation.long, setting.lat, setting.long);
+          updateGpsCard(jarak, setting.radius);
+        }
       },
       (error) => {
         currentLocation.alamat = "GPS terkunci / tidak aktif";
-        const gpsEl = document.getElementById('previewGps');
-        if (gpsEl) gpsEl.innerText = `⚠ ${currentLocation.alamat}`;
+        document.getElementById('lokasiStatus').textContent = 'GPS off';
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   } else {
     currentLocation.alamat = "Browser tidak mendukung GPS";
   }
+}
+
+function hitungJarak(lat1, lon1, lat2, lon2) {
+  const R = 6371e3; const p1 = lat1 * Math.PI/180; const p2 = lat2 * Math.PI/180;
+  const dp = (lat2-lat1) * Math.PI/180; const dl = (lon2-lon1) * Math.PI/180;
+  const a = Math.sin(dp/2) * Math.sin(dp/2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dl/2) * Math.sin(dl/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
 function startTimemark() {
@@ -927,7 +1076,7 @@ async function capture() {
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Proses...';
 
   const ctx = canvas.getContext('2d');
-  const MAX_WIDTH = 1280; // Ganti ke 800 kalau mau super hemat
+  const MAX_WIDTH = 1280;
   let width = video.videoWidth;
   let height = video.videoHeight;
 
@@ -967,7 +1116,6 @@ async function capture() {
   ctx.font = `mono ${11 * scale}px Courier New`;
   ctx.fillText(`GPS: ${currentLocation.lat}, ${currentLocation.long}`, 25 * scale, height - 20 * scale);
 
-  // Kualitas 0.7 udah cukup tajam, size turun 85%
   const fotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
 
   const kirimData = {
@@ -978,7 +1126,6 @@ async function capture() {
     long: currentLocation.long
   };
 
-  // UX: Tutup kamera duluan biar berasa cepet
   closeCam();
 
   btn.disabled = false;
@@ -994,7 +1141,6 @@ async function capture() {
 
 async function api(aksi, payload = {}) {
   try {
-    console.log('API call:', aksi, payload);
     const response = await fetch(URL_GAS, {
       method: 'POST',
       mode: 'cors',
@@ -1002,7 +1148,6 @@ async function api(aksi, payload = {}) {
       body: JSON.stringify({ aksi, data: payload })
     });
     const data = await response.json();
-    console.log('API response:', data);
     return data;
   } catch (error) {
     console.error('API error:', error);
@@ -1085,6 +1230,22 @@ async function gantiPassword() {
   }
   btn.disabled = false;
   btn.innerHTML = 'Update';
+}
+
+async function cekStatus() {
+  try {
+    const res = await api('cekStatus', { username: user.username });
+    if (res.status === 'success') {
+      statusServer = res;
+      const contentArea = document.getElementById('contentArea');
+      if (contentArea && currentPage === 'home') {
+        contentArea.innerHTML = renderPage();
+        loadHomeStats();
+      }
+    }
+  } catch(e) {
+    console.error('Cek status error:', e);
+  }
 }
 
 console.log('Starting app...');
