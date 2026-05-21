@@ -978,17 +978,24 @@ function dapatkanLokasiGPS() {
         currentLocation.lat = position.coords.latitude.toFixed(6);
         currentLocation.long = position.coords.longitude.toFixed(6);
         currentLocation.alamat = `Lat: ${currentLocation.lat}, Long: ${currentLocation.long}`;
-        document.getElementById('lokasiStatus').textContent = 'Lokasi terkunci';
+        const lokasiEl = document.getElementById('lokasiStatus');
+        if (lokasiEl) lokasiEl.textContent = 'Lokasi terkunci';
         
+        // Update GPS card
         const setting = await api('getSetting', {});
         if (setting.lat) {
           const jarak = hitungJarak(currentLocation.lat, currentLocation.long, setting.lat, setting.long);
           updateGpsCard(jarak, setting.radius);
         }
+        const gpsEl = document.getElementById('previewGps');
+        if (gpsEl) gpsEl.innerText = `📍 ${currentLocation.alamat}`;
       },
       (error) => {
         currentLocation.alamat = "GPS terkunci / tidak aktif";
-        document.getElementById('lokasiStatus').textContent = 'GPS off';
+        const lokasiEl = document.getElementById('lokasiStatus');
+        if (lokasiEl) lokasiEl.textContent = 'GPS off';
+        const gpsEl = document.getElementById('previewGps');
+        if (gpsEl) gpsEl.innerText = `⚠ ${currentLocation.alamat}`;
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
