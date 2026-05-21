@@ -1,5 +1,9 @@
 const URL_GAS = 'https://script.google.com/macros/s/AKfycbzTLDlivTgJS3QUIm-qmaHRFLVmu-aPYdYwMoG-YdG6xSyeUF9sDUaHV7_E-4xLUAiB/exec';
+console.log('App.js loaded');
+
 const app = document.getElementById('app');
+if(!app) console.error('Div #app tidak ditemukan!');
+
 let user = JSON.parse(localStorage.getItem('user') || 'null');
 let isDark = localStorage.getItem('dark') === 'true';
 let currentType = '';
@@ -9,9 +13,16 @@ let currentLocation = { lat: 0, long: 0, alamat: 'Mencari sinyal GPS...' };
 let currentPage = 'home';
 let statusServer = {};
 
+// Data dummy untuk menu baru, nanti ganti pake GAS
+let dataRekap = [];
+let dataPatroli = [];
+let dataKejadian = [];
+let dataPembinaan = [];
+
 if (isDark) document.documentElement.classList.add('dark');
 
 function render() {
+  console.log('Render called, user:', user);
   if (!user) return renderLogin();
   renderDashboard();
 }
@@ -57,6 +68,7 @@ async function login() {
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Memproses...';
 
   const res = await api('login', {username, password});
+  console.log('Login response:', res);
   if (res.status === 'success') {
     user = res;
     localStorage.setItem('user', JSON.stringify(user));
@@ -128,19 +140,19 @@ function renderDashboard() {
         <span class="text-xs font-semibold">Home</span>
       </button>
       <button onclick="switchPage('rekap')" class="flex flex-col items-center py-2 ${currentPage==='rekap'?'text-red-800':'text-gray-500'}">
-        <i class="fa-solid fa-calendar-days text-xl mb-1"></i>
+        <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-JSKN/main/icon-rekap.png" class="w-6 h-6 mb-1 ${currentPage==='rekap'?'':'opacity-50'}">
         <span class="text-xs font-semibold">Rekap</span>
       </button>
       <button onclick="switchPage('patroli')" class="flex flex-col items-center py-2 ${currentPage==='patroli'?'text-red-800':'text-gray-500'}">
-        <i class="fa-solid fa-route text-xl mb-1"></i>
+        <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-JSKN/main/icon-patroli.png" class="w-6 h-6 mb-1 ${currentPage==='patroli'?'':'opacity-50'}">
         <span class="text-xs font-semibold">Patroli</span>
       </button>
       <button onclick="switchPage('kejadian')" class="flex flex-col items-center py-2 ${currentPage==='kejadian'?'text-red-800':'text-gray-500'}">
-        <i class="fa-solid fa-triangle-exclamation text-xl mb-1"></i>
+        <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-JSKN/main/icon-kejadian.png" class="w-6 h-6 mb-1 ${currentPage==='kejadian'?'':'opacity-50'}">
         <span class="text-xs font-semibold">Kejadian</span>
       </button>
       <button onclick="switchPage('pembinaan')" class="flex flex-col items-center py-2 ${currentPage==='pembinaan'?'text-red-800':'text-gray-500'}">
-        <i class="fa-solid fa-user-graduate text-xl mb-1"></i>
+        <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-JSKN/main/icon-pembinaan.png" class="w-6 h-6 mb-1 ${currentPage==='pembinaan'?'':'opacity-50'}">
         <span class="text-xs font-semibold">Bina</span>
       </button>
     </div>
@@ -234,14 +246,18 @@ function renderDashboard() {
 }
 
 function renderPage() {
-  if (currentPage!== 'home') {
-    return `<div class="text-center py-12 text-gray-500">
-      <i class="fa-solid fa-tools text-4xl mb-3"></i>
-      <p class="font-bold">Halaman ${currentPage.toUpperCase()}</p>
-      <p class="text-sm">Sedang dalam pengembangan</p>
-    </div>`;
+  switch(currentPage) {
+    case 'home': return renderHome();
+    case 'rekap': return renderRekap();
+    case 'patroli': return renderPatroli();
+    case 'kejadian': return renderKejadian();
+    case 'pembinaan': return renderPembinaan();
+    default: return renderHome();
   }
+}
 
+// ========== HALAMAN HOME ==========
+function renderHome() {
   const { bisaIn = false, bisaOut = false, lock12Jam = false, sisaJam = 0, jamMasuk = '--:--', jamPulang = '--:--' } = statusServer;
 
   return `
@@ -281,14 +297,145 @@ function renderPage() {
   `;
 }
 
+// ========== HALAMAN REKAP ==========
+function renderRekap() {
+  return `
+  <div class="space-y-4">
+    <div class="flex justify-between items-center">
+      <h2 class="text-xl font-bold text-gray-800 dark:text-white">Rekap Absensi</h2>
+      <button onclick="loadRekap()" class="bg-red-800 text-white px-4 py-2 rounded-lg text-sm">
+        <i class="fa-solid fa-refresh mr-1"></i>Refresh
+      </button>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Bulan: ${new Date().toLocaleDateString('id-ID', {month: 'long', year: 'numeric'})}</p>
+      <div class="grid grid-cols-3 gap-3 text-center">
+        <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+          <p class="text-2xl font-bold text-green-600">0</p>
+          <p class="text-xs text-gray-600 dark:text-gray-400">Hadir</p>
+        </div>
+        <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg">
+          <p class="text-2xl font-bold text-yellow-600">0</p>
+          <p class="text-xs text-gray-600 dark:text-gray-400">Izin</p>
+        </div>
+        <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
+          <p class="text-2xl font-bold text-red-600">0</p>
+          <p class="text-xs text-gray-600 dark:text-gray-400">Alpha</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+      <p class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Riwayat 7 Hari Terakhir</p>
+      <div class="space-y-2">
+        <div class="text-center text-gray-400 py-8">
+          <i class="fa-solid fa-calendar-xmark text-3xl mb-2"></i>
+          <p class="text-sm">Belum ada data absensi</p>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ========== HALAMAN PATROLI ==========
+function renderPatroli() {
+  return `
+  <div class="space-y-4">
+    <div class="flex justify-between items-center">
+      <h2 class="text-xl font-bold text-gray-800 dark:text-white">Patroli</h2>
+      <button onclick="tambahPatroli()" class="bg-red-800 text-white px-4 py-2 rounded-lg text-sm">
+        <i class="fa-solid fa-plus mr-1"></i>Tambah
+      </button>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+      <div class="text-center text-gray-400 py-8">
+        <i class="fa-solid fa-route text-3xl mb-2"></i>
+        <p class="text-sm">Belum ada data patroli</p>
+        <p class="text-xs mt-1">Klik tombol Tambah untuk input patroli</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ========== HALAMAN KEJADIAN ==========
+function renderKejadian() {
+  return `
+  <div class="space-y-4">
+    <div class="flex justify-between items-center">
+      <h2 class="text-xl font-bold text-gray-800 dark:text-white">Laporan Kejadian</h2>
+      <button onclick="tambahKejadian()" class="bg-red-800 text-white px-4 py-2 rounded-lg text-sm">
+        <i class="fa-solid fa-plus mr-1"></i>Lapor
+      </button>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+      <div class="text-center text-gray-400 py-8">
+        <i class="fa-solid fa-triangle-exclamation text-3xl mb-2"></i>
+        <p class="text-sm">Belum ada laporan kejadian</p>
+        <p class="text-xs mt-1">Klik tombol Lapor untuk input kejadian</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ========== HALAMAN PEMBINAAN ==========
+function renderPembinaan() {
+  return `
+  <div class="space-y-4">
+    <div class="flex justify-between items-center">
+      <h2 class="text-xl font-bold text-gray-800 dark:text-white">Pembinaan</h2>
+      <button onclick="tambahPembinaan()" class="bg-red-800 text-white px-4 py-2 rounded-lg text-sm">
+        <i class="fa-solid fa-plus mr-1"></i>Tambah
+      </button>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+      <div class="text-center text-gray-400 py-8">
+        <i class="fa-solid fa-user-graduate text-3xl mb-2"></i>
+        <p class="text-sm">Belum ada data pembinaan</p>
+        <p class="text-xs mt-1">Klik tombol Tambah untuk input pembinaan</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ========== FUNGSI MENU BARU ==========
+function loadRekap() {
+  alert('Fitur Rekap: Akan ambil data dari sheet REKAP di GAS');
+  // Nanti: await api('getRekap', {username: user.username})
+}
+
+function tambahPatroli() {
+  alert('Fitur Patroli: Form input patroli akan dibuat di sini');
+  // Nanti: await api('tambahPatroli', {data})
+}
+
+function tambahKejadian() {
+  alert('Fitur Kejadian: Form lapor kejadian akan dibuat di sini');
+  // Nanti: await api('tambahKejadian', {data})
+}
+
+function tambahPembinaan() {
+  alert('Fitur Pembinaan: Form input pembinaan akan dibuat di sini');
+  // Nanti: await api('tambahPembinaan', {data})
+}
+
+// ========== FUNGSI ABSEN LAMA - JANGAN DIUBAH ==========
 async function cekStatus() {
-  const res = await api('cekStatus', { username: user.username });
-  if (res.status === 'success') {
-    statusServer = res;
-    const contentArea = document.getElementById('contentArea');
-    if (contentArea && currentPage === 'home') {
-      contentArea.innerHTML = renderPage();
+  try {
+    const res = await api('cekStatus', { username: user.username });
+    console.log('Cek status:', res);
+    if (res.status === 'success') {
+      statusServer = res;
+      const contentArea = document.getElementById('contentArea');
+      if (contentArea && currentPage === 'home') {
+        contentArea.innerHTML = renderPage();
+      }
     }
+  } catch(e) {
+    console.error('Cek status error:', e);
   }
 }
 
@@ -359,11 +506,11 @@ function openCam() {
   startTimemark();
 
   navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
-  .then(s => {
+ .then(s => {
       stream = s;
       document.getElementById('video').srcObject = s;
     })
-  .catch(err => {
+ .catch(err => {
       alert('Gagal mengakses kamera: ' + err.message);
       closeCam();
     });
@@ -446,16 +593,19 @@ async function capture() {
 
 async function api(aksi, payload = {}) {
   try {
+    console.log('API call:', aksi, payload);
     const response = await fetch(URL_GAS, {
       method: 'POST',
       mode: 'cors',
       headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ aksi, data: payload })
     });
-    return await response.json();
+    const data = await response.json();
+    console.log('API response:', data);
+    return data;
   } catch (error) {
-    console.error(error);
-    return { status: 'error', message: 'Koneksi internet bermasalah / GAS Error' };
+    console.error('API error:', error);
+    return { status: 'error', message: 'Koneksi internet bermasalah / GAS Error: ' + error.message };
   }
 }
 
@@ -536,4 +686,5 @@ async function gantiPassword() {
   btn.innerHTML = 'Update';
 }
 
+console.log('Starting app...');
 render();
