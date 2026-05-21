@@ -12,8 +12,6 @@ let animationFrame = null;
 let currentLocation = { lat: 0, long: 0, alamat: 'Mencari sinyal GPS...' };
 let currentPage = 'home';
 let statusServer = {};
-
-// Data dummy untuk menu baru, nanti ganti pake GAS
 let dataRekap = [];
 let dataPatroli = [];
 let dataKejadian = [];
@@ -240,9 +238,63 @@ function renderDashboard() {
         <button onclick="gantiPassword()" id="btnGantiPass" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Update</button>
       </div>
     </div>
+  </div>
+
+  <!-- MODAL INPUT PATROLI -->
+  <div id="modalPatroli" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- flex flex-col shadow-2xl">
+      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Input Patroli</h3><button onclick="closeModalPatroli()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
+      <div class="flex-1 overflow-y-auto p-4 space-y-3">
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Lokasi Patroli</label><input id="patroliLokasi" placeholder="Contoh: Pos A, Gudang B" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Keterangan</label><textarea id="patroliKet" rows="3" placeholder="Kondisi aman, ada kendala, dll" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Foto Bukti</label><input type="file" id="patroliFoto" accept="image/*" class="w-full text-sm dark:text-white"></div>
+      </div>
+      <div class="p-4"><button onclick="simpanPatroli()" id="btnSimpanPatroli" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Simpan Patroli</button></div>
+    </div>
+  </div>
+
+  <!-- MODAL INPUT KEJADIAN -->
+  <div id="modalKejadian" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- flex flex-col shadow-2xl">
+      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Lapor Kejadian</h3><button onclick="closeModalKejadian()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
+      <div class="flex-1 overflow-y-auto p-4 space-y-3">
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Jenis Kejadian</label>
+          <select id="kejadianJenis" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white">
+            <option value="">Pilih Jenis</option>
+            <option value="Kebakaran">Kebakaran</option>
+            <option value="Pencurian">Pencurian</option>
+            <option value="Kecelakaan">Kecelakaan</option>
+            <option value="Kerusakan">Kerusakan</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
+        </div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Lokasi</label><input id="kejadianLokasi" placeholder="Lokasi kejadian" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Kronologi</label><textarea id="kejadianKronologi" rows="4" placeholder="Jelaskan kronologi kejadian" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Foto Bukti</label><input type="file" id="kejadianFoto" accept="image/*" class="w-full text-sm dark:text-white"></div>
+      </div>
+      <div class="p-4"><button onclick="simpanKejadian()" id="btnSimpanKejadian" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Laporkan</button></div>
+    </div>
+  </div>
+
+  <!-- MODAL INPUT PEMBINAAN -->
+  <div id="modalPembinaan" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- flex flex-col shadow-2xl">
+      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Input Pembinaan</h3><button onclick="closeModalPembinaan()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
+      <div class="flex-1 overflow-y-auto p-4 space-y-3">
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Materi Pembinaan</label><input id="binaMateri" placeholder="Contoh: Safety Induction, SOP" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Nama Pelatih</label><input id="binaPelatih" placeholder="Nama pelatih/instruktur" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Nilai (0-100)</label><input id="binaNilai" type="number" min="0" max="100" placeholder="80" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Keterangan</label><textarea id="binaKet" rows="2" placeholder="Catatan tambahan" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea></div>
+      </div>
+      <div class="p-4"><button onclick="simpanPembinaan()" id="btnSimpanPembinaan" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Simpan</button></div>
+    </div>
   </div>`;
 
   if (currentPage === 'home') cekStatus();
+  if (currentPage === 'rekap') loadRekap();
+  if (currentPage === 'patroli') loadPatroli();
+  if (currentPage === 'kejadian') loadKejadian();
+  if (currentPage === 'pembinaan') loadPembinaan();
 }
 
 function renderPage() {
@@ -303,7 +355,7 @@ function renderRekap() {
   <div class="space-y-4">
     <div class="flex justify-between items-center">
       <h2 class="text-xl font-bold text-gray-800 dark:text-white">Rekap Absensi</h2>
-      <button onclick="loadRekap()" class="bg-red-800 text-white px-4 py-2 rounded-lg text-sm">
+      <button onclick="loadRekap()" class="bg-red-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-900 transition">
         <i class="fa-solid fa-refresh mr-1"></i>Refresh
       </button>
     </div>
@@ -312,15 +364,15 @@ function renderRekap() {
       <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Bulan: ${new Date().toLocaleDateString('id-ID', {month: 'long', year: 'numeric'})}</p>
       <div class="grid grid-cols-3 gap-3 text-center">
         <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
-          <p class="text-2xl font-bold text-green-600">0</p>
+          <p class="text-2xl font-bold text-green-600" id="totalHadir">-</p>
           <p class="text-xs text-gray-600 dark:text-gray-400">Hadir</p>
         </div>
         <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg">
-          <p class="text-2xl font-bold text-yellow-600">0</p>
+          <p class="text-2xl font-bold text-yellow-600" id="totalIzin">-</p>
           <p class="text-xs text-gray-600 dark:text-gray-400">Izin</p>
         </div>
         <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
-          <p class="text-2xl font-bold text-red-600">0</p>
+          <p class="text-2xl font-bold text-red-600" id="totalAlpha">-</p>
           <p class="text-xs text-gray-600 dark:text-gray-400">Alpha</p>
         </div>
       </div>
@@ -328,14 +380,73 @@ function renderRekap() {
 
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
       <p class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Riwayat 7 Hari Terakhir</p>
-      <div class="space-y-2">
+      <div class="space-y-2" id="listRekap">
         <div class="text-center text-gray-400 py-8">
           <i class="fa-solid fa-calendar-xmark text-3xl mb-2"></i>
-          <p class="text-sm">Belum ada data absensi</p>
+          <p class="text-sm">Klik Refresh untuk load data</p>
         </div>
       </div>
     </div>
   </div>`;
+}
+
+async function loadRekap() {
+  const btn = event.target;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i>Loading...';
+
+  const res = await api('getRekap', { username: user.username });
+  
+  if (res.status === 'success') {
+    dataRekap = res.data || [];
+    
+    // Hitung total
+    let hadir = 0, izin = 0, alpha = 0;
+    dataRekap.forEach(r => {
+      if (r.keterangan === 'IN') hadir++;
+      // Nanti bisa tambah logic izin/alpha
+    });
+    
+    document.getElementById('totalHadir').textContent = hadir;
+    document.getElementById('totalIzin').textContent = izin;
+    document.getElementById('totalAlpha').textContent = alpha;
+    
+    // Render list 7 hari terakhir
+    const listEl = document.getElementById('listRekap');
+    if (dataRekap.length > 0) {
+      const last7 = dataRekap.slice(-7).reverse();
+      listEl.innerHTML = last7.map(r => {
+        const isMasuk = r.keterangan === 'IN';
+        const tgl = new Date(r.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: 'short'});
+        return `
+          <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 ${isMasuk ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'} rounded-lg flex items-center justify-center">
+                <i class="fa-solid ${isMasuk ? 'fa-sign-in-alt' : 'fa-sign-out-alt'}"></i>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-gray-800 dark:text-white">${isMasuk ? 'Masuk' : 'Pulang'}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">${tgl}</p>
+              </div>
+            </div>
+            <p class="text-sm font-bold text-gray-700 dark:text-gray-300">${r.jam}</p>
+          </div>
+        `;
+      }).join('');
+    } else {
+      listEl.innerHTML = `
+        <div class="text-center text-gray-400 py-8">
+          <i class="fa-solid fa-calendar-xmark text-3xl mb-2"></i>
+          <p class="text-sm">Belum ada data absensi</p>
+        </div>
+      `;
+    }
+  } else {
+    alert('Gagal load rekap: ' + res.message);
+  }
+  
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fa-solid fa-refresh mr-1"></i>Refresh';
 }
 
 // ========== HALAMAN PATROLI ==========
@@ -344,19 +455,134 @@ function renderPatroli() {
   <div class="space-y-4">
     <div class="flex justify-between items-center">
       <h2 class="text-xl font-bold text-gray-800 dark:text-white">Patroli</h2>
-      <button onclick="tambahPatroli()" class="bg-red-800 text-white px-4 py-2 rounded-lg text-sm">
+      <button onclick="openFormPatroli()" class="bg-red-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-900 transition">
         <i class="fa-solid fa-plus mr-1"></i>Tambah
       </button>
     </div>
 
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-      <div class="text-center text-gray-400 py-8">
-        <i class="fa-solid fa-route text-3xl mb-2"></i>
-        <p class="text-sm">Belum ada data patroli</p>
-        <p class="text-xs mt-1">Klik tombol Tambah untuk input patroli</p>
+      <div id="listPatroli" class="space-y-2">
+        <div class="text-center text-gray-400 py-8">
+          <i class="fa-solid fa-route text-3xl mb-2"></i>
+          <p class="text-sm">Klik Refresh untuk load data</p>
+        </div>
+      </div>
+      <button onclick="loadPatroli()" class="w-full mt-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg text-sm">
+        <i class="fa-solid fa-refresh mr-1"></i>Muat Data
+      </button>
+    </div>
+  </div>
+  
+  <!-- MODAL FORM PATROLI -->
+  <div id="modalPatroli" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
+      <div class="bg-red-800 px-5 py-4 flex items-center justify-between">
+        <h3 class="font-bold text-lg text-white">Input Patroli</h3>
+        <button onclick="closeFormPatroli()"><i class="fa-solid fa-xmark text-xl text-white"></i></button>
+      </div>
+      <div class="p-4 space-y-3">
+        <div>
+          <label class="text-xs font-bold text-red-800 block mb-1">Lokasi Patroli</label>
+          <input id="patroliLokasi" placeholder="Contoh: Pos 1, Lantai 2" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white">
+        </div>
+        <div>
+          <label class="text-xs font-bold text-red-800 block mb-1">Keterangan</label>
+          <textarea id="patroliKet" rows="3" placeholder="Situasi aman, dll" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-red-800 block mb-1">Foto (Opsional)</label>
+          <input id="patroliFoto" type="file" accept="image/*" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm dark:text-white">
+        </div>
+        <button onclick="simpanPatroli()" id="btnSimpanPatroli" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Simpan</button>
       </div>
     </div>
   </div>`;
+}
+
+async function loadPatroli() {
+  const res = await api('getPatroli', { username: user.username });
+  const listEl = document.getElementById('listPatroli');
+  
+  if (res.status === 'success' && res.data.length > 0) {
+    dataPatroli = res.data;
+    listEl.innerHTML = dataPatroli.map(p => {
+      const tgl = new Date(p.timestamp).toLocaleDateString('id-ID', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'});
+      return `
+        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <p class="text-sm font-bold text-gray-800 dark:text-white">${p.lokasi}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">${tgl}</p>
+            </div>
+            ${p.foto ? `<img src="${p.foto}" class="w-12 h-12 rounded-lg object-cover">` : ''}
+          </div>
+          <p class="text-xs text-gray-600 dark:text-gray-300">${p.keterangan}</p>
+        </div>
+      `;
+    }).join('');
+  } else {
+    listEl.innerHTML = `
+      <div class="text-center text-gray-400 py-8">
+        <i class="fa-solid fa-route text-3xl mb-2"></i>
+        <p class="text-sm">Belum ada data patroli</p>
+      </div>
+    `;
+  }
+}
+
+function openFormPatroli() {
+  document.getElementById('modalPatroli').classList.replace('hidden', 'flex');
+}
+
+function closeFormPatroli() {
+  document.getElementById('modalPatroli').classList.replace('flex', 'hidden');
+  document.getElementById('patroliLokasi').value = '';
+  document.getElementById('patroliKet').value = '';
+  document.getElementById('patroliFoto').value = '';
+}
+
+async function simpanPatroli() {
+  const btn = document.getElementById('btnSimpanPatroli');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyimpan...';
+
+  const lokasi = document.getElementById('patroliLokasi').value.trim();
+  const ket = document.getElementById('patroliKet').value.trim();
+  const fotoFile = document.getElementById('patroliFoto').files[0];
+  
+  if (!lokasi) {
+    alert('Lokasi wajib diisi');
+    btn.disabled = false;
+    btn.innerHTML = 'Simpan';
+    return;
+  }
+
+  let fotoBase64 = '';
+  if (fotoFile) {
+    fotoBase64 = await new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.readAsDataURL(fotoFile);
+    });
+  }
+
+  const res = await api('tambahPatroli', {
+    username: user.username,
+    lokasi: lokasi,
+    keterangan: ket,
+    foto: fotoBase64
+  });
+
+  if (res.status === 'success') {
+    alert(res.message);
+    closeFormPatroli();
+    loadPatroli();
+  } else {
+    alert(res.message);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = 'Simpan';
 }
 
 // ========== HALAMAN KEJADIAN ==========
@@ -365,19 +591,148 @@ function renderKejadian() {
   <div class="space-y-4">
     <div class="flex justify-between items-center">
       <h2 class="text-xl font-bold text-gray-800 dark:text-white">Laporan Kejadian</h2>
-      <button onclick="tambahKejadian()" class="bg-red-800 text-white px-4 py-2 rounded-lg text-sm">
+      <button onclick="openFormKejadian()" class="bg-red-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-900 transition">
         <i class="fa-solid fa-plus mr-1"></i>Lapor
       </button>
     </div>
 
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-      <div class="text-center text-gray-400 py-8">
-        <i class="fa-solid fa-triangle-exclamation text-3xl mb-2"></i>
-        <p class="text-sm">Belum ada laporan kejadian</p>
-        <p class="text-xs mt-1">Klik tombol Lapor untuk input kejadian</p>
+      <div id="listKejadian" class="space-y-2">
+        <div class="text-center text-gray-400 py-8">
+          <i class="fa-solid fa-triangle-exclamation text-3xl mb-2"></i>
+          <p class="text-sm">Klik Refresh untuk load data</p>
+        </div>
+      </div>
+      <button onclick="loadKejadian()" class="w-full mt-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg text-sm">
+        <i class="fa-solid fa-refresh mr-1"></i>Muat Data
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL FORM KEJADIAN -->
+  <div id="modalKejadian" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- overflow-y-auto shadow-2xl">
+      <div class="bg-red-800 px-5 py-4 flex items-center justify-between sticky top-0">
+        <h3 class="font-bold text-lg text-white">Lapor Kejadian</h3>
+        <button onclick="closeFormKejadian()"><i class="fa-solid fa-xmark text-xl text-white"></i></button>
+      </div>
+      <div class="p-4 space-y-3">
+        <div>
+          <label class="text-xs font-bold text-red-800 block mb-1">Jenis Kejadian</label>
+          <select id="kejadianJenis" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white">
+            <option value="">Pilih Jenis</option>
+            <option value="Kehilangan">Kehilangan</option>
+            <option value="Kerusakan">Kerusakan</option>
+            <option value="Kecelakaan">Kecelakaan</option>
+            <option value="Mencurigakan">Mencurigakan</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-red-800 block mb-1">Lokasi</label>
+          <input id="kejadianLokasi" placeholder="Contoh: Parkir A, Lantai 3" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white">
+        </div>
+        <div>
+          <label class="text-xs font-bold text-red-800 block mb-1">Kronologi</label>
+          <textarea id="kejadianKronologi" rows="4" placeholder="Jelaskan kejadian..." class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-red-800 block mb-1">Foto Bukti</label>
+          <input id="kejadianFoto" type="file" accept="image/*" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm dark:text-white">
+        </div>
+        <button onclick="simpanKejadian()" id="btnSimpanKejadian" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Kirim Laporan</button>
       </div>
     </div>
   </div>`;
+}
+
+async function loadKejadian() {
+  const res = await api('getKejadian', { username: user.username });
+  const listEl = document.getElementById('listKejadian');
+  
+  if (res.status === 'success' && res.data.length > 0) {
+    dataKejadian = res.data;
+    listEl.innerHTML = dataKejadian.map(k => {
+      const tgl = new Date(k.timestamp).toLocaleDateString('id-ID', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'});
+      return `
+        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <p class="text-sm font-bold text-red-600">${k.jenis}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">${tgl} - ${k.lokasi}</p>
+            </div>
+            ${k.foto ? `<img src="${k.foto}" class="w-12 h-12 rounded-lg object-cover">` : ''}
+          </div>
+          <p class="text-xs text-gray-600 dark:text-gray-300">${k.kronologi}</p>
+        </div>
+      `;
+    }).join('');
+  } else {
+    listEl.innerHTML = `
+      <div class="text-center text-gray-400 py-8">
+        <i class="fa-solid fa-triangle-exclamation text-3xl mb-2"></i>
+        <p class="text-sm">Belum ada laporan kejadian</p>
+      </div>
+    `;
+  }
+}
+
+function openFormKejadian() {
+  document.getElementById('modalKejadian').classList.replace('hidden', 'flex');
+}
+
+function closeFormKejadian() {
+  document.getElementById('modalKejadian').classList.replace('flex', 'hidden');
+  document.getElementById('kejadianJenis').value = '';
+  document.getElementById('kejadianLokasi').value = '';
+  document.getElementById('kejadianKronologi').value = '';
+  document.getElementById('kejadianFoto').value = '';
+}
+
+async function simpanKejadian() {
+  const btn = document.getElementById('btnSimpanKejadian');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Mengirim...';
+
+  const jenis = document.getElementById('kejadianJenis').value;
+  const lokasi = document.getElementById('kejadianLokasi').value.trim();
+  const kronologi = document.getElementById('kejadianKronologi').value.trim();
+  const fotoFile = document.getElementById('kejadianFoto').files[0];
+  
+  if (!jenis || !lokasi || !kronologi) {
+    alert('Jenis, Lokasi, dan Kronologi wajib diisi');
+    btn.disabled = false;
+    btn.innerHTML = 'Kirim Laporan';
+    return;
+  }
+
+  let fotoBase64 = '';
+  if (fotoFile) {
+    fotoBase64 = await new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.readAsDataURL(fotoFile);
+    });
+  }
+
+  const res = await api('tambahKejadian', {
+    username: user.username,
+    jenis: jenis,
+    lokasi: lokasi,
+    kronologi: kronologi,
+    foto: fotoBase64
+  });
+
+  if (res.status === 'success') {
+    alert(res.message);
+    closeFormKejadian();
+    loadKejadian();
+  } else {
+    alert(res.message);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = 'Kirim Laporan';
 }
 
 // ========== HALAMAN PEMBINAAN ==========
@@ -386,40 +741,134 @@ function renderPembinaan() {
   <div class="space-y-4">
     <div class="flex justify-between items-center">
       <h2 class="text-xl font-bold text-gray-800 dark:text-white">Pembinaan</h2>
-      <button onclick="tambahPembinaan()" class="bg-red-800 text-white px-4 py-2 rounded-lg text-sm">
+      <button onclick="openFormPembinaan()" class="bg-red-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-900 transition">
         <i class="fa-solid fa-plus mr-1"></i>Tambah
       </button>
     </div>
 
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-      <div class="text-center text-gray-400 py-8">
-        <i class="fa-solid fa-user-graduate text-3xl mb-2"></i>
-        <p class="text-sm">Belum ada data pembinaan</p>
-        <p class="text-xs mt-1">Klik tombol Tambah untuk input pembinaan</p>
+      <div id="listPembinaan" class="space-y-2">
+        <div class="text-center text-gray-400 py-8">
+          <i class="fa-solid fa-user-graduate text-3xl mb-2"></i>
+          <p class="text-sm">Klik Refresh untuk load data</p>
+        </div>
+      </div>
+      <button onclick="loadPembinaan()" class="w-full mt-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg text-sm">
+        <i class="fa-solid fa-refresh mr-1"></i>Muat Data
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL FORM PEMBINAAN -->
+  <div id="modalPembinaan" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- overflow-y-auto shadow-2xl">
+      <div class="bg-red-800 px-5 py-4 flex items-center justify-between sticky top-0">
+        <h3 class="font-bold text-lg text-white">Input Pembinaan</h3>
+        <button onclick="closeFormPembinaan()"><i class="fa-solid fa-xmark text-xl text-white"></i></button>
+      </div>
+      <div class="p-4 space-y-3">
+        <div>
+          <label class="text-xs font-bold text-red-800 block mb-1">Materi Pembinaan</label>
+          <input id="pembinaanMateri" placeholder="Contoh: SOP Keamanan" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white">
+        </div>
+        <div>
+          <label class="text-xs font-bold text-red-800 block mb-1">Nama Pelatih</label>
+          <input id="pembinaanPelatih" placeholder="Contoh: Pak Budi" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white">
+        </div>
+        <div>
+          <label class="text-xs font-bold text-red-800 block mb-1">Nilai</label>
+          <input id="pembinaanNilai" type="number" min="0" max="100" placeholder="0-100" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white">
+        </div>
+        <div>
+          <label class="text-xs font-bold text-red-800 block mb-1">Keterangan</label>
+          <textarea id="pembinaanKet" rows="3" placeholder="Catatan tambahan..." class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea>
+        </div>
+        <button onclick="simpanPembinaan()" id="btnSimpanPembinaan" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Simpan</button>
       </div>
     </div>
   </div>`;
 }
 
-// ========== FUNGSI MENU BARU ==========
-function loadRekap() {
-  alert('Fitur Rekap: Akan ambil data dari sheet REKAP di GAS');
-  // Nanti: await api('getRekap', {username: user.username})
+async function loadPembinaan() {
+  const res = await api('getPembinaan', { username: user.username });
+  const listEl = document.getElementById('listPembinaan');
+  
+  if (res.status === 'success' && res.data.length > 0) {
+    dataPembinaan = res.data;
+    listEl.innerHTML = dataPembinaan.map(p => {
+      const tgl = new Date(p.timestamp).toLocaleDateString('id-ID', {day: '2-digit', month: 'short'});
+      return `
+        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <p class="text-sm font-bold text-gray-800 dark:text-white">${p.materi}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">${tgl} - ${p.pelatih}</p>
+            </div>
+            <div class="bg-red-800 text-white px-3 py-1 rounded-full">
+              <p class="text-sm font-bold">${p.nilai}</p>
+            </div>
+          </div>
+          <p class="text-xs text-gray-600 dark:text-gray-300">${p.keterangan}</p>
+        </div>
+      `;
+    }).join('');
+  } else {
+    listEl.innerHTML = `
+      <div class="text-center text-gray-400 py-8">
+        <i class="fa-solid fa-user-graduate text-3xl mb-2"></i>
+        <p class="text-sm">Belum ada data pembinaan</p>
+      </div>
+    `;
+  }
 }
 
-function tambahPatroli() {
-  alert('Fitur Patroli: Form input patroli akan dibuat di sini');
-  // Nanti: await api('tambahPatroli', {data})
+function openFormPembinaan() {
+  document.getElementById('modalPembinaan').classList.replace('hidden', 'flex');
 }
 
-function tambahKejadian() {
-  alert('Fitur Kejadian: Form lapor kejadian akan dibuat di sini');
-  // Nanti: await api('tambahKejadian', {data})
+function closeFormPembinaan() {
+  document.getElementById('modalPembinaan').classList.replace('flex', 'hidden');
+  document.getElementById('pembinaanMateri').value = '';
+  document.getElementById('pembinaanPelatih').value = '';
+  document.getElementById('pembinaanNilai').value = '';
+  document.getElementById('pembinaanKet').value = '';
 }
 
-function tambahPembinaan() {
-  alert('Fitur Pembinaan: Form input pembinaan akan dibuat di sini');
-  // Nanti: await api('tambahPembinaan', {data})
+async function simpanPembinaan() {
+  const btn = document.getElementById('btnSimpanPembinaan');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyimpan...';
+
+  const materi = document.getElementById('pembinaanMateri').value.trim();
+  const pelatih = document.getElementById('pembinaanPelatih').value.trim();
+  const nilai = document.getElementById('pembinaanNilai').value;
+  const ket = document.getElementById('pembinaanKet').value.trim();
+  
+  if (!materi || !pelatih || !nilai) {
+    alert('Materi, Pelatih, dan Nilai wajib diisi');
+    btn.disabled = false;
+    btn.innerHTML = 'Simpan';
+    return;
+  }
+
+  const res = await api('tambahPembinaan', {
+    username: user.username,
+    materi: materi,
+    pelatih: pelatih,
+    nilai: nilai,
+    keterangan: ket
+  });
+
+  if (res.status === 'success') {
+    alert(res.message);
+    closeFormPembinaan();
+    loadPembinaan();
+  } else {
+    alert(res.message);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = 'Simpan';
 }
 
 // ========== FUNGSI ABSEN LAMA - JANGAN DIUBAH ==========
@@ -487,7 +936,6 @@ function startTimemark() {
     if (modalCam &&!modalCam.classList.contains('hidden')) {
       animationFrame = requestAnimationFrame(update);
     }
-  }
   update();
 }
 
@@ -578,113 +1026,3 @@ async function capture() {
     lat: currentLocation.lat,
     long: currentLocation.long
   };
-
-  const res = await api('absen', kirimData);
-  alert(res.message);
-
-  btn.disabled = false;
-  btn.innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Kirim Absen';
-
-  if (res.status === 'success') {
-    closeCam();
-    cekStatus();
-  }
-}
-
-async function api(aksi, payload = {}) {
-  try {
-    console.log('API call:', aksi, payload);
-    const response = await fetch(URL_GAS, {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ aksi, data: payload })
-    });
-    const data = await response.json();
-    console.log('API response:', data);
-    return data;
-  } catch (error) {
-    console.error('API error:', error);
-    return { status: 'error', message: 'Koneksi internet bermasalah / GAS Error: ' + error.message };
-  }
-}
-
-function openProfil() { document.getElementById('modalProfil').classList.replace('hidden', 'flex'); }
-function closeProfil() { document.getElementById('modalProfil').classList.replace('flex', 'hidden'); }
-function openEditProfil() { closeProfil(); document.getElementById('modalEditProfil').classList.replace('hidden', 'flex'); }
-function closeEditProfil() { document.getElementById('modalEditProfil').classList.replace('flex', 'hidden'); }
-function openGantiPassword() { closeProfil(); document.getElementById('modalGantiPassword').classList.replace('hidden', 'flex'); }
-function closeGantiPassword() { document.getElementById('modalGantiPassword').classList.replace('flex', 'hidden'); }
-function gantiFotoProfil() { document.getElementById('inputFotoProfil').click(); }
-
-async function uploadFotoProfil(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const base64 = e.target.result;
-    document.getElementById('fotoProfil').src = base64;
-    const res = await api('uploadFoto', { username: user.username, fotoBase64: base64 });
-    if (res.status === 'success') {
-      user.foto = res.urlFoto;
-      localStorage.setItem('user', JSON.stringify(user));
-      document.getElementById('avatarNav').src = res.urlFoto;
-      alert('Foto profil berhasil diupdate');
-    } else {
-      alert(res.message);
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-async function simpanProfil() {
-  const btn = document.getElementById('btnSimpanProfil');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyimpan...';
-
-  const d = {
-    username: user.username,
-    nama: document.getElementById('editNama').value,
-    ktp: document.getElementById('editKtp').value,
-    hp: document.getElementById('editHp').value,
-    alamat: document.getElementById('editAlamat').value,
-    ttl: document.getElementById('editTtl').value,
-    bank: document.getElementById('editBank').value,
-    rekening: document.getElementById('editRek').value
-  };
-  const res = await api('updateProfil', d);
-  if(res.status==='success') {
-    user={...user,...d};
-    localStorage.setItem('user', JSON.stringify(user));
-    closeEditProfil();
-    renderDashboard();
-    alert(res.message);
-  } else {
-    alert(res.message);
-  }
-  btn.disabled = false;
-  btn.innerHTML = 'Simpan';
-}
-
-async function gantiPassword() {
-  const btn = document.getElementById('btnGantiPass');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Update...';
-
-  const res = await api('gantiPassword', {
-    username: user.username,
-    passLama: document.getElementById('passLama').value,
-    passBaru: document.getElementById('passBaru').value
-  });
-  alert(res.message);
-  if(res.status==='success') {
-    document.getElementById('passLama').value = '';
-    document.getElementById('passBaru').value = '';
-    closeGantiPassword();
-  }
-  btn.disabled = false;
-  btn.innerHTML = 'Update';
-}
-
-console.log('Starting app...');
-render();
