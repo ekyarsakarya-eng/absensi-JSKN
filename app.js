@@ -521,6 +521,7 @@ async function loadPatroli() {
           <div class="flex justify-between items-start mb-2">
             <div class="flex-1">
               <p class="text-sm font-bold text-gray-800 dark:text-white">${p.lokasi}</p>
+              <p class="text-xs text-red-600 dark:text-red-400 font-semibold">Petugas: ${p.nama}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">${tgl}</p>
             </div>
             ${p.foto? `<img src="${p.foto}" class="w-12 h-12 rounded-lg object-cover ml-2">` : ''}
@@ -629,6 +630,7 @@ async function loadKejadian() {
           <div class="flex justify-between items-start mb-2">
             <div class="flex-1">
               <p class="text-sm font-bold text-red-600">${k.jenis}</p>
+              <p class="text-xs text-red-600 dark:text-red-400 font-semibold">Pelapor: ${k.nama}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">${tgl} - ${k.lokasi}</p>
             </div>
             ${k.foto? `<img src="${k.foto}" class="w-12 h-12 rounded-lg object-cover ml-2">` : ''}
