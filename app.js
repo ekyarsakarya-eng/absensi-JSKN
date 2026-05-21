@@ -1,6 +1,49 @@
 const URL_GAS = 'https://script.google.com/macros/s/AKfycbzTLDlivTgJS3QUIm-qmaHRFLVmu-aPYdYwMoG-YdG6xSyeUF9sDUaHV7_E-4xLUAiB/exec';
 console.log('App.js loaded');
 
+// === PWA INSTALL ===
+let deferredPrompt;
+const installPopup = document.getElementById('installPopup');
+const btnInstall = document.getElementById('btnInstall');
+
+// Cek udah diinstall apa belum
+const isInStandaloneMode = () => 
+  window.matchMedia('(display-mode: standalone)').matches || 
+  window.navigator.standalone || 
+  document.referrer.includes('android-app://');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Munculin popup kalau belum diinstall
+  if (!isInStandaloneMode()) {
+    installPopup.classList.remove('hidden');
+    installPopup.classList.add('flex');
+  }
+});
+
+btnInstall?.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') {
+    installPopup.classList.add('hidden');
+  }
+  deferredPrompt = null;
+});
+
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}
+
+// Kalau udah diinstall, langsung hide popup
+if (isInStandaloneMode()) {
+  installPopup?.classList.add('hidden');
+}
+
 const app = document.getElementById('app');
 if(!app) console.error('Div #app tidak ditemukan!');
 
