@@ -395,7 +395,7 @@ async function loadRekap() {
   if (listEl) listEl.innerHTML = '<div class="text-center text-gray-400 py-8"><i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i><p class="text-sm">Loading...</p></div>';
 
   try {
-    const res = await api('getRekap', { username: user.username });
+    const res = await api('getRekap', { username: user.username }); // <-- YANG BENER PAKE api()
     
     if (res.status === 'success') {
       dataRekap = res.data || [];
@@ -410,7 +410,6 @@ async function loadRekap() {
       document.getElementById('totalAlpha').textContent = 0;
       
       if (dataRekap.length > 0) {
-        // Group by tanggal
         const grouped = {};
         dataRekap.forEach(r => {
           const d = new Date(r.tanggal);
