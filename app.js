@@ -239,31 +239,114 @@ function renderHome() {
   const { bisaIn = false, bisaOut = false, lock12Jam = false, sisaJam = 0, jamMasuk = '--:--', jamPulang = '--:--' } = statusServer;
   const statusText = lock12Jam ? `Terkunci ${sisaJam} jam lagi` : bisaIn ? 'Siap Absen Masuk' : bisaOut ? 'Siap Absen Pulang' : 'Sudah Selesai';
   const statusColor = lock12Jam ? 'bg-amber-500' : bisaIn || bisaOut ? 'bg-green-500' : 'bg-gray-500';
+  
   return `
   <div class="space-y-4">
+    <!-- GPS CARD -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-100 dark:border-gray-700">
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center"><i class="fa-solid fa-satellite-dish text-red-800 text-sm"></i></div>
-          <div><p class="text-xs text-gray-500 dark:text-gray-400">Lokasi GPS</p><p class="text-xs font-bold text-red-800 dark:text-white">REAL-TIME</p></div>
+          <div class="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-satellite-dish text-red-800 text-sm"></i>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Lokasi GPS</p>
+            <p class="text-xs font-bold text-red-800 dark:text-white">REAL-TIME</p>
+          </div>
         </div>
-        <div class="flex items-center gap-1"><div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div><span class="text-xs text-green-600 font-medium">Aktif</span></div>
+        <div class="flex items-center gap-1">
+          <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <span class="text-xs text-green-600 font-medium">Aktif</span>
+        </div>
       </div>
+      
       <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-3 space-y-2">
-        <div class="flex items-start gap-2"><i class="fa-solid fa-location-dot text-red-800 mt-0.5 text-sm"></i><div class="flex-1 min-w-0"><p class="text-xs text-gray-500 dark:text-gray-400">Alamat</p><p id="gpsAlamat" class="text-sm font-medium text-gray-900 dark:text-white leading-snug">${currentLocation.alamat}</p></div></div>
-        <div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-200 dark:border-gray-700"><div><p class="text-xs text-gray-500">Latitude</p><p id="gpsLat" class="text-sm font-mono font-bold text-gray-900 dark:text-white">${currentLocation.lat}</p></div><div><p class="text-xs text-gray-500">Longitude</p><p id="gpsLong" class="text-sm font-mono font-bold text-gray-900 dark:text-white">${currentLocation.long}</p></div></div>
+        <div class="flex items-start gap-2">
+          <i class="fa-solid fa-location-dot text-red-800 mt-0.5 text-sm"></i>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs text-gray-500 dark:text-gray-400">Alamat</p>
+            <p id="gpsAlamat" class="text-sm font-medium text-gray-900 dark:text-white leading-snug">${currentLocation.alamat}</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+          <div>
+            <p class="text-xs text-gray-500">Latitude</p>
+            <p id="gpsLat" class="text-sm font-mono font-bold text-gray-900 dark:text-white">${currentLocation.lat}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500">Longitude</p>
+            <p id="gpsLong" class="text-sm font-mono font-bold text-gray-900 dark:text-white">${currentLocation.long}</p>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- STATUS CARD -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-lg border border-gray-100 dark:border-gray-700">
-      <div class="flex items-center justify-between mb-4"><h2 class="font-bold text-gray-900 dark:text-white">Status Hari Ini</h2><span class="px-3 py-1 ${statusColor} text-white text-xs font-bold rounded-full">${statusText}</span></div>
-      <div class="grid grid-cols-2 gap-3 mb-4"><div class="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 text-center border border-green-200 dark:border-green-800"><i class="fa-solid fa-right-to-bracket text-green-600 text-lg mb-1"></i><p class="text-xs text-gray-600 dark:text-gray-400">Masuk</p><p class="text-lg font-bold text-green-600">${jamMasuk}</p></div><div class="bg-red-50 dark:bg-red-900/20 rounded-xl p-3 text-center border border-red-200 dark:border-red-800"><i class="fa-solid fa-right-from-bracket text-red-600 text-lg mb-1"></i><p class="text-xs text-gray-600 dark:text-gray-400">Pulang</p><p class="text-lg font-bold text-red-600">${jamPulang}</p></div></div>
-      <div class="text-center py-2 bg-gray-50 dark:bg-gray-900/50 rounded-xl"><p class="text-xs text-gray-500 dark:text-gray-400">Waktu Sekarang</p><p id="jamRealtime" class="text-2xl font-mono font-bold text-red-800 dark:text-white">--:--:--</p></div>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-bold text-gray-900 dark:text-white">Status Hari Ini</h2>
+        <span class="px-3 py-1 ${statusColor} text-white text-xs font-bold rounded-full">${statusText}</span>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 text-center border border-green-200 dark:border-green-800">
+          <i class="fa-solid fa-right-to-bracket text-green-600 text-lg mb-1"></i>
+          <p class="text-xs text-gray-600 dark:text-gray-400">Masuk</p>
+          <p class="text-lg font-bold text-green-600">${jamMasuk}</p>
+        </div>
+        <div class="bg-red-50 dark:bg-red-900/20 rounded-xl p-3 text-center border border-red-200 dark:border-red-800">
+          <i class="fa-solid fa-right-from-bracket text-red-600 text-lg mb-1"></i>
+          <p class="text-xs text-gray-600 dark:text-gray-400">Pulang</p>
+          <p class="text-lg font-bold text-red-600">${jamPulang}</p>
+        </div>
+      </div>
+
+      <div class="text-center py-2 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+        <p class="text-xs text-gray-500 dark:text-gray-400">Waktu Sekarang</p>
+        <p id="jamRealtime" class="text-2xl font-mono font-bold text-red-800 dark:text-white">--:--:--</p>
+      </div>
     </div>
+
+    <!-- TOMBOL ABSEN -->
     <div class="space-y-3">
-      <button onclick="bukaKameraAbsen('Masuk')" ${!bisaIn ? 'disabled' : ''} class="w-full relative overflow-hidden group ${bisaIn ? 'bg-green-600 hover:bg-green-700 active:scale-98' : 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'} text-white p-5 rounded-2xl font-bold text-lg shadow-xl transition-all"><div class="flex items-center justify-center gap-3"><div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm"><i class="fa-solid fa-fingerprint text-2xl"></i></div><div class="text-left"><p class="text-lg">Absen Masuk</p><p class="text-xs opacity-80 font-normal">Tap untuk scan wajah & GPS</p></div></div>${!bisaIn ? '<div class="absolute inset-0 bg-black/10 backdrop-blur-"></div>' : ''}</button>
-      <button onclick="bukaKameraAbsen('Pulang')" ${!bisaOut ? 'disabled' : ''} class="w-full relative overflow-hidden group ${bisaOut ? 'bg-red-800 hover:bg-red-900 active:scale-98' : 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'} text-white p-5 rounded-2xl font-bold text-lg shadow-xl transition-all"><div class="flex items-center justify-center gap-3"><div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm"><i class="fa-solid fa-hand-wave text-2xl"></i></div><div class="text-left"><p class="text-lg">Absen Pulang</p><p class="text-xs opacity-80 font-normal">Selesaikan shift hari ini</p></div></div>${!bisaOut ? '<div class="absolute inset-0 bg-black/10 backdrop-blur-"></div>' : ''}</button>
+      <button onclick="bukaKameraAbsen('Masuk')" 
+              ${!bisaIn ? 'disabled' : ''}
+              class="w-full relative overflow-hidden group ${bisaIn ? 'bg-green-600 hover:bg-green-700 active:scale-98' : 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'} text-white p-5 rounded-2xl font-bold text-lg shadow-xl transition-all">
+        <div class="flex items-center justify-center gap-3">
+          <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+            <i class="fa-solid fa-fingerprint text-2xl"></i>
+          </div>
+          <div class="text-left">
+            <p class="text-lg">Absen Masuk</p>
+            <p class="text-xs opacity-80 font-normal">Tap untuk scan wajah & GPS</p>
+          </div>
+        ${!bisaIn ? '<div class="absolute inset-0 bg-black/10 backdrop-blur-"></div>' : ''}
+      </button>
+
+      <button onclick="bukaKameraAbsen('Pulang')"
+              ${!bisaOut ? 'disabled' : ''}
+              class="w-full relative overflow-hidden group ${bisaOut ? 'bg-red-800 hover:bg-red-900 active:scale-98' : 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'} text-white p-5 rounded-2xl font-bold text-lg shadow-xl transition-all">
+        <div class="flex items-center justify-center gap-3">
+          <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+            <i class="fa-solid fa-hand-wave text-2xl"></i>
+          </div>
+          <div class="text-left">
+            <p class="text-lg">Absen Pulang</p>
+            <p class="text-xs opacity-80 font-normal">Selesaikan shift hari ini</p>
+          </div>
+        </div>
+        ${!bisaOut ? '<div class="absolute inset-0 bg-black/10 backdrop-blur-"></div>' : ''}
+      </button>
     </div>
-    ${lock12Jam ? `<div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-start gap-3"><i class="fa-solid fa-lock text-amber-600 mt-0.5"></i><div><p class="font-bold text-amber-800 dark:text-amber-400 text-sm">Terkunci Sementara</p><p class="text-xs text-amber-700 dark:text-amber-300 mt-1">Anda baru saja absen pulang. Tunggu ${sisaJam} jam lagi untuk absen masuk berikutnya.</p></div></div>` : ''}
+
+    ${lock12Jam ? `
+    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-start gap-3">
+      <i class="fa-solid fa-lock text-amber-600 mt-0.5"></i>
+      <div>
+        <p class="font-bold text-amber-800 dark:text-amber-400 text-sm">Terkunci Sementara</p>
+        <p class="text-xs text-amber-700 dark:text-amber-300 mt-1">Anda baru saja absen pulang. Tunggu ${sisaJam} jam lagi untuk absen masuk berikutnya.</p>
+      </div>
+    ` : ''}
   </div>`;
 }
 
@@ -319,10 +402,27 @@ function renderPatroli() {
 async function loadPatroli() {
   const res = await api('getPatroli', { username: user.username });
   const el = document.getElementById('listPatroli');
-  if (res.status === 'success') {
-    dataPatroli = res.data;
-    el.innerHTML = dataPatroli.map(p => `<div class="p-2 border-b">${p.lokasi} - ${p.keterangan}</div>`).join('') || 'Kosong';
+  if (!el) return;
+  if (res.status !== 'success' || !res.data.length) {
+    el.innerHTML = '<p class="text-gray-500 text-center py-4">Belum ada patroli</p>';
+    return;
   }
+  dataPatroli = res.data;
+  el.innerHTML = dataPatroli.map(p => {
+    const tgl = new Date(p.timestamp).toLocaleString('id-ID', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+    return `
+    <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl mb-2 border border-gray-200 dark:border-gray-600">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="font-bold text-red-800 dark:text-white text-sm">${p.nama || p.username}</p>
+          <p class="text-xs text-gray-500">${tgl}</p>
+        </div>
+        ${p.foto ? `<img src="${p.foto}" class="w-12 h-12 rounded-lg object-cover">` : ''}
+      </div>
+      <p class="text-sm mt-2"><i class="fa-solid fa-location-dot text-red-600 mr-1"></i>${p.lokasi}</p>
+      <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">${p.keterangan}</p>
+    </div>`;
+  }).join('');
 }
 function openFormPatroli() { document.getElementById('modalPatroli')?.classList.remove('hidden'); }
 function closeFormPatroli() { document.getElementById('modalPatroli')?.classList.add('hidden'); }
@@ -331,16 +431,27 @@ async function simpanPatroli() {
   if (res.status === 'success') { showSuccess(res.message); closeFormPatroli(); loadPatroli(); } else { showError(res.message); }
 }
 
-function renderKejadian() {
-  return `<div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow"><div class="flex justify-between mb-3"><h2 class="font-bold">Kejadian</h2><button onclick="openFormKejadian()" class="bg-red-800 text-white px-3 py-1 rounded text-sm">+ Lapor</button></div><div id="listKejadian">Loading...</div></div>`;
-}
-async function loadKejadian() {
-  const res = await api('getKejadian', { username: user.username });
-  const el = document.getElementById('listKejadian');
-  if (res.status === 'success') {
-    dataKejadian = res.data;
-    el.innerHTML = dataKejadian.map(k => `<div class="p-2 border-b">${k.jenis} - ${k.lokasi}</div>`).join('') || 'Kosong';
+async function loadPembinaan() {
+  const res = await api('getPembinaan', { username: user.username });
+  const el = document.getElementById('listPembinaan');
+  if (!el) return;
+  if (res.status !== 'success' || !res.data.length) {
+    el.innerHTML = '<p class="text-gray-500 text-center py-4">Belum ada data</p>';
+    return;
   }
+  dataPembinaan = res.data;
+  el.innerHTML = dataPembinaan.map(b => {
+    const tgl = new Date(b.timestamp).toLocaleDateString('id-ID', { day:'2-digit', month:'short' });
+    return `
+    <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl mb-2 border border-gray-200 dark:border-gray-600">
+      <div class="flex justify-between">
+        <p class="font-bold text-red-800 dark:text-white text-sm">${b.nama || b.username}</p>
+        <p class="text-xs text-gray-500">${tgl}</p>
+      </div>
+      <p class="text-sm mt-1"><span class="font-semibold">Materi:</span> ${b.materi}</p>
+      <p class="text-xs text-gray-600">Pelatih: ${b.pelatih} • Nilai: <span class="font-bold">${b.nilai}</span></p>
+    </div>`;
+  }).join('');
 }
 function openFormKejadian() { document.getElementById('modalKejadian')?.classList.remove('hidden'); }
 function closeFormKejadian() { document.getElementById('modalKejadian')?.classList.add('hidden'); }
