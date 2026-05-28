@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Absensi Karyawan JSKN</title>
-
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#800000">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,39 +11,21 @@
   <meta name="apple-mobile-web-app-title" content="Absensi">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="mobile-web-app-capable" content="yes">
-
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: { extend: { colors: { 'maroon': '#800000','maroon-dark': '#5c0000' } } }
-    }
-  </script>
+  <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{'maroon':'#800000','maroon-dark':'#5c0000'}}}}</script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    video { transform: scaleX(-1); }
-    #canvas { transform: scaleX(-1); }
-    * { -webkit-tap-highlight-color: transparent; }
-  </style>
+  <style>video{transform:scaleX(-1)}#canvas{transform:scaleX(-1)}*{-webkit-tap-highlight-color:transparent}</style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition">
   <div id="app"></div>
-
   <div id="installPopup" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden items-center justify-center p-4 z-[999]">
     <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl">
-      <div class="w-20 h-20 bg-red-800 rounded-3xl mx-auto flex items-center justify-center mb-4 animate-bounce">
-        <i class="fa-solid fa-download text-white text-3xl"></i>
-      </div>
+      <div class="w-20 h-20 bg-red-800 rounded-3xl mx-auto flex items-center justify-center mb-4 animate-bounce"><i class="fa-solid fa-download text-white text-3xl"></i></div>
       <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">Install Aplikasi Dulu</h3>
-      <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">Untuk absen, aplikasi harus diinstall ke HP kamu. Biar bisa dipake offline + lebih cepat + full screen.</p>
-      <button id="btnInstall" class="w-full bg-red-800 hover:bg-red-900 active:scale-95 text-white py-4 rounded-2xl font-bold text-lg shadow-xl transition">
-        <i class="fa-solid fa-download mr-2"></i>Install Sekarang
-      </button>
-      <p class="text-xs text-gray-500 mt-4">Ukuran cuma 2MB • Gratis</p>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">Untuk absen, aplikasi harus diinstall ke HP kamu.</p>
+      <button id="btnInstall" class="w-full bg-red-800 hover:bg-red-900 text-white py-4 rounded-2xl font-bold text-lg"><i class="fa-solid fa-download mr-2"></i>Install Sekarang</button>
     </div>
   </div>
-
-  <!-- TAMBAHAN POPUP MODERN -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="app.js"></script>
 </body>
