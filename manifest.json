@@ -1,12 +1,15 @@
 {
-  "name": "Absensi Karyawan JSKN",
-  "short_name": "Absensi",
-  "description": "Aplikasi Absensi Karyawan dengan GPS & Selfie",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#800000",
-  "theme_color": "#800000",
-  "orientation": "portrait",
+"name"
+:
+"Absensi Karyawan JSKN",
+"short_name":"Absensi",
+"description":"Aplikasi Absensi Karyawan dengan GPS & Selfie",
+"start_url":"./index.html",
+"scope":"./",
+"display":"standalone",
+"background_color":"#800000",
+"theme_color":"#800000",
+"orientation":"portrait",
   "icons": [
     {
       "src": "icon-192.png",
