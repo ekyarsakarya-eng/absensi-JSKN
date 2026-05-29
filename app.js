@@ -190,7 +190,7 @@ function renderDashboard() {
       </button>
       <button onclick="switchPage('pembinaan')" class="flex flex-col items-center py-2 ${currentPage==='pembinaan'?'text-red-800':'text-gray-500'}">
         <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-JSKN/main/icon-pembinaan.png" class="w-6 h-6 mb-1 ${currentPage==='pembinaan'?'':'opacity-50'}">
-        <span class="text-xs font-semibold">Bina</span>
+        <span class="text-xs font-semibold">Pembinaan</span>
       </button>
     </div>
   </div>
