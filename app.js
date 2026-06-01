@@ -1150,6 +1150,109 @@ async function loadPembinaan() {
   }
 }
 
+function renderPembinaan() {
+  return `
+  <div class="space-y-4">
+    <div class="flex justify-between items-center">
+      <h2 class="text-xl font-bold text-gray-800 dark:text-white">Pembinaan</h2>
+      <button onclick="openFormPembinaan()" class="bg-red-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-900 transition">
+        <i class="fa-solid fa-plus mr-1"></i>Tambah
+      </button>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+      <div id="listPembinaan" class="space-y-2">
+        <div class="text-center text-gray-400 py-8">
+          <i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i>
+          <p class="text-sm">Loading data...</p>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function loadPembinaan() {
+  const res = await api('getPembinaan', { username: user.username });
+  const listEl = document.getElementById('listPembinaan');
+
+  if (res.status === 'success' && res.data.length > 0) {
+    dataPembinaan = res.data;
+    listEl.innerHTML = dataPembinaan.map(p => {
+      const tgl = new Date(p.timestamp).toLocaleDateString('id-ID', {day: '2-digit', month: 'short'});
+      return `
+        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex-1">
+              <p class="text-sm font-bold text-gray-800 dark:text-white">${p.materi}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">${tgl} - ${p.pelatih}</p>
+            </div>
+            <div class="bg-red-800 text-white px-3 py-1 rounded-full">
+              <p class="text-sm font-bold">${p.nilai}</p>
+            </div>
+          </div>
+          <p class="text-xs text-gray-600 dark:text-gray-300">${p.keterangan || '-'}</p>
+        </div>
+      `;
+    }).join('');
+  } else {
+    listEl.innerHTML = `
+      <div class="text-center text-gray-400 py-8">
+        <i class="fa-solid fa-user-graduate text-3xl mb-2"></i>
+        <p class="text-sm">Belum ada data pembinaan</p>
+      </div>
+    `;
+  }
+}
+
+function openFormPembinaan() {
+  document.getElementById('modalPembinaan').classList.replace('hidden', 'flex');
+}
+
+function closeFormPembinaan() {
+  document.getElementById('modalPembinaan').classList.replace('flex', 'hidden');
+  document.getElementById('pembinaanMateri').value = '';
+  document.getElementById('pembinaanPelatih').value = '';
+  document.getElementById('pembinaanNilai').value = '';
+  document.getElementById('pembinaanKet').value = '';
+}
+
+async function simpanPembinaan() {
+  const btn = document.getElementById('btnSimpanPembinaan');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyimpan...';
+
+  const materi = document.getElementById('pembinaanMateri').value.trim();
+  const pelatih = document.getElementById('pembinaanPelatih').value.trim();
+  const nilai = document.getElementById('pembinaanNilai').value;
+  const ket = document.getElementById('pembinaanKet').value.trim();
+
+  if (!materi ||!pelatih ||!nilai) {
+    toast('Materi, Pelatih, dan Nilai wajib diisi');
+    btn.disabled = false;
+    btn.innerHTML = 'Simpan';
+    return;
+  }
+
+  const res = await api('tambahPembinaan', {
+    username: user.username,
+    materi: materi,
+    pelatih: pelatih,
+    nilai: nilai,
+    keterangan: ket
+  });
+
+  if (res.status === 'success') {
+    toast(res.message);
+    closeFormPembinaan();
+    loadPembinaan();
+  } else {
+    toast(res.message);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = 'Simpan';
+}
+
 function switchPage(page) {
   currentPage = page;
   renderDashboard();
