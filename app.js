@@ -197,7 +197,7 @@ function renderDashboard() {
   </div>
 
   <!-- MODAL KAMERA -->
-  <div id="modalCam" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-50">
+  <div id="modalCam" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-70">
     <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 w-full max-w-md">
       <h3 class="font-bold text-lg mb-3 text-red-800 dark:text-white text-center">
         <i class="fa-solid fa-camera mr-2"></i><span id="judulKamera">Ambil Foto</span>
@@ -376,6 +376,8 @@ function bukaKameraAbsen(type) {
 
 function bukaKameraPatroli() {
   currentCamMode = 'patroli';
+  // Hide modal patroli biar ga ganggu
+  document.getElementById('modalPatroli').classList.replace('flex', 'hidden');
   document.getElementById('judulKamera').textContent = 'Foto Lokasi Patroli';
   document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Ambil Foto';
   currentLocation.alamat = 'Mengunci Posisi Satelit...';
@@ -385,11 +387,32 @@ function bukaKameraPatroli() {
 
 function bukaKameraKejadian() {
   currentCamMode = 'kejadian';
+  // Hide modal kejadian biar ga ganggu
+  document.getElementById('modalKejadian').classList.replace('flex', 'hidden');
   document.getElementById('judulKamera').textContent = 'Foto Bukti Kejadian';
   document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Ambil Foto';
   currentLocation.alamat = 'Mengunci Posisi Satelit...';
   dapatkanLokasiGPS();
   openCam();
+}
+
+// Update closeCam biar balikin popup form-nya
+function closeCam() {
+  const modal = document.getElementById('modalCam');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    stream = null;
+  }
+  if (animationFrame) cancelAnimationFrame(animationFrame);
+  
+  // Balikin popup form kalo user batal foto
+  if (currentCamMode === 'patroli') {
+    document.getElementById('modalPatroli').classList.replace('hidden', 'flex');
+  } else if (currentCamMode === 'kejadian') {
+    document.getElementById('modalKejadian').classList.replace('hidden', 'flex');
+  }
 }
 
 function openCam() {
