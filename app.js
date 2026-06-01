@@ -1,6 +1,21 @@
 const URL_GAS = 'https://script.google.com/macros/s/AKfycbzTLDlivTgJS3QUIm-qmaHRFLVmu-aPYdYwMoG-YdG6xSyeUF9sDUaHV7_E-4xLUAiB/exec';
 console.log('App.js loaded - v1.0 STABLE');
 
+let user = JSON.parse(localStorage.getItem('user') || 'null');
+let isDark = localStorage.getItem('dark') === 'true';
+let currentType = ''; // Khusus absen: 'Masuk' / 'Pulang'
+let currentCamMode = ''; // 'absen', 'patroli', 'kejadian'
+let modalAsal = '';
+let stream = null;
+let animationFrame = null;
+let currentLocation = { lat: 0, long: 0, alamat: 'Mencari sinyal GPS...' };
+let currentPage = 'home';
+let statusServer = {};
+let dataRekap = [];
+let dataPatroli = [];
+let dataKejadian = [];
+let dataPembinaan = [];
+
 // === PWA INSTALL ===
 let deferredPrompt;
 const installPopup = document.getElementById('installPopup');
@@ -38,21 +53,6 @@ if (isInStandaloneMode()) installPopup?.classList.add('hidden');
 
 const app = document.getElementById('app');
 if(!app) console.error('Div #app tidak ditemukan!');
-
-let user = JSON.parse(localStorage.getItem('user') || 'null');
-let isDark = localStorage.getItem('dark') === 'true';
-let currentType = ''; // Khusus absen: 'Masuk' / 'Pulang'
-let currentCamMode = ''; // 'absen', 'patroli', 'kejadian'
-let stream = null;
-let animationFrame = null;
-let currentLocation = { lat: 0, long: 0, alamat: 'Mencari sinyal GPS...' };
-let currentPage = 'home';
-let statusServer = {};
-let dataRekap = [];
-let dataPatroli = [];
-let dataKejadian = [];
-let dataPembinaan = [];
-let modalAsal = '';
 
 if (isDark) document.documentElement.classList.add('dark');
 
@@ -674,17 +674,21 @@ async function loadHomeStats() {
       api('getPatroli', { username: user.username })
     ]);
 
-    if (rekap.status === 'success') {
-      const hadir = rekap.data.filter(r => r.keterangan === 'IN' && r.jam).length;
-      document.getElementById('statHadir').textContent = hadir;
-      document.getElementById('statTelat').textContent = 0;
+    const statHadir = document.getElementById('statHadir');
+    const statTelat = document.getElementById('statTelat');
+    const statPatroli = document.getElementById('statPatroli');
+
+    if (rekap.status === 'success' && statHadir) {
+      const hadir = rekap.data.filter(r => r.keterangan === 'IN' && r.jam && r.jam!== '--:--').length;
+      statHadir.textContent = hadir;
+      if(statTelat) statTelat.textContent = 0;
     }
 
-    if (patroli.status === 'success') {
-      document.getElementById('statPatroli').textContent = patroli.data.length;
+    if (patroli.status === 'success' && statPatroli) {
+      statPatroli.textContent = patroli.data.length;
 
       const aktivitasEl = document.getElementById('aktivitasTerakhir');
-      if (patroli.data.length > 0) {
+      if (aktivitasEl && patroli.data.length > 0) {
         const last = patroli.data[0];
         const waktu = new Date(last.timestamp);
         const selisih = Math.floor((new Date() - waktu) / 60000);
@@ -701,8 +705,6 @@ async function loadHomeStats() {
             </div>
           </div>
         `;
-      } else {
-        aktivitasEl.innerHTML = `<p class="text-xs text-gray-400 text-center py-2">Belum ada aktivitas</p>`;
       }
     }
   } catch(e) {
