@@ -376,7 +376,7 @@ function bukaKameraAbsen(type) {
 
 function bukaKameraPatroli() {
   currentCamMode = 'patroli';
-  document.getElementById('judulKamera').textContent = 'Ambil Foto Patroli';
+  document.getElementById('judulKamera').textContent = 'Foto Lokasi Patroli';
   document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Ambil Foto';
   currentLocation.alamat = 'Mengunci Posisi Satelit...';
   dapatkanLokasiGPS();
@@ -385,7 +385,7 @@ function bukaKameraPatroli() {
 
 function bukaKameraKejadian() {
   currentCamMode = 'kejadian';
-  document.getElementById('judulKamera').textContent = 'Ambil Foto Kejadian';
+  document.getElementById('judulKamera').textContent = 'Foto Bukti Kejadian';
   document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Ambil Foto';
   currentLocation.alamat = 'Mengunci Posisi Satelit...';
   dapatkanLokasiGPS();
@@ -397,7 +397,17 @@ function openCam() {
   modal.classList.remove('hidden');
   modal.classList.add('flex');
   startTimemark();
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
+
+  // Pilih kamera berdasarkan mode
+  let facingMode = 'user'; // default kamera depan
+  if (currentCamMode === 'patroli' || currentCamMode === 'kejadian') {
+    facingMode = 'environment'; // kamera belakang buat patroli/kejadian
+  }
+
+  navigator.mediaDevices.getUserMedia({ 
+    video: { facingMode: facingMode }, 
+    audio: false 
+  })
 .then(s => {
       stream = s;
       document.getElementById('video').srcObject = s;
