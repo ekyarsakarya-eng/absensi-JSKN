@@ -52,6 +52,7 @@ let dataRekap = [];
 let dataPatroli = [];
 let dataKejadian = [];
 let dataPembinaan = [];
+let modalAsal = '';
 
 if (isDark) document.documentElement.classList.add('dark');
 
@@ -367,6 +368,7 @@ function renderDashboard() {
 function bukaKameraAbsen(type) {
   currentCamMode = 'absen';
   currentType = type;
+  modalAsal = ''; // absen ga pake form
   document.getElementById('judulKamera').textContent = 'Ambil Foto Selfie';
   document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Kirim Absen';
   currentLocation.alamat = 'Mengunci Posisi Satelit...';
@@ -376,8 +378,7 @@ function bukaKameraAbsen(type) {
 
 function bukaKameraPatroli() {
   currentCamMode = 'patroli';
-  // Hide modal patroli biar ga ganggu
-  document.getElementById('modalPatroli').classList.replace('flex', 'hidden');
+  modalAsal = 'patroli'; // simpen info asal
   document.getElementById('judulKamera').textContent = 'Foto Lokasi Patroli';
   document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Ambil Foto';
   currentLocation.alamat = 'Mengunci Posisi Satelit...';
@@ -387,8 +388,7 @@ function bukaKameraPatroli() {
 
 function bukaKameraKejadian() {
   currentCamMode = 'kejadian';
-  // Hide modal kejadian biar ga ganggu
-  document.getElementById('modalKejadian').classList.replace('flex', 'hidden');
+  modalAsal = 'kejadian'; // simpen info asal
   document.getElementById('judulKamera').textContent = 'Foto Bukti Kejadian';
   document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Ambil Foto';
   currentLocation.alamat = 'Mengunci Posisi Satelit...';
@@ -396,7 +396,6 @@ function bukaKameraKejadian() {
   openCam();
 }
 
-// Update closeCam biar balikin popup form-nya
 function closeCam() {
   const modal = document.getElementById('modalCam');
   modal.classList.add('hidden');
@@ -407,12 +406,13 @@ function closeCam() {
   }
   if (animationFrame) cancelAnimationFrame(animationFrame);
   
-  // Balikin popup form kalo user batal foto
-  if (currentCamMode === 'patroli') {
+  // BALIKIN KE MODAL FORM ASAL
+  if (modalAsal === 'patroli') {
     document.getElementById('modalPatroli').classList.replace('hidden', 'flex');
-  } else if (currentCamMode === 'kejadian') {
+  } else if (modalAsal === 'kejadian') {
     document.getElementById('modalKejadian').classList.replace('hidden', 'flex');
   }
+  modalAsal = ''; // reset
 }
 
 function openCam() {
@@ -514,10 +514,11 @@ async function capture() {
     const res = await api('absen', kirimData);
     toast(res.message);
     if (res.status === 'success') cekStatus();
-  } else if (currentCamMode === 'patroli') {
+  else if (currentCamMode === 'patroli') {
     document.getElementById('patroliFotoBase64').value = fotoBase64;
     document.getElementById('previewPatroli').innerHTML = `<img src="${fotoBase64}" class="w-full h-full object-cover">`;
     toast('Foto patroli berhasil diambil');
+}
   } else if (currentCamMode === 'kejadian') {
     document.getElementById('kejadianFotoBase64').value = fotoBase64;
     document.getElementById('previewKejadian').innerHTML = `<img src="${fotoBase64}" class="w-full h-full object-cover">`;
