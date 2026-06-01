@@ -398,25 +398,6 @@ function bukaKameraKejadian() {
   openCam();
 }
 
-function closeCam() {
-  const modal = document.getElementById('modalCam');
-  modal.classList.add('hidden');
-  modal.classList.remove('flex');
-  if (stream) {
-    stream.getTracks().forEach(track => track.stop());
-    stream = null;
-  }
-  if (animationFrame) cancelAnimationFrame(animationFrame);
-  
-  // BALIKIN KE MODAL FORM ASAL
-  if (modalAsal === 'patroli') {
-    document.getElementById('modalPatroli').classList.replace('hidden', 'flex');
-  } else if (modalAsal === 'kejadian') {
-    document.getElementById('modalKejadian').classList.replace('hidden', 'flex');
-  }
-  modalAsal = ''; // reset
-}
-
 function openCam() {
   const modal = document.getElementById('modalCam');
   modal.classList.remove('hidden');
@@ -443,7 +424,7 @@ function openCam() {
     });
 }
 
-function closeCam() {
+ function closeCam() {
   const modal = document.getElementById('modalCam');
   modal.classList.add('hidden');
   modal.classList.remove('flex');
@@ -452,6 +433,14 @@ function closeCam() {
     stream = null;
   }
   if (animationFrame) cancelAnimationFrame(animationFrame);
+  
+  // BALIKIN KE MODAL FORM ASAL
+  if (modalAsal === 'patroli') {
+    document.getElementById('modalPatroli').classList.replace('hidden', 'flex');
+  } else if (modalAsal === 'kejadian') {
+    document.getElementById('modalKejadian').classList.replace('hidden', 'flex');
+  }
+  modalAsal = ''; // reset
 }
 
 async function capture() {
