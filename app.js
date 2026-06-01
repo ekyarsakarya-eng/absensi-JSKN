@@ -252,16 +252,24 @@ function renderDashboard() {
     <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- flex flex-col shadow-2xl">
       <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Edit Profil</h3><button onclick="closeEditProfil()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
       <div class="flex-1 overflow-y-auto p-4 space-y-3">
-        <div><label class="text-xs font-bold text-red-800 block mb-1">Nama Lengkap</label><input id="editNama" value="${user.nama||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
-        <div><label class="text-xs font-bold text-red-800 block mb-1">No KTP</label><input id="editKtp" value="${user.ktp||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
-        <div><label class="text-xs font-bold text-red-800 block mb-1">No HP</label><input id="editHp" value="${user.hp||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
-        <div><label class="text-xs font-bold text-red-800 block mb-1">Alamat</label><textarea id="editAlamat" rows="2" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white">${user.alamat||''}</textarea></div>
-        <div><label class="text-xs font-bold text-red-800 block mb-1">Tempat, Tgl Lahir</label><input id="editTtl" value="${user.ttl||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
-        <div class="grid grid-cols-2 gap-3">
-          <div><label class="text-xs font-bold text-red-800 block mb-1">Bank</label><input id="editBank" value="${user.bank||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
-          <div><label class="text-xs font-bold text-red-800 block mb-1">No Rekening</label><input id="editRek" value="${user.rekening||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
-        </div>
+  <div><label class="text-xs font-bold text-red-800 block mb-1">Lokasi Patroli</label><input id="patroliLokasi" placeholder="Contoh: Pos 1, Lantai 2" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+  <div><label class="text-xs font-bold text-red-800 block mb-1">Keterangan</label><textarea id="patroliKet" rows="3" placeholder="Situasi aman, dll" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea></div>
+
+  <!-- GANTI INPUT FILE JADI INI -->
+  <div>
+    <label class="text-xs font-bold text-red-800 block mb-1">Foto Bukti Wajib</label>
+    <div id="previewPatroli" class="w-full h-40 bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center mb-2 overflow-hidden">
+      <div class="text-center text-gray-400">
+        <i class="fa-solid fa-camera text-3xl mb-1"></i>
+        <p class="text-xs">Belum ada foto</p>
       </div>
+    </div>
+    <button onclick="bukaKameraPatroli()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl font-bold text-sm">
+      <i class="fa-solid fa-camera mr-2"></i>Ambil Foto Langsung
+    </button>
+    <input id="patroliFotoBase64" type="hidden">
+  </div>
+</div>
       <div class="p-4"><button onclick="simpanProfil()" id="btnSimpanProfil" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Simpan</button></div>
     </div>
   </div>
@@ -308,8 +316,18 @@ function renderDashboard() {
         </div>
         <div><label class="text-xs font-bold text-red-800 block mb-1">Lokasi</label><input id="kejadianLokasi" placeholder="Lokasi kejadian" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
         <div><label class="text-xs font-bold text-red-800 block mb-1">Kronologi</label><textarea id="kejadianKronologi" rows="4" placeholder="Jelaskan kejadian..." class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea></div>
-        <div><label class="text-xs font-bold text-red-800 block mb-1">Foto Bukti</label><input id="kejadianFoto" type="file" accept="image/*" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm dark:text-white"></div>
-      </div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Foto Bukti Wajib</label>
+  <div id="previewKejadian" class="w-full h-40 bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center mb-2 overflow-hidden">
+    <div class="text-center text-gray-400">
+      <i class="fa-solid fa-camera text-3xl mb-1"></i>
+      <p class="text-xs">Belum ada foto</p>
+    </div>
+  </div>
+  <button onclick="bukaKameraKejadian()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl font-bold text-sm">
+    <i class="fa-solid fa-camera mr-2"></i>Ambil Foto Langsung
+  </button>
+  <input id="kejadianFotoBase64" type="hidden">
+</div>
       <div class="p-4"><button onclick="simpanKejadian()" id="btnSimpanKejadian" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Kirim Laporan</button></div>
     </div>
   </div>
@@ -336,6 +354,111 @@ function renderDashboard() {
   if (currentPage === 'patroli') loadPatroli();
   if (currentPage === 'kejadian') loadKejadian();
   if (currentPage === 'pembinaan') loadPembinaan();
+}
+
+let currentCamMode = ''; // 'absen', 'patroli', 'kejadian'
+
+function bukaKameraPatroli() {
+  currentCamMode = 'patroli';
+  currentType = 'PATROLI';
+  currentLocation.alamat = 'Mengunci Posisi Satelit...';
+  dapatkanLokasiGPS();
+  openCam();
+}
+
+function bukaKameraKejadian() {
+  currentCamMode = 'kejadian';
+  currentType = 'KEJADIAN';
+  currentLocation.alamat = 'Mengunci Posisi Satelit...';
+  dapatkanLokasiGPS();
+  openCam();
+}
+
+// MODIFIKASI fungsi capture() biar bisa buat 3 mode
+async function capture() {
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const btn = document.getElementById('btnCapture');
+
+  if (!video ||!canvas) return;
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Proses...';
+
+  const ctx = canvas.getContext('2d');
+  const MAX_WIDTH = 1024;
+  let width = video.videoWidth;
+  let height = video.videoHeight;
+
+  if (width > MAX_WIDTH) {
+    height = height * (MAX_WIDTH / width);
+    width = MAX_WIDTH;
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+  ctx.drawImage(video, 0, 0, width, height);
+
+  // TIMEMARK SAMA KAYA ABSEN
+  const scale = width / 640;
+  ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+  ctx.fillRect(10 * scale, height - 110 * scale, 320 * scale, 100 * scale);
+  ctx.strokeStyle = "#800000";
+  ctx.lineWidth = 4 * scale;
+  ctx.strokeRect(10 * scale, height - 110 * scale, 4 * scale, 100 * scale);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `bold ${14 * scale}px Arial`;
+  const tglTeks = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  ctx.fillText(tglTeks, 25 * scale, height - 85 * scale);
+  ctx.fillStyle = "#facc15";
+  ctx.font = `bold ${16 * scale}px Arial`;
+  const jamTeks = new Date().toLocaleTimeString('id-ID');
+  ctx.fillText(jamTeks, 25 * scale, height - 65 * scale);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `${13 * scale}px Arial`;
+  ctx.fillText(`Nama: ${user.nama}`, 25 * scale, height - 45 * scale);
+  ctx.fillStyle = "#4ade80";
+  ctx.font = `mono ${11 * scale}px Courier New`;
+  ctx.fillText(`GPS: ${currentLocation.lat}, ${currentLocation.long}`, 25 * scale, height - 20 * scale);
+
+  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.6);
+  closeCam();
+
+  if (currentCamMode === 'absen') {
+    // Logic absen lama
+    const kirimData = {
+      username: user.username,
+      tipeAbsen: currentType,
+      foto: fotoBase64,
+      lat: currentLocation.lat,
+      long: currentLocation.long
+    };
+    const res = await api('absen', kirimData);
+    toast(res.message);
+    if (res.status === 'success') cekStatus();
+  } else if (currentCamMode === 'patroli') {
+    // Taro ke preview patroli
+    document.getElementById('patroliFotoBase64').value = fotoBase64;
+    document.getElementById('previewPatroli').innerHTML = `<img src="${fotoBase64}" class="w-full h-full object-cover">`;
+    toast('Foto patroli berhasil diambil');
+  } else if (currentCamMode === 'kejadian') {
+    // Taro ke preview kejadian
+    document.getElementById('kejadianFotoBase64').value = fotoBase64;
+    document.getElementById('previewKejadian').innerHTML = `<img src="${fotoBase64}" class="w-full h-full object-cover">`;
+    toast('Foto kejadian berhasil diambil');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Kirim';
+}
+
+// MODIFIKASI bukaKameraAbsen biar set mode
+function bukaKameraAbsen(type) {
+  currentCamMode = 'absen';
+  currentType = type;
+  currentLocation.alamat = 'Mengunci Posisi Satelit...';
+  dapatkanLokasiGPS();
+  openCam();
 }
 
 function renderPage() {
@@ -735,7 +858,8 @@ function closeFormPatroli() {
   document.getElementById('modalPatroli').classList.replace('flex', 'hidden');
   document.getElementById('patroliLokasi').value = '';
   document.getElementById('patroliKet').value = '';
-  document.getElementById('patroliFoto').value = '';
+  document.getElementById('patroliFotoBase64').value = '';
+  document.getElementById('previewPatroli').innerHTML = `<div class="text-center text-gray-400"><i class="fa-solid fa-camera text-3xl mb-1"></i><p class="text-xs">Belum ada foto</p></div>`;
 }
 
 async function simpanPatroli() {
@@ -745,7 +869,7 @@ async function simpanPatroli() {
 
   const lokasi = document.getElementById('patroliLokasi').value.trim();
   const ket = document.getElementById('patroliKet').value.trim();
-  const fotoFile = document.getElementById('patroliFoto').files[0];
+  const fotoBase64 = document.getElementById('patroliFotoBase64').value;
 
   if (!lokasi) {
     toast('Lokasi wajib diisi');
@@ -753,14 +877,11 @@ async function simpanPatroli() {
     btn.innerHTML = 'Simpan Patroli';
     return;
   }
-
-  let fotoBase64 = '';
-  if (fotoFile) {
-    fotoBase64 = await new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result);
-      reader.readAsDataURL(fotoFile);
-    });
+  if (!fotoBase64) {
+    toast('Foto bukti wajib diambil');
+    btn.disabled = false;
+    btn.innerHTML = 'Simpan Patroli';
+    return;
   }
 
   const res = await api('tambahPatroli', {
@@ -846,7 +967,8 @@ function closeFormKejadian() {
   document.getElementById('kejadianJenis').value = '';
   document.getElementById('kejadianLokasi').value = '';
   document.getElementById('kejadianKronologi').value = '';
-  document.getElementById('kejadianFoto').value = '';
+  document.getElementById('kejadianFotoBase64').value = '';
+  document.getElementById('previewKejadian').innerHTML = `<div class="text-center text-gray-400"><i class="fa-solid fa-camera text-3xl mb-1"></i><p class="text-xs">Belum ada foto</p></div>`;
 }
 
 async function simpanKejadian() {
@@ -857,7 +979,7 @@ async function simpanKejadian() {
   const jenis = document.getElementById('kejadianJenis').value;
   const lokasi = document.getElementById('kejadianLokasi').value.trim();
   const kronologi = document.getElementById('kejadianKronologi').value.trim();
-  const fotoFile = document.getElementById('kejadianFoto').files[0];
+  const fotoBase64 = document.getElementById('kejadianFotoBase64').value;
 
   if (!jenis ||!lokasi ||!kronologi) {
     toast('Jenis, Lokasi, dan Kronologi wajib diisi');
@@ -865,14 +987,11 @@ async function simpanKejadian() {
     btn.innerHTML = 'Kirim Laporan';
     return;
   }
-
-  let fotoBase64 = '';
-  if (fotoFile) {
-    fotoBase64 = await new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result);
-      reader.readAsDataURL(fotoFile);
-    });
+  if (!fotoBase64) {
+    toast('Foto bukti wajib diambil');
+    btn.disabled = false;
+    btn.innerHTML = 'Kirim Laporan';
+    return;
   }
 
   const res = await api('tambahKejadian', {
@@ -896,7 +1015,6 @@ async function simpanKejadian() {
   btn.disabled = false;
   btn.innerHTML = 'Kirim Laporan';
 }
-
 function renderPembinaan() {
   return `
   <div class="space-y-4">
