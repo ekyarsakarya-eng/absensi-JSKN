@@ -1332,4 +1332,26 @@ async function api(aksi, payload = {}) {
 }
 
 console.log('Starting app...');
+
+// === HANDLE BACK BUTTON HP - LANGSUNG HOME ===
+window.addEventListener('popstate', function(event) {
+  if (currentPage !== 'home') {
+    currentPage = 'home';
+    renderDashboard();
+  }
+  // Push state lagi biar back ga langsung keluar
+  history.pushState({ page: 'home' }, '', '');
+});
+
+// Set initial state
+history.pushState({ page: currentPage }, '', '');
+
+const originalSwitchPage = switchPage;
+switchPage = function(page) {
+  originalSwitchPage(page);
+  history.pushState({ page: page }, '', '');
+}
+
+console.log('Starting app...');
+render();
 render();
