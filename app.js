@@ -283,7 +283,7 @@ function renderDashboard() {
 
   <!-- MODAL INPUT PATROLI -->
   <div id="modalPatroli" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
-    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- flex flex-col shadow-2xl">
+  <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl">
       <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Input Patroli</h3><button onclick="closeFormPatroli()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
       <div class="flex-1 overflow-y-auto p-4 space-y-3">
         <div><label class="text-xs font-bold text-red-800 block mb-1">Lokasi Patroli</label><input id="patroliLokasi" placeholder="Contoh: Pos 1, Lantai 2" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
@@ -308,7 +308,7 @@ function renderDashboard() {
 
   <!-- MODAL INPUT KEJADIAN -->
   <div id="modalKejadian" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
-    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- flex flex-col shadow-2xl">
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl">
       <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Lapor Kejadian</h3><button onclick="closeFormKejadian()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
       <div class="flex-1 overflow-y-auto p-4 space-y-3">
         <div><label class="text-xs font-bold text-red-800 block mb-1">Jenis Kejadian</label>
@@ -368,7 +368,7 @@ function renderDashboard() {
 function bukaKameraAbsen(type) {
   currentCamMode = 'absen';
   currentType = type;
-  modalAsal = ''; // absen ga pake form
+  modalAsal = '';
   document.getElementById('judulKamera').textContent = 'Ambil Foto Selfie';
   document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Kirim Absen';
   currentLocation.alamat = 'Mengunci Posisi Satelit...';
@@ -378,7 +378,8 @@ function bukaKameraAbsen(type) {
 
 function bukaKameraPatroli() {
   currentCamMode = 'patroli';
-  modalAsal = 'patroli'; // simpen info asal
+  modalAsal = 'patroli';
+  // JANGAN HIDE MODAL PATROLI, BIARIN AJA
   document.getElementById('judulKamera').textContent = 'Foto Lokasi Patroli';
   document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Ambil Foto';
   currentLocation.alamat = 'Mengunci Posisi Satelit...';
@@ -388,7 +389,8 @@ function bukaKameraPatroli() {
 
 function bukaKameraKejadian() {
   currentCamMode = 'kejadian';
-  modalAsal = 'kejadian'; // simpen info asal
+  modalAsal = 'kejadian';
+  // JANGAN HIDE MODAL KEJADIAN, BIARIN AJA
   document.getElementById('judulKamera').textContent = 'Foto Bukti Kejadian';
   document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Ambil Foto';
   currentLocation.alamat = 'Mengunci Posisi Satelit...';
@@ -452,7 +454,6 @@ function closeCam() {
   if (animationFrame) cancelAnimationFrame(animationFrame);
 }
 
-// FIX: capture() sekarang cek currentCamMode, bukan currentType
 async function capture() {
   const video = document.getElementById('video');
   const canvas = document.getElementById('canvas');
@@ -477,9 +478,9 @@ async function capture() {
   canvas.height = height;
   ctx.drawImage(video, 0, 0, width, height);
 
-  // TIMEMARK SAMA KAYA ABSEN
+  // TIMEMARK
   const scale = width / 640;
-  ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+  ctx.fillStyle = "rgba(0, 0, 0.6)";
   ctx.fillRect(10 * scale, height - 110 * scale, 320 * scale, 100 * scale);
   ctx.strokeStyle = "#800000";
   ctx.lineWidth = 4 * scale;
@@ -502,11 +503,11 @@ async function capture() {
   const fotoBase64 = canvas.toDataURL('image/jpeg', 0.6);
   closeCam();
 
-  // FIX: Pake currentCamMode, bukan currentType
+  // FIX: Kurung kurawal udah bener
   if (currentCamMode === 'absen') {
     const kirimData = {
       username: user.username,
-      tipeAbsen: currentType, // currentType = 'Masuk' / 'Pulang'
+      tipeAbsen: currentType,
       foto: fotoBase64,
       lat: currentLocation.lat,
       long: currentLocation.long
@@ -514,11 +515,10 @@ async function capture() {
     const res = await api('absen', kirimData);
     toast(res.message);
     if (res.status === 'success') cekStatus();
-  else if (currentCamMode === 'patroli') {
+  } else if (currentCamMode === 'patroli') {
     document.getElementById('patroliFotoBase64').value = fotoBase64;
     document.getElementById('previewPatroli').innerHTML = `<img src="${fotoBase64}" class="w-full h-full object-cover">`;
     toast('Foto patroli berhasil diambil');
-}
   } else if (currentCamMode === 'kejadian') {
     document.getElementById('kejadianFotoBase64').value = fotoBase64;
     document.getElementById('previewKejadian').innerHTML = `<img src="${fotoBase64}" class="w-full h-full object-cover">`;
@@ -528,7 +528,6 @@ async function capture() {
   btn.disabled = false;
   btn.innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Ambil Foto';
 }
-
 function renderPage() {
   switch(currentPage) {
     case 'home': return renderHome();
