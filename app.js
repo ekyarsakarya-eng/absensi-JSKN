@@ -597,7 +597,7 @@ async function loadRekap() {
 
       let hadir = 0;
       dataRekap.forEach(r => {
-        if (r.keterangan === 'IN' && r.jam) hadir++;
+        if (r.keterangan === 'IN' && r.jam && r.jam!== '--:--') hadir++;
       });
 
       document.getElementById('totalHadir').textContent = hadir;
@@ -607,7 +607,8 @@ async function loadRekap() {
       if (dataRekap.length > 0) {
         const grouped = {};
         dataRekap.forEach(r => {
-          const d = new Date(r.tanggal);
+          // r.tanggal format "2026-06-01" dari GAS, aman di semua browser
+          const d = new Date(r.tanggal + 'T00:00:00'); // tambah T00:00:00 biar ga timezone issue
           const tglKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
           if (!grouped[tglKey]) grouped[tglKey] = [];
           grouped[tglKey].push(r);
@@ -620,12 +621,13 @@ async function loadRekap() {
           const masuk = records.find(r => r.keterangan === 'IN');
           const pulang = records.find(r => r.keterangan === 'OUT');
 
-          const tglObj = new Date(records[0].tanggal);
+          // tglObj aman karena udah ditambah T00:00:00
+          const tglObj = new Date(records[0].tanggal + 'T00:00:00');
           const tglFormat = tglObj.toLocaleDateString('id-ID', {
             weekday: 'short', day: '2-digit', month: 'short'
           });
 
-          // UDAH GA PAKE formatJam LAGI, LANGSUNG PAKE r.jam
+          // LANGSUNG PAKE r.jam, GA USAH new Date()
           return `
             <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <p class="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">${tglFormat}</p>
