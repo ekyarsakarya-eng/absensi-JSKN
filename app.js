@@ -584,19 +584,7 @@ function renderHome() {
     </div>
   </div>
 
-  ${lock12Jam? `
-    <div class="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 rounded-2xl mb-5">
-      <div class="flex gap-3">
-        <i class="fa-solid fa-clock-rotate-left text-amber-600 text-xl mt-0.5"></i>
-        <div>
-          <p class="text-sm font-bold text-amber-800 dark:text-amber-300">Terkunci 12 Jam</p>
-          <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">Sisa <b>${sisaJam} jam</b> lagi sebelum bisa absen masuk</p>
-        </div>
-      </div>
-    </div>
-  ` : ''}
-
-  <div class="space-y-3 mb-5">
+   <div class="space-y-3 mb-5">
     <button onclick="bukaKameraAbsen('Masuk')" ${!bisaIn? 'disabled' : ''}
       class="w-full py-5 rounded-3xl font-bold text-white transition-all duration-300 flex items-center gap-4 shadow-xl
       ${!bisaIn? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed shadow-none text-gray-500' : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:scale-[1.02] active:scale-[0.98] hover:shadow-green-500/50'}">
