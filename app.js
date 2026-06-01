@@ -6,16 +6,14 @@ let deferredPrompt;
 const installPopup = document.getElementById('installPopup');
 const btnInstall = document.getElementById('btnInstall');
 
-// Cek udah diinstall apa belum
-const isInStandaloneMode = () => 
-  window.matchMedia('(display-mode: standalone)').matches || 
-  window.navigator.standalone || 
+const isInStandaloneMode = () =>
+  window.matchMedia('(display-mode: standalone)').matches ||
+  window.navigator.standalone ||
   document.referrer.includes('android-app://');
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  // Munculin popup kalau belum diinstall
   if (!isInStandaloneMode()) {
     installPopup.classList.remove('hidden');
     installPopup.classList.add('flex');
@@ -26,23 +24,17 @@ btnInstall?.addEventListener('click', async () => {
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
   const { outcome } = await deferredPrompt.userChoice;
-  if (outcome === 'accepted') {
-    installPopup.classList.add('hidden');
-  }
+  if (outcome === 'accepted') installPopup.classList.add('hidden');
   deferredPrompt = null;
 });
 
-// Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(e => console.log(e));
   });
 }
 
-// Kalau udah diinstall, langsung hide popup
-if (isInStandaloneMode()) {
-  installPopup?.classList.add('hidden');
-}
+if (isInStandaloneMode()) installPopup?.classList.add('hidden');
 
 const app = document.getElementById('app');
 if(!app) console.error('Div #app tidak ditemukan!');
@@ -101,7 +93,7 @@ function renderLogin() {
 async function login() {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value.trim();
-  if (!username ||!password) return alert('Username & password wajib diisi');
+  if (!username ||!password) return toast('Username & password wajib diisi');
   const btn = document.getElementById('btnLogin');
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Memproses...';
@@ -111,7 +103,7 @@ async function login() {
     localStorage.setItem('user', JSON.stringify(user));
     render();
   } else {
-    alert(res.message);
+    toast(res.message);
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i>Masuk';
   }
@@ -145,6 +137,14 @@ function toggleDark() {
   document.getElementById('darkIcon').className = `fa-solid ${isDark? 'fa-sun' : 'fa-moon'} text-xl`;
 }
 
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-full text-sm z-[999]';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+
 function renderDashboard() {
   app.innerHTML = `
   <nav class="bg-red-800 text-white p-4 flex justify-between items-center shadow-lg sticky top-0 z-10">
@@ -154,7 +154,6 @@ function renderDashboard() {
         <h1 class="font-bold text-lg leading-tight">Hi, ${user.nama}</h1>
         <p class="text-xs opacity-80">${new Date().toLocaleDateString('id-ID', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}</p>
       </div>
-    </div>
     <div class="flex gap-3 items-center">
       <button onclick="toggleDark()" class="hover:bg-red-900 p-2 rounded-lg transition">
         <i id="darkIcon" class="fa-solid ${isDark? 'fa-sun' : 'fa-moon'} text-xl"></i>
@@ -195,7 +194,7 @@ function renderDashboard() {
     </div>
   </div>
 
-  <!-- MODAL KAMERA -->
+    <!-- MODAL KAMERA -->
   <div id="modalCam" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-50">
     <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 w-full max-w-md">
       <h3 class="font-bold text-lg mb-3 text-red-800 dark:text-white text-center">
@@ -555,7 +554,7 @@ function renderRekap() {
         <i class="fa-solid fa-refresh mr-1"></i>Refresh
       </button>
     </div>
-    
+
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
       <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Bulan: ${new Date().toLocaleDateString('id-ID', {month: 'long', year: 'numeric'})}</p>
       <div class="grid grid-cols-3 gap-3 text-center">
@@ -592,40 +591,40 @@ async function loadRekap() {
 
   try {
     const res = await api('getRekap', { username: user.username });
-    
+
     if (res.status === 'success') {
       dataRekap = res.data || [];
-      
+
       let hadir = 0;
       dataRekap.forEach(r => {
         if (r.keterangan === 'IN' && r.jam) hadir++;
       });
-      
+
       document.getElementById('totalHadir').textContent = hadir;
       document.getElementById('totalIzin').textContent = 0;
       document.getElementById('totalAlpha').textContent = 0;
-      
+
       if (dataRekap.length > 0) {
         const grouped = {};
         dataRekap.forEach(r => {
           const d = new Date(r.tanggal);
           const tglKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-          if (!grouped[tglKey]) grouped[tglKey] = [];
+                    if (!grouped[tglKey]) grouped[tglKey] = [];
           grouped[tglKey].push(r);
         });
-        
+
         const last7Keys = Object.keys(grouped).sort().slice(-7).reverse();
-        
+
         listEl.innerHTML = last7Keys.map(key => {
           const records = grouped[key];
           const masuk = records.find(r => r.keterangan === 'IN');
           const pulang = records.find(r => r.keterangan === 'OUT');
-          
+
           const tglObj = new Date(records[0].tanggal);
           const tglFormat = tglObj.toLocaleDateString('id-ID', {
             weekday: 'short', day: '2-digit', month: 'short'
           });
-          
+
           const formatJam = (isoStr) => {
             if (!isoStr) return '--:--';
             try {
@@ -635,7 +634,7 @@ async function loadRekap() {
               return '--:--';
             }
           };
-          
+
           return `
             <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <p class="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">${tglFormat}</p>
@@ -707,7 +706,7 @@ function renderPatroli() {
 async function loadPatroli() {
   const res = await api('getPatroli', { username: user.username });
   const listEl = document.getElementById('listPatroli');
-  
+
   if (res.status === 'success' && res.data.length > 0) {
     dataPatroli = res.data;
     listEl.innerHTML = dataPatroli.map(p => {
@@ -755,9 +754,9 @@ async function simpanPatroli() {
   const lokasi = document.getElementById('patroliLokasi').value.trim();
   const ket = document.getElementById('patroliKet').value.trim();
   const fotoFile = document.getElementById('patroliFoto').files[0];
-  
+
   if (!lokasi) {
-    alert('Lokasi wajib diisi');
+    toast('Lokasi wajib diisi');
     btn.disabled = false;
     btn.innerHTML = 'Simpan Patroli';
     return;
@@ -782,11 +781,11 @@ async function simpanPatroli() {
   });
 
   if (res.status === 'success') {
-    alert(res.message);
+    toast(res.message);
     closeFormPatroli();
     loadPatroli();
   } else {
-    alert(res.message);
+    toast(res.message);
   }
 
   btn.disabled = false;
@@ -817,7 +816,7 @@ function renderKejadian() {
 async function loadKejadian() {
   const res = await api('getKejadian', { username: user.username });
   const listEl = document.getElementById('listKejadian');
-  
+
   if (res.status === 'success' && res.data.length > 0) {
     dataKejadian = res.data;
     listEl.innerHTML = dataKejadian.map(k => {
@@ -867,9 +866,9 @@ async function simpanKejadian() {
   const lokasi = document.getElementById('kejadianLokasi').value.trim();
   const kronologi = document.getElementById('kejadianKronologi').value.trim();
   const fotoFile = document.getElementById('kejadianFoto').files[0];
-  
+
   if (!jenis ||!lokasi ||!kronologi) {
-    alert('Jenis, Lokasi, dan Kronologi wajib diisi');
+    toast('Jenis, Lokasi, dan Kronologi wajib diisi');
     btn.disabled = false;
     btn.innerHTML = 'Kirim Laporan';
     return;
@@ -895,11 +894,11 @@ async function simpanKejadian() {
   });
 
   if (res.status === 'success') {
-    alert(res.message);
+    toast(res.message);
     closeFormKejadian();
     loadKejadian();
   } else {
-    alert(res.message);
+    toast(res.message);
   }
 
   btn.disabled = false;
@@ -930,7 +929,7 @@ function renderPembinaan() {
 async function loadPembinaan() {
   const res = await api('getPembinaan', { username: user.username });
   const listEl = document.getElementById('listPembinaan');
-  
+
   if (res.status === 'success' && res.data.length > 0) {
     dataPembinaan = res.data;
     listEl.innerHTML = dataPembinaan.map(p => {
@@ -945,7 +944,6 @@ async function loadPembinaan() {
             <div class="bg-red-800 text-white px-3 py-1 rounded-full">
               <p class="text-sm font-bold">${p.nilai}</p>
             </div>
-          </div>
           <p class="text-xs text-gray-600 dark:text-gray-300">${p.keterangan || '-'}</p>
         </div>
       `;
@@ -981,9 +979,9 @@ async function simpanPembinaan() {
   const pelatih = document.getElementById('pembinaanPelatih').value.trim();
   const nilai = document.getElementById('pembinaanNilai').value;
   const ket = document.getElementById('pembinaanKet').value.trim();
-  
+
   if (!materi ||!pelatih ||!nilai) {
-    alert('Materi, Pelatih, dan Nilai wajib diisi');
+    toast('Materi, Pelatih, dan Nilai wajib diisi');
     btn.disabled = false;
     btn.innerHTML = 'Simpan';
     return;
@@ -998,11 +996,11 @@ async function simpanPembinaan() {
   });
 
   if (res.status === 'success') {
-    alert(res.message);
+    toast(res.message);
     closeFormPembinaan();
     loadPembinaan();
   } else {
-    alert(res.message);
+    toast(res.message);
   }
 
   btn.disabled = false;
@@ -1023,8 +1021,8 @@ function dapatkanLokasiGPS() {
         currentLocation.alamat = `Lat: ${currentLocation.lat}, Long: ${currentLocation.long}`;
         const lokasiEl = document.getElementById('lokasiStatus');
         if (lokasiEl) lokasiEl.textContent = 'Lokasi terkunci';
-        
-        // Update GPS card
+        localStorage.setItem('gps', JSON.stringify(currentLocation));
+
         const setting = await api('getSetting', {});
         if (setting.lat) {
           const jarak = hitungJarak(currentLocation.lat, currentLocation.long, setting.lat, setting.long);
@@ -1040,7 +1038,7 @@ function dapatkanLokasiGPS() {
         const gpsEl = document.getElementById('previewGps');
         if (gpsEl) gpsEl.innerText = `⚠ ${currentLocation.alamat}`;
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 20000 }
     );
   } else {
     currentLocation.alamat = "Browser tidak mendukung GPS";
@@ -1099,7 +1097,7 @@ function openCam() {
       document.getElementById('video').srcObject = s;
     })
 .catch(err => {
-      alert('Gagal mengakses kamera: ' + err.message);
+      toast('Gagal mengakses kamera: ' + err.message);
       closeCam();
     });
 }
@@ -1126,7 +1124,7 @@ async function capture() {
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Proses...';
 
   const ctx = canvas.getContext('2d');
-  const MAX_WIDTH = 1280;
+  const MAX_WIDTH = 1024;
   let width = video.videoWidth;
   let height = video.videoHeight;
 
@@ -1166,7 +1164,7 @@ async function capture() {
   ctx.font = `mono ${11 * scale}px Courier New`;
   ctx.fillText(`GPS: ${currentLocation.lat}, ${currentLocation.long}`, 25 * scale, height - 20 * scale);
 
-  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.6);
 
   const kirimData = {
     username: user.username,
@@ -1182,7 +1180,7 @@ async function capture() {
   btn.innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Kirim Absen';
 
   const res = await api('absen', kirimData);
-  alert(res.message);
+  toast(res.message);
 
   if (res.status === 'success') {
     cekStatus();
@@ -1225,9 +1223,9 @@ async function uploadFotoProfil(event) {
       user.foto = res.urlFoto;
       localStorage.setItem('user', JSON.stringify(user));
       document.getElementById('avatarNav').src = res.urlFoto;
-      alert('Foto profil berhasil diupdate');
+      toast('Foto profil berhasil diupdate');
     } else {
-      alert(res.message);
+      toast(res.message);
     }
   };
   reader.readAsDataURL(file);
@@ -1254,9 +1252,9 @@ async function simpanProfil() {
     localStorage.setItem('user', JSON.stringify(user));
     closeEditProfil();
     renderDashboard();
-    alert(res.message);
+    toast(res.message);
   } else {
-    alert(res.message);
+    toast(res.message);
   }
   btn.disabled = false;
   btn.innerHTML = 'Simpan';
@@ -1272,7 +1270,7 @@ async function gantiPassword() {
     passLama: document.getElementById('passLama').value,
     passBaru: document.getElementById('passBaru').value
   });
-  alert(res.message);
+  toast(res.message);
   if(res.status==='success') {
     document.getElementById('passLama').value = '';
     document.getElementById('passBaru').value = '';
@@ -1292,6 +1290,8 @@ async function cekStatus() {
         contentArea.innerHTML = renderPage();
         loadHomeStats();
       }
+    } else {
+      toast(res.message);
     }
   } catch(e) {
     console.error('Cek status error:', e);
