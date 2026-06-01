@@ -609,7 +609,7 @@ async function loadRekap() {
         dataRekap.forEach(r => {
           const d = new Date(r.tanggal);
           const tglKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-                    if (!grouped[tglKey]) grouped[tglKey] = [];
+          if (!grouped[tglKey]) grouped[tglKey] = [];
           grouped[tglKey].push(r);
         });
 
@@ -625,16 +625,7 @@ async function loadRekap() {
             weekday: 'short', day: '2-digit', month: 'short'
           });
 
-          const formatJam = (isoStr) => {
-            if (!isoStr) return '--:--';
-            try {
-              const d = new Date(isoStr);
-              return d.toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'});
-            } catch {
-              return '--:--';
-            }
-          };
-
+          // UDAH GA PAKE formatJam LAGI, LANGSUNG PAKE r.jam
           return `
             <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <p class="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">${tglFormat}</p>
@@ -645,7 +636,7 @@ async function loadRekap() {
                   </div>
                   <span class="text-sm text-gray-700 dark:text-gray-300">Masuk</span>
                 </div>
-                <p class="text-sm font-bold text-gray-800 dark:text-white">${formatJam(masuk?.jam)}</p>
+                <p class="text-sm font-bold text-gray-800 dark:text-white">${masuk?.jam || '--:--'}</p>
               </div>
               <div class="flex justify-between items-center">
                 <div class="flex items-center gap-2">
@@ -654,7 +645,7 @@ async function loadRekap() {
                   </div>
                   <span class="text-sm text-gray-700 dark:text-gray-300">Pulang</span>
                 </div>
-                <p class="text-sm font-bold text-gray-800 dark:text-white">${formatJam(pulang?.jam)}</p>
+                <p class="text-sm font-bold text-gray-800 dark:text-white">${pulang?.jam || '--:--'}</p>
               </div>
             </div>
           `;
@@ -681,7 +672,6 @@ async function loadRekap() {
     `;
   }
 }
-
 function renderPatroli() {
   return `
   <div class="space-y-4">
