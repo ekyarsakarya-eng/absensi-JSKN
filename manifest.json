@@ -1,7 +1,5 @@
 {
-"name"
-:
-"Absensi Karyawan JSKN",
+"name":"Absensi Karyawan JSKN",
 "short_name":"Absensi JSKN",
 "description":"Aplikasi Absensi Karyawan dengan GPS & Selfie",
 "start_url":"./index.html",
