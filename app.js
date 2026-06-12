@@ -1,5 +1,5 @@
 const URL_GAS = 'https://script.google.com/macros/s/AKfycbzTLDlivTgJS3QUIm-qmaHRFLVmu-aPYdYwMoG-YdG6xSyeUF9sDUaHV7_E-4xLUAiB/exec';
-console.log('App.js loaded - v1.1 FIXED');
+console.log('App.js loaded - v2.0');
 
 let user = JSON.parse(localStorage.getItem('user') || 'null');
 let isDark = localStorage.getItem('dark') === 'true';
@@ -101,8 +101,31 @@ async function login() {
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Memproses...';
   const res = await api('login', {username, password});
   if (res.status === 'success') {
+    // --- CEK UPDATE VERSI ---
+    const serverVer = res.version || '1.0';
+    const localVer = localStorage.getItem('app_ver');
+
+    // simpan user & versi dulu
     user = res;
     localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('app_ver', serverVer);
+
+    if (localVer && localVer!== serverVer) {
+      toast('Update ditemukan, memuat versi baru...');
+      // hapus semua cache PWA
+      if ('caches' in window) {
+        await caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+      }
+      // unregister service worker lama
+      if ('serviceWorker' in navigator) {
+        await navigator.serviceWorker.getRegistrations().then(regs => Promise.all(regs.map(r => r.unregister())));
+      }
+      // reload paksa ambil app.js baru dari GitHub
+      setTimeout(() => window.location.reload(true), 800);
+      return;
+    }
+    // --- END CEK ---
+
     render();
   } else {
     toast(res.message);
