@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Admin JSKN</title>
+<link rel="manifest" href="admin-manifest.json">
+<meta name="theme-color" content="#7a1f2c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{font-family:'Manrope',sans-serif}.mono{font-variant-numeric:tabular-nums;font-family:ui-monospace}body{background:#f6f7fb}
+@media(max-width:1023px){.sidebar{display:none!important}.main{margin-left:0!important}.bottom-nav{display:flex!important}}
+.bottom-nav{display:none}
+</style>
+</head>
+<body class="text-slate-800 antialiased">
+<div class="flex min-h-screen">
+  <aside class="sidebar w-[270px] bg-white/70 backdrop-blur-xl border-r border-slate-200/60 fixed h-full z-30">
+    <div class="h-[72px] flex items-center px-6 gap-3">
+      <div class="w-11 h-11 rounded-2xl text-white grid place-items-center font-extrabold shadow-lg" style="background:linear-gradient(135deg,#7a1f2c,#d94a1f)">J</div>
+      <div><div class="font-extrabold leading-none tracking-tight">JSKN</div><div class="text-[11px] text-slate-500 -mt-0.5">Admin Panel v2</div></div>
+    </div>
+    <nav class="p-3 space-y-1 text-[15px]">
+      <button onclick="p('live')" id="m-live" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-900/5 transition"><i class="fa-solid fa-house w-5 text-[#7a1f2c]"></i>Live</button>
+      <button onclick="p('rekap')" id="m-rekap" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-900/5"><i class="fa-solid fa-table w-5 text-[#7a1f2c]"></i>Rekap</button>
+      <button onclick="p('kar')" id="m-kar" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-900/5"><i class="fa-solid fa-users w-5 text-[#7a1f2c]"></i>Personil</button>
+      <button onclick="p('setting')" id="m-setting" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-900/5"><i class="fa-solid fa-gear w-5 text-[#7a1f2c]"></i>Setting</button>
+    </nav>
+  </aside>
+
+  <main class="main ml-0 lg:ml-[270px] flex-1 pb-24 lg:pb-0">
+    <header class="h-[64px] lg:h-[72px] bg-white/60 backdrop-blur-xl sticky top-0 z-20 border-b border-slate-200/60 flex items-center px-4 lg:px-8">
+      <h1 id="title" class="text-[20px] lg:text-[22px] font-bold tracking-tight">Live</h1>
+      <div class="ml-auto text-right">
+        <div id="jam" class="font-bold mono text-[18px] lg:text-[20px] leading-none">--:--:--</div>
+        <div id="tglJawa" class="text-[10px] lg:text-[11px] text-slate-500">Sabtu Pahing, 13 Juni 2026</div>
+      </div>
+    </header>
+
+    <div class="p-4 lg:p-8 max-w-[1600px] mx-auto">
+      <!-- LIVE -->
+      <div id="page-live">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-5">
+          <div class="bg-white rounded-3xl p-4 lg:p-6 border border-slate-100 shadow-sm"><div class="text-xs text-slate-500">Total</div><div id="tot" class="text-2xl lg:text-3xl font-extrabold mt-1">0</div></div>
+          <div class="bg-white rounded-3xl p-4 lg:p-6 border border-slate-100 shadow-sm"><div class="text-xs text-slate-500">Bertugas</div><div id="on" class="text-2xl lg:text-3xl font-extrabold mt-1 text-emerald-600">0</div></div>
+          <div class="bg-white rounded-3xl p-4 lg:p-6 border border-slate-100 shadow-sm"><div class="text-xs text-slate-500">Selesai</div><div id="off" class="text-2xl lg:text-3xl font-extrabold mt-1">0</div></div>
+          <div class="bg-white rounded-3xl p-4 lg:p-6 border border-slate-100 shadow-sm flex items-center gap-3"><i class="fa-regular fa-calendar text-slate-400"></i><input id="tglLive" type="date" class="w-full outline-none bg-transparent font-medium"></div>
+        </div>
+        <div id="liveWrap" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 lg:gap-5"></div>
+      </div>
+
+      <!-- REKAP -->
+      <div id="page-rekap" class="hidden"><div class="bg-white rounded-3xl p-4 lg:p-6 border border-slate-100 shadow-sm"><div class="flex flex-wrap gap-2 mb-4"><input id="bulanRekap" type="month" class="border rounded-xl px-3 py-2.5 text-sm flex-1 min-w-[150px]"><button id="btnLoad" class="px-4 py-2.5 text-white rounded-xl text-sm font-semibold" style="background:#7a1f2c">Muat</button><button id="btnExp" class="px-4 py-2.5 border rounded-xl text-sm font-medium">Export</button></div><div class="overflow-auto rounded-xl border"><table class="w-full text-sm"><thead class="bg-slate-50/80"><tr id="headRekap"></tr></thead><tbody id="bodyRekap" class="divide-y"></tbody></table></div></div></div>
+
+      <!-- PERSONIL -->
+      <div id="page-kar" class="hidden"><div class="bg-white rounded-3xl p-4 lg:p-6 border border-slate-100 shadow-sm"><div class="flex flex-col sm:flex-row gap-3 mb-4"><input id="cari" placeholder="Cari nama..." class="border rounded-xl px-4 py-2.5 flex-1 text-sm focus:ring-2 focus:ring-[#d94a1f]/20 outline-none"><button id="add" class="px-4 py-2.5 text-white rounded-xl text-sm font-semibold shadow" style="background:#d94a1f">+ Tambah</button></div><div id="listKar" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4"></div></div></div>
+
+      <!-- SETTING -->
+      <div id="page-setting" class="hidden">
+        <div class="grid lg:grid-cols-3 gap-4 lg:gap-6">
+          <div class="lg:col-span-2 bg-white rounded-3xl p-5 lg:p-7 border border-slate-100 shadow-sm">
+            <h3 class="font-bold text-lg mb-5 flex items-center gap-2"><i class="fa-solid fa-location-dot text-[#7a1f2c]"></i> Lokasi & Aturan</h3>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div><label class="text-xs text-slate-500 font-medium">Latitude</label><input id="lat" class="w-full mt-1.5 border rounded-2xl px-4 py-3 mono text-[15px] focus:ring-2 focus:ring-[#7a1f2c]/20 outline-none"></div>
+              <div><label class="text-xs text-slate-500 font-medium">Longitude</label><input id="long" class="w-full mt-1.5 border rounded-2xl px-4 py-3 mono text-[15px] focus:ring-2 focus:ring-[#7a1f2c]/20 outline-none"></div>
+            </div>
+            <div class="grid sm:grid-cols-3 gap-4 mt-5 items-end">
+              <div class="sm:col-span-2">
+                <label class="text-xs text-slate-500 font-medium">Radius Absen</label>
+                <div class="flex items-center gap-4 mt-2">
+                  <input id="radius" type="range" min="20" max="1000" step="10" class="flex-1 h-2 accent-[#7a1f2c]">
+                  <div class="w-20 text-center"><div id="radVal" class="text-2xl font-extrabold text-[#d94a1f] leading-none">100</div><div class="text-[11px] text-slate-500 -mt-1">meter</div></div>
+                </div>
+              </div>
+              <div><label class="text-xs text-slate-500 font-medium">Batas Jam</label><select id="maxJam" class="w-full mt-1.5 border rounded-2xl px-4 py-3 text-[15px]"><option value="0">Tanpa</option><option value="6">6 jam</option><option value="8">8 jam</option><option value="10">10 jam</option><option value="12">12 jam</option></select></div>
+            </div>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-6 pt-5 border-t">
+              <label class="flex items-center gap-2.5 cursor-pointer"><input id="lock" type="checkbox" class="w-5 h-5 accent-[#7a1f2c] rounded"><span class="text-sm font-medium">Aktifkan Lock Lokasi</span></label>
+              <button id="saveSet" class="w-full sm:w-auto px-6 py-3 text-white rounded-2xl text-sm font-semibold shadow-md" style="background:#7a1f2c"><i class="fa-solid fa-floppy-disk mr-2"></i>Simpan</button>
+            </div>
+          </div>
+          <div class="space-y-4 lg:space-y-6">
+            <div class="bg-white rounded-3xl p-5 lg:p-7 border border-slate-100 shadow-sm">
+              <h3 class="font-bold text-lg mb-1">Versi Aplikasi</h3>
+              <p class="text-xs text-slate-500 mb-4">Otomatis update saat user re-login</p>
+              <div class="space-y-3 text-sm">
+                <div class="flex justify-between items-center"><span class="text-slate-500">Server (GAS)</span><span id="verServer" class="font-mono font-semibold bg-slate-50 px-2 py-1 rounded-lg">...</span></div>
+                <div class="flex justify-between items-center"><span class="text-slate-500">GitHub</span><span id="verGithub" class="font-mono font-semibold bg-slate-50 px-2 py-1 rounded-lg">...</span></div>
+              </div>
+              <div id="verStatus" class="mt-4 p-3 rounded-xl text-xs font-medium bg-slate-50">Mengecek...</div>
+              <button onclick="cekVersi()" class="mt-4 w-full py-2.5 border border-slate-200 rounded-xl text-sm font-medium hover:bg-slate-50">Cek Ulang</button>
+            </div>
+            <div class="bg-white rounded-3xl p-5 lg:p-7 border border-slate-100 shadow-sm">
+              <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fa-solid fa-unlock-keyhole text-amber-500"></i> Buka Kunci Manual</h3>
+              <select id="unlockUser" class="w-full border rounded-2xl px-4 py-3 mb-3 text-[15px]"></select>
+              <button id="btnUnlock" class="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl text-sm font-semibold shadow">Buka Kunci 12 Jam</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 justify-around py-2 z-40">
+  <button onclick="p('live')" id="mb-live" class="flex flex-col items-center gap-1 p-2 w-1/4"><i class="fa-solid fa-house text-[18px]"></i><span class="text-[10px] font-medium">Live</span></button>
+  <button onclick="p('rekap')" id="mb-rekap" class="flex flex-col items-center gap-1 p-2 w-1/4"><i class="fa-solid fa-table text-[18px]"></i><span class="text-[10px]">Rekap</span></button>
+  <button onclick="p('kar')" id="mb-kar" class="flex flex-col items-center gap-1 p-2 w-1/4"><i class="fa-solid fa-users text-[18px]"></i><span class="text-[10px]">Personil</span></button>
+  <button onclick="p('setting')" id="mb-setting" class="flex flex-col items-center gap-1 p-2 w-1/4"><i class="fa-solid fa-gear text-[18px]"></i><span class="text-[10px]">Setting</span></button>
+</nav>
+
+<div id="modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm grid place-items-center p-4 z-50"><div class="bg-white rounded-3xl p-6 lg:p-7 w-full max-w-md shadow-2xl"><h3 class="font-bold text-lg mb-4" id="modalTitle">Tambah Personil</h3><input id="fNama" placeholder="Nama" class="w-full border rounded-xl px-4 py-2.5 mb-3 focus:ring-2 focus:ring-[#d94a1f]/20 outline-none"><div class="grid grid-cols-2 gap-3"><input id="fUser" placeholder="Username" class="border rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-[#d94a1f]/20 outline-none"><input id="fPass" placeholder="Password" class="border rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-[#d94a1f]/20 outline-none"></div><div class="flex justify-end gap-2 mt-6"><button onclick="modal.classList.add('hidden')" class="px-5 py-2.5 border rounded-xl font-medium">Batal</button><button id="saveK" class="px-5 py-2.5 text-white rounded-xl font-semibold shadow" style="background:#7a1f2c">Simpan</button></div></div></div>
+
+<script>
+const call=(f,...a)=>new Promise((r,j)=>google.script.run.withSuccessHandler(r).withFailureHandler(j)[f](...a));
+const $=i=>document.getElementById(i); let rek=null, editMode=false;
+function p(x){['live','rekap','kar','setting'].forEach(k=>{$(`page-${k}`).classList.toggle('hidden',k!==x);const el=$(`m-${k}`);if(el)el.classList.toggle('bg-slate-900/5',k===x);const mb=$(`mb-${k}`);if(mb)mb.classList.toggle('text-[#7a1f2c]',k===x)});$('title').textContent={live:'Live',rekap:'Rekap',kar:'Personil',setting:'Setting'}[x];if(x==='live')loadLive();if(x==='kar')loadKar();if(x==='setting'){loadSet();cekVersi()}}
+function updateClock(){const now=new Date();$('jam').textContent=now.toLocaleTimeString('id-ID',{hour12:false});const hari=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][now.getDay()];const pasaran=['Pahing','Pon','Wage','Kliwon','Legi'];const base=new Date(2000,0,1);const diff=Math.floor((now-base)/86400000);const pas=pasaran[(diff%5+5)%5];const tgl=now.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});$('tglJawa').textContent=`${hari} ${pas}, ${tgl}`;}setInterval(updateClock,1000);updateClock();
+async function loadSet(){const s=await call('getSetting');$('lat').value=s.lat;$('long').value=s.long;$('radius').value=s.radius;$('radVal').textContent=s.radius;$('maxJam').value=s.maxJam;$('lock').checked=s.lockAktif;const k=await call('getKaryawanAdmin');$('unlockUser').innerHTML='<option value="">Pilih personil</option>'+k.data.map(v=>`<option value="${v.username}">${v.nama}</option>`).join('')}
+async function saveSet(){await call('updateSetting',+$('lat').value,+$('long').value,+$('radius').value,+$('maxJam').value,$('lock').checked);alert('Tersimpan')}
+async function loadLive(){const d=$('tglLive').value;const r=await call('getLiveAbsen',d);$('tot').textContent=r.data.length;$('on').textContent=r.data.filter(x=>x.status==='Kerja').length;$('off').textContent=r.data.filter(x=>x.status==='Selesai').length;$('liveWrap').innerHTML=r.data.map(x=>{const fotoIn=x.fotoIn?`<img src="${x.fotoIn}" class="w-full aspect-[3/4] object-cover rounded-2xl cursor-pointer" loading="lazy" referrerpolicy="no-referrer" onclick="showFoto('${x.fotoIn}')">`:`<div class="w-full aspect-[3/4] bg-slate-100 rounded-2xl grid place-items-center text-slate-400"><i class="fa-regular fa-image text-2xl"></i></div>`;const fotoOut=x.fotoOut?`<img src="${x.fotoOut}" class="w-full aspect-[3/4] object-cover rounded-2xl cursor-pointer" loading="lazy" referrerpolicy="no-referrer" onclick="showFoto('${x.fotoOut}')">`:`<div class="w-full aspect-[3/4] bg-slate-100 rounded-2xl grid place-items-center text-slate-400"><i class="fa-regular fa-image text-2xl"></i></div>`;return`<div class="bg-white border border-slate-100 rounded-3xl p-4 lg:p-5 shadow-sm"><div class="text-[#7a1f2c] font-extrabold text-[15px] uppercase truncate mb-2">${x.nama}</div><div class="flex justify-center gap-6 text-[12px] text-slate-500 mb-3"><div>IN <span class="font-mono text-slate-900 font-bold">${x.jamIn||'--:--'}</span></div><div>OUT <span class="font-mono text-slate-900 font-bold">${x.jamOut||'--:--'}</span></div></div><div class="grid grid-cols-2 gap-3">${fotoIn}${fotoOut}</div></div>`}).join('');}
+async function loadRekap(){const b=$('bulanRekap').value;if(!b)return;const[y,m]=b.split('-');rek=await call('getRekapMatrix',m+'/'+y);$('headRekap').innerHTML='<th class="text-left px-4 py-3 font-semibold">Nama</th>'+rek.dates.map(d=>`<th class="px-2 py-3 font-medium">${d.slice(0,2)}</th>`).join('');$('bodyRekap').innerHTML=rek.rows.map(r=>`<tr class="hover:bg-slate-50"><td class="px-4 py-2.5 font-medium">${r.nama}</td>`+r.in.map((v,i)=>`<td class="px-2 py-2 text-center"><div class="text-emerald-600 text-[13px]">${v||''}</div><div class="text-sky-600 text-[13px]">${r.out[i]||''}</div></td>`).join('')+'</tr>').join('');}
+async function loadKar(){const k=await call('getKaryawanAdmin');const q=$('cari').value.toLowerCase();$('listKar').innerHTML=k.data.filter(x=>x.nama.toLowerCase().includes(q)).map(x=>`<div class="border border-slate-200 rounded-2xl p-4 flex items-center gap-3 bg-white"><img src="${x.foto||'https://ui-avatars.com/api/?name='+encodeURIComponent(x.nama)+'&background=7a1f2c&color=fff'}" class="w-11 h-11 rounded-full object-cover"><div class="flex-1 min-w-0"><div class="font-semibold truncate">${x.nama}</div><div class="text-xs text-slate-500">${x.username}</div></div><button onclick="editKar('${x.username}')" class="w-8 h-8 grid place-items-center text-slate-500 hover:text-[#7a1f2c] rounded-lg hover:bg-slate-100"><i class="fa-solid fa-pen-to-square text-sm"></i></button><button onclick="delKar('${x.username}','${x.nama}')" class="w-8 h-8 grid place-items-center text-slate-500 hover:text-red-600 rounded-lg hover:bg-red-50"><i class="fa-solid fa-trash text-sm"></i></button></div>`).join('');}
+async function editKar(u){const k=await call('getKaryawanAdmin');const d=k.data.find(x=>x.username===u);editMode=true;$('modalTitle').textContent='Edit Personil';$('fNama').value=d.nama;$('fUser').value=d.username;$('fUser').disabled=true;$('fPass').value='';$('fPass').placeholder='Kosongkan jika tidak ganti';$('modal').classList.remove('hidden')}
+async function delKar(u,n){if(!confirm('Hapus '+n+'?'))return;await call('hapusKaryawanAdmin',{username:u});loadKar()}
+async function cekVersi(){$('verStatus').className='mt-4 p-3 rounded-xl text-xs font-medium bg-slate-50';$('verStatus').textContent='Mengecek...';try{const verServer=await call('getGithubVersion');$('verServer').textContent=verServer;const verGithub=await new Promise((res,rej)=>google.script.run.withSuccessHandler(res).withFailureHandler(rej).getGithubVersionLive());$('verGithub').textContent=verGithub;if(verServer===verGithub){$('verStatus').className='mt-4 p-3 rounded-xl text-xs font-medium bg-emerald-50 text-emerald-700';$('verStatus').innerHTML='<i class="fa-solid fa-circle-check mr-1"></i> Sudah sinkron'}else{$('verStatus').className='mt-4 p-3 rounded-xl text-xs font-medium bg-amber-50 text-amber-700';$('verStatus').innerHTML='<i class="fa-solid fa-triangle-exclamation mr-1"></i> Ada update'}}catch(e){$('verStatus').textContent='Gagal'}}
+document.addEventListener('DOMContentLoaded',()=>{$('tglLive').valueAsDate=new Date();p('live');$('tglLive').onchange=loadLive;$('radius').oninput=e=>$('radVal').textContent=e.target.value;$('saveSet').onclick=saveSet;$('btnUnlock').onclick=async()=>{const u=$('unlockUser').value;if(!u)return;await call('bukaKunci12Jam',u);alert('Dibuka')};$('btnLoad').onclick=loadRekap;$('btnExp').onclick=()=>{if(!rek)return;const ws=XLSX.utils.aoa_to_sheet([['Nama',...rek.dates],...rek.rows.flatMap(r=>[[r.nama+' IN',...r.in],[r.nama+' OUT',...r.out]])]);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'R');XLSX.writeFile(wb,'rekap.xlsx')};$('add').onclick=()=>{editMode=false;$('modalTitle').textContent='Tambah Personil';$('fNama').value='';$('fUser').value='';$('fUser').disabled=false;$('fPass').value='';$('fPass').placeholder='Password';$('modal').classList.remove('hidden')};$('saveK').onclick=async()=>{const data={nama:$('fNama').value,username:$('fUser').value,password:$('fPass').value};if(!editMode||data.password)await call('saveKaryawanAdmin',data);else await call('saveKaryawanAdmin',{...data,password:''});$('modal').classList.add('hidden');loadKar()};$('cari').oninput=loadKar;setInterval(()=>{if(!$('page-live').classList.contains('hidden'))loadLive()},30000);});
+if('serviceWorker' in navigator){navigator.serviceWorker.register('admin-sw.js').catch(()=>{})}
+</script>
+<div id="fotoModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 grid place-items-center p-4" onclick="this.classList.add('hidden')"><img id="fotoBig" class="max-w-full max-h-[90vh] rounded-2xl shadow-2xl" referrerpolicy="no-referrer"></div>
+<script>function showFoto(u){document.getElementById('fotoBig').src=u;document.getElementById('fotoModal').classList.remove('hidden')}</script>
+</body>
+</html>
