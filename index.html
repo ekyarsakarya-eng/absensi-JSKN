@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Absensi Karyawan JSKN</title>
   
   <!-- PWA Manifest -->
@@ -18,20 +18,7 @@
   <!-- Android PWA -->
   <meta name="mobile-web-app-capable" content="yes">
   
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            'maroon': '#800000',
-            'maroon-dark': '#5c0000',
-          }
-        }
-      }
-    }
-  </script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     video { transform: scaleX(-1); }
@@ -57,6 +44,13 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+   <script src="app.js"></script>
+  <script>
+    // Patch iPhone - tidak ganggu Android
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if(isIos && !window.navigator.standalone){
+      setTimeout(()=>{ document.getElementById('installPopup')?.classList.remove('hidden'); }, 1500);
+    }
+  </script>
 </body>
 </html>
