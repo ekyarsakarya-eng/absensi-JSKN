@@ -209,7 +209,7 @@ function renderDashboard() {
   </div>
 
   <!-- MODAL KAMERA -->
-  <div id="modalCam" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4" style="z-index:9999">
+  <div id="modalCam" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-[70]">
     <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 w-full max-w-md">
       <h3 class="font-bold text-lg mb-3 text-red-800 dark:text-white text-center">
         <i class="fa-solid fa-camera mr-2"></i><span id="judulKamera">Ambil Foto</span>
@@ -388,9 +388,6 @@ function bukaKameraAbsen(type) {
 }
 
 function bukaKameraPatroli() {
-  document.getElementById('modalPatroli').classList.add('hidden');
-  document.getElementById('modalPatroli').classList.remove('flex');
-  
   currentCamMode = 'patroli';
   modalAsal = 'patroli';
   document.getElementById('judulKamera').textContent = 'Foto Lokasi Patroli';
@@ -401,9 +398,6 @@ function bukaKameraPatroli() {
 }
 
 function bukaKameraKejadian() {
-  document.getElementById('modalKejadian').classList.add('hidden');
-  document.getElementById('modalKejadian').classList.remove('flex');
-  
   currentCamMode = 'kejadian';
   modalAsal = 'kejadian';
   document.getElementById('judulKamera').textContent = 'Foto Bukti Kejadian';
