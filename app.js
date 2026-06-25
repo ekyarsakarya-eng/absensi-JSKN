@@ -16,40 +16,51 @@ let dataPatroli = [];
 let dataKejadian = [];
 let dataPembinaan = [];
 
-// === PWA INSTALL ===
+// === PWA INSTALL UNIVERSAL ===
 let deferredPrompt;
 const installPopup = document.getElementById('installPopup');
-const btnInstall = document.getElementById('btnInstall');
+const btnAndroid = document.getElementById('btnInstallAndroid');
+const btnIOS = document.getElementById('btnInstallIOS');
+const iosSteps = document.getElementById('iosSteps');
 
-const isInStandaloneMode = () =>
-  window.matchMedia('(display-mode: standalone)').matches ||
-  window.navigator.standalone ||
-  document.referrer.includes('android-app://');
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) &&!window.MSStream;
+const isInStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
+// ANDROID - pakai event asli
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  if (!isInStandaloneMode()) {
-    installPopup.classList.remove('hidden');
-    installPopup.classList.add('flex');
+  if (!isInStandalone()) {
+    installPopup.classList.remove('hidden'); installPopup.classList.add('flex');
+    btnAndroid.classList.remove('hidden');
+    document.getElementById('installTitle').textContent = 'Install Aplikasi Dulu';
   }
 });
 
-btnInstall?.addEventListener('click', async () => {
+btnAndroid?.addEventListener('click', async () => {
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  if (outcome === 'accepted') installPopup.classList.add('hidden');
+  await deferredPrompt.userChoice;
   deferredPrompt = null;
+  installPopup.classList.add('hidden');
 });
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(e => console.log(e));
-  });
+// IPHONE - paksa tampil
+if (isIOS &&!isInStandalone()) {
+  installPopup.classList.remove('hidden'); installPopup.classList.add('flex');
+  btnIOS.classList.remove('hidden');
+  document.getElementById('installTitle').textContent = 'Wajib Install di iPhone';
+  document.getElementById('installDesc').textContent = 'Safari tidak bisa absen normal kalau belum di Add to Home Screen';
 }
+btnIOS?.addEventListener('click', () => {
+  iosSteps.classList.toggle('hidden');
+  btnIOS.innerHTML = iosSteps.classList.contains('hidden')
+   ? '<i class="fa-solid fa-share-from-square mr-2"></i>Lihat Cara Install'
+    : '<i class="fa-solid fa-check mr-2"></i>Sudah Install? Buka dari Home';
+});
 
-if (isInStandaloneMode()) installPopup?.classList.add('hidden');
+// Kalau sudah install, sembunyikan
+if (isInStandalone()) installPopup?.classList.add('hidden');
 
 const app = document.getElementById('app');
 if(!app) console.error('Div #app tidak ditemukan!');
@@ -101,31 +112,8 @@ async function login() {
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Memproses...';
   const res = await api('login', {username, password});
   if (res.status === 'success') {
-    // --- CEK UPDATE VERSI ---
-    const serverVer = res.version || '1.0';
-    const localVer = localStorage.getItem('app_ver');
-
-    // simpan user & versi dulu
     user = res;
     localStorage.setItem('user', JSON.stringify(user));
-    localStorage.setItem('app_ver', serverVer);
-
-    if (localVer && localVer!== serverVer) {
-      toast('Update ditemukan, memuat versi baru...');
-      // hapus semua cache PWA
-      if ('caches' in window) {
-        await caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
-      }
-      // unregister service worker lama
-      if ('serviceWorker' in navigator) {
-        await navigator.serviceWorker.getRegistrations().then(regs => Promise.all(regs.map(r => r.unregister())));
-      }
-      // reload paksa ambil app.js baru dari GitHub
-      setTimeout(() => window.location.reload(true), 800);
-      return;
-    }
-    // --- END CEK ---
-
     render();
   } else {
     toast(res.message);
@@ -202,26 +190,26 @@ function renderDashboard() {
         <span class="text-xs font-semibold">Home</span>
       </button>
       <button onclick="switchPage('rekap')" class="flex flex-col items-center py-2 ${currentPage==='rekap'?'text-red-800':'text-gray-500'}">
-        <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-JSKN/main/icon-rekap.png" class="w-6 h-6 mb-1 ${currentPage==='rekap'?'':'opacity-50'}">
+        <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-rekap.png" class="w-6 h-6 mb-1 ${currentPage==='rekap'?'':'opacity-50'}">
         <span class="text-xs font-semibold">Rekap</span>
       </button>
       <button onclick="switchPage('patroli')" class="flex flex-col items-center py-2 ${currentPage==='patroli'?'text-red-800':'text-gray-500'}">
-        <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-JSKN/main/icon-patroli.png" class="w-6 h-6 mb-1 ${currentPage==='patroli'?'':'opacity-50'}">
+        <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-patroli.png" class="w-6 h-6 mb-1 ${currentPage==='patroli'?'':'opacity-50'}">
         <span class="text-xs font-semibold">Patroli</span>
       </button>
       <button onclick="switchPage('kejadian')" class="flex flex-col items-center py-2 ${currentPage==='kejadian'?'text-red-800':'text-gray-500'}">
-        <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-JSKN/main/icon-kejadian.png" class="w-6 h-6 mb-1 ${currentPage==='kejadian'?'':'opacity-50'}">
+        <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-kejadian.png" class="w-6 h-6 mb-1 ${currentPage==='kejadian'?'':'opacity-50'}">
         <span class="text-xs font-semibold">Kejadian</span>
       </button>
       <button onclick="switchPage('pembinaan')" class="flex flex-col items-center py-2 ${currentPage==='pembinaan'?'text-red-800':'text-gray-500'}">
-        <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-JSKN/main/icon-pembinaan.png" class="w-6 h-6 mb-1 ${currentPage==='pembinaan'?'':'opacity-50'}">
+        <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-pembinaan.png" class="w-6 h-6 mb-1 ${currentPage==='pembinaan'?'':'opacity-50'}">
         <span class="text-xs font-semibold">Pembinaan</span>
       </button>
     </div>
   </div>
 
   <!-- MODAL KAMERA -->
-  <div id="modalCam" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-[70]">
+  <div id="modalCam" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4" style="z-index:9999">
     <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 w-full max-w-md">
       <h3 class="font-bold text-lg mb-3 text-red-800 dark:text-white text-center">
         <i class="fa-solid fa-camera mr-2"></i><span id="judulKamera">Ambil Foto</span>
@@ -400,6 +388,9 @@ function bukaKameraAbsen(type) {
 }
 
 function bukaKameraPatroli() {
+  document.getElementById('modalPatroli').classList.add('hidden');
+  document.getElementById('modalPatroli').classList.remove('flex');
+  
   currentCamMode = 'patroli';
   modalAsal = 'patroli';
   document.getElementById('judulKamera').textContent = 'Foto Lokasi Patroli';
@@ -410,6 +401,9 @@ function bukaKameraPatroli() {
 }
 
 function bukaKameraKejadian() {
+  document.getElementById('modalKejadian').classList.add('hidden');
+  document.getElementById('modalKejadian').classList.remove('flex');
+  
   currentCamMode = 'kejadian';
   modalAsal = 'kejadian';
   document.getElementById('judulKamera').textContent = 'Foto Bukti Kejadian';
@@ -421,25 +415,37 @@ function bukaKameraKejadian() {
 
 function openCam() {
   const modal = document.getElementById('modalCam');
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
+  modal.classList.remove('hidden'); modal.classList.add('flex');
   startTimemark();
 
-  let facingMode = 'user';
-  if (currentCamMode === 'patroli' || currentCamMode === 'kejadian') {
-    facingMode = 'environment';
-  }
+  const video = document.getElementById('video');
+  const isSelfie = (currentCamMode === 'absen');
 
-  navigator.mediaDevices.getUserMedia({ 
-    video: { facingMode: facingMode }, 
-    audio: false 
-  })
-.then(s => {
+  // iPhone fix: jangan mirror global
+  video.style.transform = isSelfie? 'scaleX(-1)' : 'none';
+  document.getElementById('canvas').style.transform = isSelfie? 'scaleX(-1)' : 'none';
+
+  const constraints = {
+    audio: false,
+    video: {
+      facingMode: { ideal: isSelfie? 'user' : 'environment' },
+      width: { ideal: 1280, max: 1920 },
+      height: { ideal: 720, max: 1080 }
+    }
+  };
+
+  navigator.mediaDevices.getUserMedia(constraints)
+   .then(s => {
       stream = s;
-      document.getElementById('video').srcObject = s;
+      video.srcObject = s;
+      video.setAttribute('playsinline', true); // WAJIB untuk iPhone
+      video.muted = true;
+      video.onloadedmetadata = () => {
+        video.play().catch(e => console.log('play error', e));
+      };
     })
-.catch(err => {
-      toast('Gagal mengakses kamera: ' + err.message);
+   .catch(err => {
+      toast('Kamera error: ' + err.message + ' - pakai Safari ya');
       closeCam();
     });
 }
@@ -473,12 +479,13 @@ async function capture() {
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Proses...';
 
   const ctx = canvas.getContext('2d');
-  const MAX_WIDTH = 1024;
+  // === FIX UTAMA: turunin ke 800px ===
+  const MAX_WIDTH = 800;
   let width = video.videoWidth;
   let height = video.videoHeight;
 
   if (width > MAX_WIDTH) {
-    height = height * (MAX_WIDTH / width);
+    height = Math.round(height * (MAX_WIDTH / width));
     width = MAX_WIDTH;
   }
 
@@ -486,50 +493,45 @@ async function capture() {
   canvas.height = height;
   ctx.drawImage(video, 0, 0, width, height);
 
-  // TIMEMARK
+  // Timemark kecil biar enteng
   const scale = width / 640;
-  ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-  ctx.fillRect(10 * scale, height - 110 * scale, 320 * scale, 100 * scale);
-  ctx.strokeStyle = "#800000";
-  ctx.lineWidth = 4 * scale;
-  ctx.strokeRect(10 * scale, height - 110 * scale, 4 * scale, 100 * scale);
+  ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
+  ctx.fillRect(8 * scale, height - 85 * scale, 280 * scale, 75 * scale);
   ctx.fillStyle = "#ffffff";
-  ctx.font = `bold ${14 * scale}px Arial`;
-  const tglTeks = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  ctx.fillText(tglTeks, 25 * scale, height - 85 * scale);
+  ctx.font = `bold ${11 * scale}px Arial`;
+  ctx.fillText(new Date().toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }), 18 * scale, height - 62 * scale);
   ctx.fillStyle = "#facc15";
-  ctx.font = `bold ${16 * scale}px Arial`;
-  const jamTeks = new Date().toLocaleTimeString('id-ID');
-  ctx.fillText(jamTeks, 25 * scale, height - 65 * scale);
+  ctx.font = `bold ${13 * scale}px Arial`;
+  ctx.fillText(new Date().toLocaleTimeString('id-ID'), 18 * scale, height - 44 * scale);
   ctx.fillStyle = "#ffffff";
-  ctx.font = `${13 * scale}px Arial`;
-  ctx.fillText(`Nama: ${user.nama}`, 25 * scale, height - 45 * scale);
+  ctx.font = `${10 * scale}px Arial`;
+  ctx.fillText(`Nama: ${user.nama}`, 18 * scale, height - 28 * scale);
   ctx.fillStyle = "#4ade80";
-  ctx.font = `mono ${11 * scale}px Courier New`;
-  ctx.fillText(`GPS: ${currentLocation.lat}, ${currentLocation.long}`, 25 * scale, height - 20 * scale);
+  ctx.font = `9px Courier New`;
+  ctx.fillText(`GPS: ${currentLocation.lat},${currentLocation.long}`, 18 * scale, height - 13 * scale);
 
-  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.6);
+  // === KOMPRES JADI 120KB ===
+  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.75);
   closeCam();
 
   if (currentCamMode === 'absen') {
-    const kirimData = {
+    const res = await api('absen', {
       username: user.username,
       tipeAbsen: currentType,
       foto: fotoBase64,
       lat: currentLocation.lat,
       long: currentLocation.long
-    };
-    const res = await api('absen', kirimData);
+    });
     toast(res.message);
     if (res.status === 'success') cekStatus();
   } else if (currentCamMode === 'patroli') {
     document.getElementById('patroliFotoBase64').value = fotoBase64;
     document.getElementById('previewPatroli').innerHTML = `<img src="${fotoBase64}" class="w-full h-full object-cover">`;
-    toast('Foto patroli berhasil diambil');
+    toast('Foto patroli berhasil');
   } else if (currentCamMode === 'kejadian') {
     document.getElementById('kejadianFotoBase64').value = fotoBase64;
     document.getElementById('previewKejadian').innerHTML = `<img src="${fotoBase64}" class="w-full h-full object-cover">`;
-    toast('Foto kejadian berhasil diambil');
+    toast('Foto kejadian berhasil');
   }
 
   btn.disabled = false;
@@ -897,7 +899,7 @@ async function loadPatroli() {
               <p class="text-xs text-red-600 dark:text-red-400 font-semibold">Petugas: ${p.nama}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">${tgl}</p>
             </div>
-            ${p.foto? `<img src="${p.foto}" class="w-12 h-12 rounded-lg object-cover ml-2">` : ''}
+            ${p.foto? `<img src="${p.foto}" onclick="bukaZoom('${p.foto}')" class="w-12 h-12 rounded-lg object-cover ml-2 cursor-pointer">` : ''}
           </div>
           <p class="text-xs text-gray-600 dark:text-gray-300">${p.keterangan || '-'}</p>
         </div>
@@ -1005,7 +1007,7 @@ async function loadKejadian() {
               <p class="text-xs text-red-600 dark:text-red-400 font-semibold">Pelapor: ${k.nama}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">${tgl} - ${k.lokasi}</p>
             </div>
-            ${k.foto? `<img src="${k.foto}" class="w-12 h-12 rounded-lg object-cover ml-2">` : ''}
+            ${k.foto? `<img src="${k.foto}" onclick="bukaZoom('${k.foto}')" class="w-12 h-12 rounded-lg object-cover ml-2 cursor-pointer">` : ''}
           </div>
           <p class="text-xs text-gray-600 dark:text-gray-300">${k.kronologi}</p>
         </div>
@@ -1345,21 +1347,27 @@ function gantiFotoProfil() { document.getElementById('inputFotoProfil').click();
 async function uploadFotoProfil(event) {
   const file = event.target.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const base64 = e.target.result;
-    document.getElementById('fotoProfil').src = base64;
-    const res = await api('uploadFoto', { username: user.username, fotoBase64: base64 });
-    if (res.status === 'success') {
-      user.foto = res.urlFoto;
-      localStorage.setItem('user', JSON.stringify(user));
-      document.getElementById('avatarNav').src = res.urlFoto;
-      toast('Foto profil berhasil diupdate');
-    } else {
-      toast(res.message);
-    }
-  };
-  reader.readAsDataURL(file);
+
+  // Kompres dulu
+  const img = await createImageBitmap(file);
+  const max = 600;
+  const scale = Math.min(1, max / Math.max(img.width, img.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = img.width * scale;
+  canvas.height = img.height * scale;
+  canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+  const base64 = canvas.toDataURL('image/jpeg', 0.8);
+
+  document.getElementById('fotoProfil').src = base64;
+  const res = await api('uploadFoto', { username: user.username, fotoBase64: base64 });
+  if (res.status === 'success') {
+    user.foto = res.urlFoto;
+    localStorage.setItem('user', JSON.stringify(user));
+    document.getElementById('avatarNav').src = res.urlFoto;
+    toast('Foto profil berhasil');
+  } else {
+    toast(res.message);
+  }
 }
 
 async function simpanProfil() {
@@ -1429,19 +1437,16 @@ async function cekStatus() {
   }
 }
 
-async function api(aksi, payload = {}) {
+async function api(action, data = {}) {
   try {
-    const response = await fetch(URL_GAS, {
+    const res = await fetch(URL_GAS, {
       method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ aksi, data: payload })
+      body: JSON.stringify({action, ...data})
     });
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('API error:', error);
-    return { status: 'error', message: 'Koneksi internet bermasalah / GAS Error: ' + error.message };
+    return await res.json();
+  } catch(e) {
+    toast('Koneksi gagal: ' + e.message);
+    return {status: 'error', message: e.message};
   }
 }
 
@@ -1468,4 +1473,4 @@ switchPage = function(page) {
 
 console.log('Starting app...');
 render();
-render();
+render(); 
