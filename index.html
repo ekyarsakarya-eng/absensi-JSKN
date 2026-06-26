@@ -4,63 +4,48 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Absensi Karyawan JSKN</title>
-  
-  <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#800000">
-  
-  <!-- iOS PWA Support -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Absensi">
   <link rel="apple-touch-icon" href="icon-192.png">
-  
-  <!-- Android PWA -->
+  <link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
   <meta name="mobile-web-app-capable" content="yes">
-  
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     video { transform: scaleX(-1); }
     #canvas { transform: scaleX(-1); }
     * { -webkit-tap-highlight-color: transparent; }
-    /* DARK MODE MANUAL - untuk CSS statis */
     .dark { color-scheme: dark; }
-    .dark .dark\:bg-gray-900 { background-color: #111827 !important; }
-    .dark .dark\:bg-gray-800 { background-color: #1f2937 !important; }
-    .dark .dark\:bg-gray-700 { background-color: #374151 !important; }
-    .dark .dark\:text-white { color: #ffffff !important; }
-    .dark .dark\:text-gray-300 { color: #d1d5db !important; }
-    .dark .dark\:text-gray-400 { color: #9ca3af !important; }
-    .dark .dark\:border-gray-700 { border-color: #374151 !important; }
-    .dark .dark\:border-gray-600 { border-color: #4b5563 !important; }
   </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition">
   <div id="app"></div>
 
-  <!-- POPUP MAKSA INSTALL PWA -->
-  <div id="installPopup" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden items-center justify-center p-4 z-[999]">
+  <div id="installPopup" class="fixed inset-0 bg-black/95 backdrop-blur-sm hidden items-center justify-center p-4 z-[9999]">
     <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl">
       <div class="w-20 h-20 bg-red-800 rounded-3xl mx-auto flex items-center justify-center mb-4 animate-bounce">
         <i class="fa-solid fa-download text-white text-3xl"></i>
       </div>
-      <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2">Install Aplikasi Dulu</h3>
-      <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">Untuk absen, aplikasi harus diinstall ke HP kamu. Biar bisa dipake offline + lebih cepat + full screen.</p>
-      <button id="btnInstall" class="w-full bg-red-800 hover:bg-red-900 active:scale-95 text-white py-4 rounded-2xl font-bold text-lg shadow-xl transition">
+      <h3 id="installTitle" class="text-xl font-black text-gray-900 dark:text-white mb-2">Install Aplikasi Dulu</h3>
+      <p id="installDesc" class="text-sm text-gray-600 dark:text-gray-400 mb-6">Untuk absen, aplikasi harus diinstall ke HP kamu.</p>
+      <button id="btnInstallAndroid" class="hidden w-full bg-red-800 hover:bg-red-900 text-white py-4 rounded-2xl font-bold text-lg mb-2">
         <i class="fa-solid fa-download mr-2"></i>Install Sekarang
       </button>
-      <p class="text-xs text-gray-500 mt-4">Ukuran cuma 2MB • Gratis</p>
+      <button id="btnInstallIOS" class="hidden w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold mb-2">
+        <i class="fa-solid fa-share-from-square mr-2"></i>Lihat Cara Install
+      </button>
+      <div id="iosSteps" class="hidden text-left bg-gray-100 dark:bg-gray-700 p-3 rounded-xl text-xs mb-2">
+        1. Tap tombol <b>Share</b> di Safari<br>
+        2. Pilih <b>Add to Home Screen</b><br>
+        3. Tap <b>Add</b>, buka dari Home
+      </div>
+      <p class="text-xs text-gray-500 mt-2">Setelah install, buka dari Home Screen</p>
     </div>
   </div>
 
-   <script src="app.js"></script>
-  <script>
-    // Patch iPhone - tidak ganggu Android
-    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    if(isIos && !window.navigator.standalone){
-      setTimeout(()=>{ document.getElementById('installPopup')?.classList.remove('hidden'); }, 1500);
-    }
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
