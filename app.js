@@ -16,51 +16,49 @@ let dataPatroli = [];
 let dataKejadian = [];
 let dataPembinaan = [];
 
-// === PWA INSTALL UNIVERSAL ===
+// SERVICE WORKER
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+
+// PWA PAKSA
 let deferredPrompt;
 const installPopup = document.getElementById('installPopup');
 const btnAndroid = document.getElementById('btnInstallAndroid');
 const btnIOS = document.getElementById('btnInstallIOS');
 const iosSteps = document.getElementById('iosSteps');
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) &&!window.MSStream;
-const isInStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
-// ANDROID - pakai event asli
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  if (!isInStandalone()) {
-    installPopup.classList.remove('hidden'); installPopup.classList.add('flex');
-    btnAndroid.classList.remove('hidden');
-    document.getElementById('installTitle').textContent = 'Install Aplikasi Dulu';
+function cekInstall() {
+  if (isStandalone()) { installPopup?.classList.add('hidden'); return true; }
+  installPopup?.classList.remove('hidden'); installPopup?.classList.add('flex');
+  if (isIOS) {
+    document.getElementById('installTitle').textContent = 'Wajib Install di iPhone';
+    document.getElementById('installDesc').textContent = 'Buka lewat Share > Add to Home Screen';
+    btnIOS?.classList.remove('hidden'); btnAndroid?.classList.add('hidden');
+  } else {
+    btnAndroid?.classList.remove('hidden'); btnIOS?.classList.add('hidden');
   }
-});
+  return false;
+}
 
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; cekInstall(); });
 btnAndroid?.addEventListener('click', async () => {
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
-  await deferredPrompt.userChoice;
+  const { outcome } = await deferredPrompt.userChoice;
   deferredPrompt = null;
-  installPopup.classList.add('hidden');
+  if (outcome !== 'accepted') {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#800000;color:white;text-align:center;padding:24px;font-family:sans-serif"><div><h1 style="font-size:26px;font-weight:900;margin-bottom:12px">INSTALL DULU</h1><p>Aplikasi absensi JSKN hanya bisa dibuka setelah diinstall ke Home Screen.<br><br>Silakan buka link ini lagi dan tap Install.</p></div></div>';
+  }
 });
+btnIOS?.addEventListener('click', () => iosSteps?.classList.toggle('hidden'));
+window.addEventListener('load', () => setTimeout(cekInstall, 500));
 
-// IPHONE - paksa tampil
-if (isIOS &&!isInStandalone()) {
-  installPopup.classList.remove('hidden'); installPopup.classList.add('flex');
-  btnIOS.classList.remove('hidden');
-  document.getElementById('installTitle').textContent = 'Wajib Install di iPhone';
-  document.getElementById('installDesc').textContent = 'Safari tidak bisa absen normal kalau belum di Add to Home Screen';
-}
-btnIOS?.addEventListener('click', () => {
-  iosSteps.classList.toggle('hidden');
-  btnIOS.innerHTML = iosSteps.classList.contains('hidden')
-   ? '<i class="fa-solid fa-share-from-square mr-2"></i>Lihat Cara Install'
-    : '<i class="fa-solid fa-check mr-2"></i>Sudah Install? Buka dari Home';
-});
-
-// Kalau sudah install, sembunyikan
-if (isInStandalone()) installPopup?.classList.add('hidden');
+// BLOKIR RENDER
+const _renderAsli = render;
+render = function(){ if(!cekInstall()) return; _renderAsli(); };
 
 const app = document.getElementById('app');
 if(!app) console.error('Div #app tidak ditemukan!');
