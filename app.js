@@ -16,69 +16,90 @@ let dataPatroli = [];
 let dataKejadian = [];
 let dataPembinaan = [];
 
-// SERVICE WORKER
+// === SERVICE WORKER AMAN ===
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js');
+  navigator.serviceWorker.register('./sw.js').catch(function(e){console.log(e)});
 }
 
-// PWA PAKSA
-let deferredPrompt;
-const installPopup = document.getElementById('installPopup');
-const btnAndroid = document.getElementById('btnInstallAndroid');
-const btnIOS = document.getElementById('btnInstallIOS');
-const iosSteps = document.getElementById('iosSteps');
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-const isMiBrowser = /MiuiBrowser|MBI|Redmi/i.test(navigator.userAgent);
-if (isMiBrowser) {
-  console.log('MIUI Browser terdeteksi - paksa fallback');
+// === PWA PAKSA VERSI REDMI ===
+var deferredPrompt = null;
+var installPopup = document.getElementById('installPopup');
+var btnAndroid = document.getElementById('btnInstallAndroid');
+var btnIOS = document.getElementById('btnInstallIOS');
+var iosSteps = document.getElementById('iosSteps');
+
+var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+var isMi = /MiuiBrowser|Redmi|MIUI/i.test(navigator.userAgent);
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 }
-const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
 function cekInstall() {
-  if (isStandalone()) { installPopup?.classList.add('hidden'); return true; }
-  installPopup?.classList.remove('hidden'); installPopup?.classList.add('flex');
-  if (isIOS) {
-    document.getElementById('installTitle').textContent = 'Wajib Install di iPhone';
-    document.getElementById('installDesc').textContent = 'Buka lewat Share > Add to Home Screen';
-    btnIOS?.classList.remove('hidden'); btnAndroid?.classList.add('hidden');
-  } else {
-    btnAndroid?.classList.remove('hidden'); btnIOS?.classList.add('hidden');
+  if (isStandalone()) {
+    if (installPopup) { installPopup.style.display = 'none'; }
+    return true;
+  }
+  if (installPopup) {
+    installPopup.classList.remove('hidden');
+    installPopup.classList.add('flex');
+    if (isIOS) {
+      document.getElementById('installTitle').innerText = 'Wajib Install iPhone';
+      if (btnIOS) btnIOS.style.display = 'block';
+      if (btnAndroid) btnAndroid.style.display = 'none';
+    } else {
+      if (btnAndroid) btnAndroid.style.display = 'block';
+      if (btnIOS) btnIOS.style.display = 'none';
+    }
   }
   return false;
 }
 
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; cekInstall(); });
-btnAndroid?.addEventListener('click', async () => {
-  if (!deferredPrompt) {
-    // FALLBACK KHUSUS REDMI / BROWSER TANPA beforeinstallprompt
-    toast('Redmi kadang blokir auto-install');
-    document.getElementById('installDesc').innerHTML =
-      'Klik titik 3 di Chrome > <b>Tambahkan ke layar utama</b><br>atau pakai Chrome, bukan Browser bawaan';
-    document.getElementById('iosSteps').classList.remove('hidden');
-    document.getElementById('iosSteps').innerHTML =
-      '1. Buka di <b>Google Chrome</b> (bukan Browser)<br>2. Tap titik 3 kanan atas<br>3. Pilih <b>Instal aplikasi</b> / <b>Tambahkan ke layar utama</b>';
-    return;
-  }
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  deferredPrompt = null;
-  if (outcome!== 'accepted') {
-    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#800000;color:white;text-align:center;padding:24px;font-family:sans-serif"><div><h1 style="font-size:26px;font-weight:900">INSTALL DULU</h1><p>Buka di Chrome > titik 3 > Tambahkan ke layar utama</p></div></div>';
-  }
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
 });
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  deferredPrompt = null;
-  if (outcome !== 'accepted') {
-    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#800000;color:white;text-align:center;padding:24px;font-family:sans-serif"><div><h1 style="font-size:26px;font-weight:900;margin-bottom:12px">INSTALL DULU</h1><p>Aplikasi absensi JSKN hanya bisa dibuka setelah diinstall ke Home Screen.<br><br>Silakan buka link ini lagi dan tap Install.</p></div></div>';
-  }
-});
-btnIOS?.addEventListener('click', () => iosSteps?.classList.toggle('hidden'));
-window.addEventListener('load', () => setTimeout(cekInstall, 500));
 
-// BLOKIR RENDER
-const _renderAsli = render;
-render = function(){ if(!cekInstall()) return; _renderAsli(); };
+if (btnAndroid) {
+  btnAndroid.onclick = async function() {
+    if (!deferredPrompt) {
+      alert('HP Redmi: Buka titik 3 di Chrome > Tambahkan ke layar utama');
+      if (iosSteps) {
+        iosSteps.style.display = 'block';
+        iosSteps.innerHTML = '1. Pakai Google Chrome<br>2. Titik 3 > Instal aplikasi<br>3. Buka dari Home';
+      }
+      return;
+    }
+    deferredPrompt.prompt();
+    var res = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if (res.outcome !== 'accepted') {
+      alert('Harus install dulu');
+    } else {
+      location.reload();
+    }
+  };
+}
+
+if (btnIOS && iosSteps) {
+  btnIOS.onclick = function() {
+    iosSteps.style.display = (iosSteps.style.display === 'none' ? 'block' : 'none');
+  };
+}
+
+window.addEventListener('load', function(){ setTimeout(cekInstall, 800); });
+
+// BLOKIR RENDER KALAU BELUM INSTALL
+var _renderAsli = render;
+render = function() {
+  try {
+    if (!cekInstall()) { return; }
+    _renderAsli();
+  } catch(err) {
+    console.log('render error', err);
+    _renderAsli(); // fallback biar tidak blank
+  }
+};
 
 const app = document.getElementById('app');
 if(!app) console.error('Div #app tidak ditemukan!');
