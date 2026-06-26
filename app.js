@@ -28,6 +28,10 @@ const btnAndroid = document.getElementById('btnInstallAndroid');
 const btnIOS = document.getElementById('btnInstallIOS');
 const iosSteps = document.getElementById('iosSteps');
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+const isMiBrowser = /MiuiBrowser|MBI|Redmi/i.test(navigator.userAgent);
+if (isMiBrowser) {
+  console.log('MIUI Browser terdeteksi - paksa fallback');
+}
 const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
 function cekInstall() {
@@ -45,7 +49,23 @@ function cekInstall() {
 
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; cekInstall(); });
 btnAndroid?.addEventListener('click', async () => {
-  if (!deferredPrompt) return;
+  if (!deferredPrompt) {
+    // FALLBACK KHUSUS REDMI / BROWSER TANPA beforeinstallprompt
+    toast('Redmi kadang blokir auto-install');
+    document.getElementById('installDesc').innerHTML =
+      'Klik titik 3 di Chrome > <b>Tambahkan ke layar utama</b><br>atau pakai Chrome, bukan Browser bawaan';
+    document.getElementById('iosSteps').classList.remove('hidden');
+    document.getElementById('iosSteps').innerHTML =
+      '1. Buka di <b>Google Chrome</b> (bukan Browser)<br>2. Tap titik 3 kanan atas<br>3. Pilih <b>Instal aplikasi</b> / <b>Tambahkan ke layar utama</b>';
+    return;
+  }
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  if (outcome!== 'accepted') {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#800000;color:white;text-align:center;padding:24px;font-family:sans-serif"><div><h1 style="font-size:26px;font-weight:900">INSTALL DULU</h1><p>Buka di Chrome > titik 3 > Tambahkan ke layar utama</p></div></div>';
+  }
+});
   deferredPrompt.prompt();
   const { outcome } = await deferredPrompt.userChoice;
   deferredPrompt = null;
