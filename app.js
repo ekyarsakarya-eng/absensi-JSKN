@@ -1,6 +1,7 @@
 const URL_GAS = 'https://script.google.com/macros/s/AKfycbzTLDlivTgJS3QUIm-qmaHRFLVmu-aPYdYwMoG-YdG6xSyeUF9sDUaHV7_E-4xLUAiB/exec';
-console.log('App.js loaded - v2.0');
+console.log('App.js loaded - v2.1 Optimized');
 
+// === VARIABEL GLOBAL ===
 let user = JSON.parse(localStorage.getItem('user') || 'null');
 let isDark = localStorage.getItem('dark') === 'true';
 let currentType = '';
@@ -16,12 +17,12 @@ let dataPatroli = [];
 let dataKejadian = [];
 let dataPembinaan = [];
 
-// === SERVICE WORKER AMAN ===
+// === SERVICE WORKER ===
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(function(e){console.log(e)});
 }
 
-// === PWA PAKSA VERSI REDMI ===
+// === PWA INSTALL PROMPT ===
 var deferredPrompt = null;
 var installPopup = document.getElementById('installPopup');
 var btnAndroid = document.getElementById('btnInstallAndroid');
@@ -89,23 +90,12 @@ if (btnIOS && iosSteps) {
 
 window.addEventListener('load', function(){ setTimeout(cekInstall, 800); });
 
-// BLOKIR RENDER KALAU BELUM INSTALL
-var _renderAsli = render;
-render = function() {
-  try {
-    if (!cekInstall()) { return; }
-    _renderAsli();
-  } catch(err) {
-    console.log('render error', err);
-    _renderAsli(); // fallback biar tidak blank
-  }
-};
-
 const app = document.getElementById('app');
 if(!app) console.error('Div #app tidak ditemukan!');
 
 if (isDark) document.documentElement.classList.add('dark');
 
+// === RENDER UTAMA ===
 function render() {
   if (!user) return renderLogin();
   renderDashboard();
@@ -197,56 +187,84 @@ function toast(msg) {
   setTimeout(() => t.remove(), 2000);
 }
 
+// === RENDER DASHBOARD (OPTIMIZED - HANYA UPDATE CONTENT AREA) ===
 function renderDashboard() {
-  app.innerHTML = `
-  <nav class="bg-red-800 text-white p-4 flex justify-between items-center shadow-lg sticky top-0 z-10">
-    <div class="flex items-center gap-3">
-      <i class="fa-solid fa-user-shield text-xl"></i>
-      <div>
-        <h1 class="font-bold text-lg leading-tight">Hi, ${user.nama}</h1>
-        <p class="text-xs opacity-80">${new Date().toLocaleDateString('id-ID', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}</p>
+  // Hanya render layout utama jika belum ada
+  if (!document.getElementById('contentArea')) {
+    app.innerHTML = `
+    <nav class="bg-red-800 text-white p-4 flex justify-between items-center shadow-lg sticky top-0 z-10">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-user-shield text-xl"></i>
+        <div>
+          <h1 class="font-bold text-lg leading-tight">Hi, ${user.nama}</h1>
+          <p class="text-xs opacity-80">${new Date().toLocaleDateString('id-ID', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}</p>
+        </div>
+      </div>
+      <div class="flex gap-3 items-center">
+        <button onclick="toggleDark()" class="hover:bg-red-900 p-2 rounded-lg transition">
+          <i id="darkIcon" class="fa-solid ${isDark? 'fa-sun' : 'fa-moon'} text-xl"></i>
+        </button>
+        <button onclick="openProfil()" class="flex items-center gap-2 hover:bg-red-900 p-1 pr-3 rounded-full transition">
+          <img id="avatarNav" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=800000&color=fff'}"
+               class="w-9 h-9 rounded-full object-cover border-2 border-white">
+        </button>
+      </div>
+    </nav>
+
+    <div id="contentArea" class="p-4 max-w-2xl mx-auto pb-32"></div>
+
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 dark:bg-gray-800 dark:border-gray-700 shadow-lg z-20">
+      <div class="grid grid-cols-5 gap-1 max-w-2xl mx-auto">
+        <button onclick="switchPage('home')" data-page="home" class="nav-btn flex flex-col items-center py-2 ${currentPage==='home'?'text-red-800':'text-gray-500'}">
+          <i class="fa-solid fa-house text-xl mb-1"></i>
+          <span class="text-xs font-semibold">Home</span>
+        </button>
+        <button onclick="switchPage('rekap')" data-page="rekap" class="nav-btn flex flex-col items-center py-2 ${currentPage==='rekap'?'text-red-800':'text-gray-500'}">
+          <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-rekap.png" class="w-6 h-6 mb-1 ${currentPage==='rekap'?'':'opacity-50'}">
+          <span class="text-xs font-semibold">Rekap</span>
+        </button>
+        <button onclick="switchPage('patroli')" data-page="patroli" class="nav-btn flex flex-col items-center py-2 ${currentPage==='patroli'?'text-red-800':'text-gray-500'}">
+          <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-patroli.png" class="w-6 h-6 mb-1 ${currentPage==='patroli'?'':'opacity-50'}">
+          <span class="text-xs font-semibold">Patroli</span>
+        </button>
+        <button onclick="switchPage('kejadian')" data-page="kejadian" class="nav-btn flex flex-col items-center py-2 ${currentPage==='kejadian'?'text-red-800':'text-gray-500'}">
+          <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-kejadian.png" class="w-6 h-6 mb-1 ${currentPage==='kejadian'?'':'opacity-50'}">
+          <span class="text-xs font-semibold">Kejadian</span>
+        </button>
+        <button onclick="switchPage('pembinaan')" data-page="pembinaan" class="nav-btn flex flex-col items-center py-2 ${currentPage==='pembinaan'?'text-red-800':'text-gray-500'}">
+          <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-pembinaan.png" class="w-6 h-6 mb-1 ${currentPage==='pembinaan'?'':'opacity-50'}">
+          <span class="text-xs font-semibold">Pembinaan</span>
+        </button>
       </div>
     </div>
-    <div class="flex gap-3 items-center">
-      <button onclick="toggleDark()" class="hover:bg-red-900 p-2 rounded-lg transition">
-        <i id="darkIcon" class="fa-solid ${isDark? 'fa-sun' : 'fa-moon'} text-xl"></i>
-      </button>
-      <button onclick="openProfil()" class="flex items-center gap-2 hover:bg-red-900 p-1 pr-3 rounded-full transition">
-        <img id="avatarNav" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=800000&color=fff'}"
-             class="w-9 h-9 rounded-full object-cover border-2 border-white">
-      </button>
-    </div>
-  </nav>
 
-  <div id="contentArea" class="p-4 max-w-2xl mx-auto pb-32">
-    ${renderPage()}
-  </div>
+    ${getModalsHTML()}`;
+  }
 
-  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 dark:bg-gray-800 dark:border-gray-700 shadow-lg z-20">
-    <div class="grid grid-cols-5 gap-1 max-w-2xl mx-auto">
-      <button onclick="switchPage('home')" class="flex flex-col items-center py-2 ${currentPage==='home'?'text-red-800':'text-gray-500'}">
-        <i class="fa-solid fa-house text-xl mb-1"></i>
-        <span class="text-xs font-semibold">Home</span>
-      </button>
-      <button onclick="switchPage('rekap')" class="flex flex-col items-center py-2 ${currentPage==='rekap'?'text-red-800':'text-gray-500'}">
-        <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-rekap.png" class="w-6 h-6 mb-1 ${currentPage==='rekap'?'':'opacity-50'}">
-        <span class="text-xs font-semibold">Rekap</span>
-      </button>
-      <button onclick="switchPage('patroli')" class="flex flex-col items-center py-2 ${currentPage==='patroli'?'text-red-800':'text-gray-500'}">
-        <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-patroli.png" class="w-6 h-6 mb-1 ${currentPage==='patroli'?'':'opacity-50'}">
-        <span class="text-xs font-semibold">Patroli</span>
-      </button>
-      <button onclick="switchPage('kejadian')" class="flex flex-col items-center py-2 ${currentPage==='kejadian'?'text-red-800':'text-gray-500'}">
-        <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-kejadian.png" class="w-6 h-6 mb-1 ${currentPage==='kejadian'?'':'opacity-50'}">
-        <span class="text-xs font-semibold">Kejadian</span>
-      </button>
-      <button onclick="switchPage('pembinaan')" class="flex flex-col items-center py-2 ${currentPage==='pembinaan'?'text-red-800':'text-gray-500'}">
-        <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-pembinaan.png" class="w-6 h-6 mb-1 ${currentPage==='pembinaan'?'':'opacity-50'}">
-        <span class="text-xs font-semibold">Pembinaan</span>
-      </button>
-    </div>
-  </div>
+  // [OPTIMASI] Hanya update konten area
+  const contentArea = document.getElementById('contentArea');
+  if (contentArea) contentArea.innerHTML = renderPage();
 
+  // Update status nav aktif
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    const isActive = btn.dataset.page === currentPage;
+    btn.classList.toggle('text-red-800', isActive);
+    btn.classList.toggle('text-gray-500', !isActive);
+    const img = btn.querySelector('img');
+    if (img) img.classList.toggle('opacity-50', !isActive);
+  });
+
+  // Load data sesuai halaman
+  if (currentPage === 'home') { cekStatus(); dapatkanLokasiGPS(); }
+  if (currentPage === 'rekap') loadRekap();
+  if (currentPage === 'patroli') loadPatroli();
+  if (currentPage === 'kejadian') loadKejadian();
+  if (currentPage === 'pembinaan') loadPembinaan();
+}
+
+// === MODALS (HTML KUMPUL DI SINI BIAR RAPI) ===
+function getModalsHTML() {
+  return `
   <!-- MODAL KAMERA -->
   <div id="modalCam" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-[70]">
     <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 w-full max-w-md">
@@ -256,7 +274,7 @@ function renderDashboard() {
       <div style="position:relative">
         <video id="video" class="w-full rounded-lg bg-black" autoplay playsinline></video>
         <canvas id="canvas" class="hidden w-full rounded-lg"></canvas>
-        <div id="timemarkPreview" class="absolute bottom-2 left-2 bg-black/70 border-l-4 border-red-800 px-3 py-2 rounded text-white text- font-semibold z-10 space-y-0.5">
+        <div id="timemarkPreview" class="absolute bottom-2 left-2 bg-black/70 border-l-4 border-red-800 px-3 py-2 rounded text-white text-sm font-semibold z-10 space-y-0.5">
           <div id="previewHari"></div>
           <div id="previewJam" class="text-yellow-400 font-bold text-xs"></div>
           <div id="previewNama" class="text-white opacity-90"></div>
@@ -292,9 +310,21 @@ function renderDashboard() {
         </div>
       </div>
       <div class="p-4 space-y-2">
-        <button onclick="openEditProfil()" class="w-full flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl transition"><div class="w-12 h-12 bg-red-800/10 text-red-800 rounded-xl flex items-center justify-center"><i class="fa-solid fa-user-pen"></i></div><div class="text-left flex-1"><p class="font-bold text-sm text-gray-900 dark:text-white">Edit Profil</p></div><i class="fa-solid fa-chevron-right text-gray-400"></i></button>
-        <button onclick="openGantiPassword()" class="w-full flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl transition"><div class="w-12 h-12 bg-red-800/10 text-red-800 rounded-xl flex items-center justify-center"><i class="fa-solid fa-key"></i></div><div class="text-left flex-1"><p class="font-bold text-sm text-gray-900 dark:text-white">Ganti Password</p></div><i class="fa-solid fa-chevron-right text-gray-400"></i></button>
-        <button onclick="logout()" class="w-full flex items-center gap-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl transition"><div class="w-12 h-12 bg-red-100 text-red-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-right-from-bracket"></i></div><div class="text-left flex-1"><p class="font-bold text-sm text-red-600">Logout</p></div><i class="fa-solid fa-chevron-right text-gray-400"></i></button>
+        <button onclick="openEditProfil()" class="w-full flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl transition">
+          <div class="w-12 h-12 bg-red-800/10 text-red-800 rounded-xl flex items-center justify-center"><i class="fa-solid fa-user-pen"></i></div>
+          <div class="text-left flex-1"><p class="font-bold text-sm text-gray-900 dark:text-white">Edit Profil</p></div>
+          <i class="fa-solid fa-chevron-right text-gray-400"></i>
+        </button>
+        <button onclick="openGantiPassword()" class="w-full flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl transition">
+          <div class="w-12 h-12 bg-red-800/10 text-red-800 rounded-xl flex items-center justify-center"><i class="fa-solid fa-key"></i></div>
+          <div class="text-left flex-1"><p class="font-bold text-sm text-gray-900 dark:text-white">Ganti Password</p></div>
+          <i class="fa-solid fa-chevron-right text-gray-400"></i>
+        </button>
+        <button onclick="logout()" class="w-full flex items-center gap-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl transition">
+          <div class="w-12 h-12 bg-red-100 text-red-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-right-from-bracket"></i></div>
+          <div class="text-left flex-1"><p class="font-bold text-sm text-red-600">Logout</p></div>
+          <i class="fa-solid fa-chevron-right text-gray-400"></i>
+        </button>
       </div>
       <input type="file" id="inputFotoProfil" accept="image/*" class="hidden" onchange="uploadFotoProfil(event)">
     </div>
@@ -302,8 +332,11 @@ function renderDashboard() {
 
   <!-- MODAL EDIT PROFIL -->
   <div id="modalEditProfil" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
-    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- flex flex-col shadow-2xl">
-      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Edit Profil</h3><button onclick="closeEditProfil()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl">
+      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between">
+        <h3 class="font-bold text-lg text-white">Edit Profil</h3>
+        <button onclick="closeEditProfil()"><i class="fa-solid fa-xmark text-xl text-white"></i></button>
+      </div>
       <div class="flex-1 overflow-y-auto p-4 space-y-3">
         <div><label class="text-xs font-bold text-red-800 block mb-1">Nama Lengkap</label><input id="editNama" value="${user.nama||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
         <div><label class="text-xs font-bold text-red-800 block mb-1">No KTP</label><input id="editKtp" value="${user.ktp||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
@@ -322,7 +355,10 @@ function renderDashboard() {
   <!-- MODAL GANTI PASSWORD -->
   <div id="modalGantiPassword" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
     <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
-      <div class="bg-red-800 px-5 py-4 flex items-center justify-between"><h3 class="font-bold text-lg text-white">Ganti Password</h3><button onclick="closeGantiPassword()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
+      <div class="bg-red-800 px-5 py-4 flex items-center justify-between">
+        <h3 class="font-bold text-lg text-white">Ganti Password</h3>
+        <button onclick="closeGantiPassword()"><i class="fa-solid fa-xmark text-xl text-white"></i></button>
+      </div>
       <div class="p-4 space-y-3">
         <div><label class="text-xs font-bold text-red-800 block mb-1">Password Lama</label><input id="passLama" type="password" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm outline-none focus:border-red-800 dark:text-white"></div>
         <div><label class="text-xs font-bold text-red-800 block mb-1">Password Baru</label><input id="passBaru" type="password" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm outline-none focus:border-red-800 dark:text-white"></div>
@@ -331,10 +367,13 @@ function renderDashboard() {
     </div>
   </div>
 
-  <!-- MODAL INPUT PATROLI -->
+  <!-- MODAL PATROLI -->
   <div id="modalPatroli" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
-    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- flex flex-col shadow-2xl">
-      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Input Patroli</h3><button onclick="closeFormPatroli()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl">
+      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between">
+        <h3 class="font-bold text-lg text-white">Input Patroli</h3>
+        <button onclick="closeFormPatroli()"><i class="fa-solid fa-xmark text-xl text-white"></i></button>
+      </div>
       <div class="flex-1 overflow-y-auto p-4 space-y-3">
         <div><label class="text-xs font-bold text-red-800 block mb-1">Lokasi Patroli</label><input id="patroliLokasi" placeholder="Contoh: Pos 1, Lantai 2" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
         <div><label class="text-xs font-bold text-red-800 block mb-1">Keterangan</label><textarea id="patroliKet" rows="3" placeholder="Situasi aman, dll" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white"></textarea></div>
@@ -356,10 +395,13 @@ function renderDashboard() {
     </div>
   </div>
 
-  <!-- MODAL INPUT KEJADIAN -->
+  <!-- MODAL KEJADIAN -->
   <div id="modalKejadian" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
-    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- flex flex-col shadow-2xl">
-      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Lapor Kejadian</h3><button onclick="closeFormKejadian()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl">
+      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between">
+        <h3 class="font-bold text-lg text-white">Lapor Kejadian</h3>
+        <button onclick="closeFormKejadian()"><i class="fa-solid fa-xmark text-xl text-white"></i></button>
+      </div>
       <div class="flex-1 overflow-y-auto p-4 space-y-3">
         <div><label class="text-xs font-bold text-red-800 block mb-1">Jenis Kejadian</label>
           <select id="kejadianJenis" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white">
@@ -391,10 +433,13 @@ function renderDashboard() {
     </div>
   </div>
 
-  <!-- MODAL INPUT PEMBINAAN -->
+  <!-- MODAL PEMBINAAN -->
   <div id="modalPembinaan" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
-    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h- flex flex-col shadow-2xl">
-      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between"><h3 class="font-bold text-lg text-white">Input Pembinaan</h3><button onclick="closeFormPembinaan()"><i class="fa-solid fa-xmark text-xl text-white"></i></button></div>
+    <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl">
+      <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between">
+        <h3 class="font-bold text-lg text-white">Input Pembinaan</h3>
+        <button onclick="closeFormPembinaan()"><i class="fa-solid fa-xmark text-xl text-white"></i></button>
+      </div>
       <div class="flex-1 overflow-y-auto p-4 space-y-3">
         <div><label class="text-xs font-bold text-red-800 block mb-1">Materi Pembinaan</label><input id="pembinaanMateri" placeholder="Contoh: SOP Keamanan" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
         <div><label class="text-xs font-bold text-red-800 block mb-1">Nama Pelatih</label><input id="pembinaanPelatih" placeholder="Nama pelatih/instruktur" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
@@ -404,17 +449,9 @@ function renderDashboard() {
       <div class="p-4"><button onclick="simpanPembinaan()" id="btnSimpanPembinaan" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Simpan</button></div>
     </div>
   </div>`;
-
-  if (currentPage === 'home') {
-    cekStatus();
-    dapatkanLokasiGPS();
-  }
-  if (currentPage === 'rekap') loadRekap();
-  if (currentPage === 'patroli') loadPatroli();
-  if (currentPage === 'kejadian') loadKejadian();
-  if (currentPage === 'pembinaan') loadPembinaan();
 }
 
+// === FUNGSI KAMERA ===
 function bukaKameraAbsen(type) {
   currentCamMode = 'absen';
   currentType = type;
@@ -448,13 +485,13 @@ function bukaKameraKejadian() {
 
 function openCam() {
   const modal = document.getElementById('modalCam');
-  modal.classList.remove('hidden'); modal.classList.add('flex');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
   startTimemark();
 
   const video = document.getElementById('video');
   const isSelfie = (currentCamMode === 'absen');
 
-  // iPhone fix: jangan mirror global
   video.style.transform = isSelfie? 'scaleX(-1)' : 'none';
   document.getElementById('canvas').style.transform = isSelfie? 'scaleX(-1)' : 'none';
 
@@ -471,14 +508,14 @@ function openCam() {
    .then(s => {
       stream = s;
       video.srcObject = s;
-      video.setAttribute('playsinline', true); // WAJIB untuk iPhone
+      video.setAttribute('playsinline', true);
       video.muted = true;
       video.onloadedmetadata = () => {
         video.play().catch(e => console.log('play error', e));
       };
     })
    .catch(err => {
-      toast('Kamera error: ' + err.message + ' - pakai Safari ya');
+      toast('Kamera error: ' + err.message);
       closeCam();
     });
 }
@@ -512,7 +549,6 @@ async function capture() {
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Proses...';
 
   const ctx = canvas.getContext('2d');
-  // === FIX UTAMA: turunin ke 800px ===
   const MAX_WIDTH = 800;
   let width = video.videoWidth;
   let height = video.videoHeight;
@@ -526,7 +562,6 @@ async function capture() {
   canvas.height = height;
   ctx.drawImage(video, 0, 0, width, height);
 
-  // Timemark kecil biar enteng
   const scale = width / 640;
   ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
   ctx.fillRect(8 * scale, height - 85 * scale, 280 * scale, 75 * scale);
@@ -543,7 +578,6 @@ async function capture() {
   ctx.font = `9px Courier New`;
   ctx.fillText(`GPS: ${currentLocation.lat},${currentLocation.long}`, 18 * scale, height - 13 * scale);
 
-  // === KOMPRES JADI 120KB ===
   const fotoBase64 = canvas.toDataURL('image/jpeg', 0.75);
   closeCam();
 
@@ -571,6 +605,7 @@ async function capture() {
   btn.innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Ambil Foto';
 }
 
+// === RENDER HALAMAN ===
 function renderPage() {
   switch(currentPage) {
     case 'home': return renderHome();
@@ -948,6 +983,17 @@ async function loadPatroli() {
   }
 }
 
+function bukaZoom(url) {
+  if (!document.getElementById('modalZoom')) {
+    const modal = document.createElement('div');
+    modal.id = 'modalZoom';
+    modal.className = 'fixed inset-0 bg-black/95 z-[9999] flex items-center justify-center p-4';
+    modal.onclick = () => modal.remove();
+    modal.innerHTML = `<img src="${url}" class="max-w-full max-h-full rounded-2xl shadow-2xl" onclick="event.stopPropagation()">`;
+    document.body.appendChild(modal);
+  }
+}
+
 function openFormPatroli() {
   document.getElementById('modalPatroli').classList.replace('hidden', 'flex');
 }
@@ -1114,88 +1160,6 @@ async function simpanKejadian() {
   btn.innerHTML = 'Kirim Laporan';
 }
 
-function openFormPembinaan() {
-  document.getElementById('modalPembinaan').classList.replace('hidden', 'flex');
-}
-
-function closeFormPembinaan() {
-  document.getElementById('modalPembinaan').classList.replace('flex', 'hidden');
-  document.getElementById('pembinaanMateri').value = '';
-  document.getElementById('pembinaanPelatih').value = '';
-  document.getElementById('pembinaanNilai').value = '';
-  document.getElementById('pembinaanKet').value = '';
-}
-
-async function simpanPembinaan() {
-  const btn = document.getElementById('btnSimpanPembinaan');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyimpan...';
-
-  const materi = document.getElementById('pembinaanMateri').value.trim();
-  const pelatih = document.getElementById('pembinaanPelatih').value.trim();
-  const nilai = document.getElementById('pembinaanNilai').value;
-  const ket = document.getElementById('pembinaanKet').value.trim();
-
-  if (!materi ||!pelatih ||!nilai) {
-    toast('Materi, Pelatih, dan Nilai wajib diisi');
-    btn.disabled = false;
-    btn.innerHTML = 'Simpan';
-    return;
-  }
-
-  const res = await api('tambahPembinaan', {
-    username: user.username,
-    materi: materi,
-    pelatih: pelatih,
-    nilai: nilai,
-    keterangan: ket
-  });
-
-  if (res.status === 'success') {
-    toast(res.message);
-    closeFormPembinaan();
-    loadPembinaan();
-  } else {
-    toast(res.message);
-  }
-
-  btn.disabled = false;
-  btn.innerHTML = 'Simpan';
-}
-
-async function loadPembinaan() {
-  const res = await api('getPembinaan', { username: user.username });
-  const listEl = document.getElementById('listPembinaan');
-
-  if (res.status === 'success' && res.data.length > 0) {
-    dataPembinaan = res.data;
-    listEl.innerHTML = dataPembinaan.map(p => {
-      const tgl = new Date(p.timestamp).toLocaleDateString('id-ID', {day: '2-digit', month: 'short'});
-      return `
-        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-          <div class="flex justify-between items-start mb-2">
-            <div class="flex-1">
-              <p class="text-sm font-bold text-gray-800 dark:text-white">${p.materi}</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400">${tgl} - ${p.pelatih}</p>
-            </div>
-            <div class="bg-red-800 text-white px-3 py-1 rounded-full">
-              <p class="text-sm font-bold">${p.nilai}</p>
-            </div>
-          </div>
-          <p class="text-xs text-gray-600 dark:text-gray-300">${p.keterangan || '-'}</p>
-        </div>
-      `;
-    }).join('');
-  } else {
-    listEl.innerHTML = `
-      <div class="text-center text-gray-400 py-8">
-        <i class="fa-solid fa-user-graduate text-3xl mb-2"></i>
-        <p class="text-sm">Belum ada data pembinaan</p>
-      </div>
-    `;
-  }
-}
-
 function renderPembinaan() {
   return `
   <div class="space-y-4">
@@ -1304,6 +1268,7 @@ function switchPage(page) {
   renderDashboard();
 }
 
+// === GPS ===
 function dapatkanLokasiGPS() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -1369,6 +1334,7 @@ function startTimemark() {
   update();
 }
 
+// === MODAL PROFIL ===
 function openProfil() { document.getElementById('modalProfil').classList.replace('hidden', 'flex'); }
 function closeProfil() { document.getElementById('modalProfil').classList.replace('flex', 'hidden'); }
 function openEditProfil() { closeProfil(); document.getElementById('modalEditProfil').classList.replace('hidden', 'flex'); }
@@ -1381,7 +1347,6 @@ async function uploadFotoProfil(event) {
   const file = event.target.files[0];
   if (!file) return;
 
-  // Kompres dulu
   const img = await createImageBitmap(file);
   const max = 600;
   const scale = Math.min(1, max / Math.max(img.width, img.height));
@@ -1432,6 +1397,7 @@ async function simpanProfil() {
   btn.innerHTML = 'Simpan';
 }
 
+// === [FIX BUG] FUNGSI GANTI PASSWORD YANG RUSAK TADI ===
 async function gantiPassword() {
   const btn = document.getElementById('btnGantiPass');
   btn.disabled = true;
@@ -1483,19 +1449,15 @@ async function api(action, data = {}) {
   }
 }
 
-console.log('Starting app...');
-
-// === HANDLE BACK BUTTON HP - LANGSUNG HOME ===
+// === BACK BUTTON HANDLING ===
 window.addEventListener('popstate', function(event) {
   if (currentPage !== 'home') {
     currentPage = 'home';
     renderDashboard();
   }
-  // Push state lagi biar back ga langsung keluar
   history.pushState({ page: 'home' }, '', '');
 });
 
-// Set initial state
 history.pushState({ page: currentPage }, '', '');
 
 const originalSwitchPage = switchPage;
