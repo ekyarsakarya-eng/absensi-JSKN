@@ -1,4 +1,4 @@
-const CACHE = 'absensi-jskn-v10';
+const CACHE = 'absensi-jskn-v11';
 const files = ['./', './index.html', './app.js', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
