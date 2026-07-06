@@ -1,7 +1,27 @@
+// ============================================
+// KONFIGURASI & VARIABEL GLOBAL
+// ============================================
 const URL_GAS = 'https://script.google.com/macros/s/AKfycbzTLDlivTgJS3QUIm-qmaHRFLVmu-aPYdYwMoG-YdG6xSyeUF9sDUaHV7_E-4xLUAiB/exec';
 console.log('App.js loaded - v2.1 Optimized');
 
-// === VARIABEL GLOBAL ===
+// Debug connection
+async function testConnection() {
+  try {
+    console.log('🔍 Testing connection to GAS...');
+    const response = await fetch(URL_GAS, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'test' })
+    });
+    const data = await response.json();
+    console.log('✅ Connection OK:', data);
+  } catch (err) {
+    console.error('❌ Connection FAILED:', err);
+    console.error('❌ Error details:', err.message);
+  }
+}
+testConnection();
+
 let user = JSON.parse(localStorage.getItem('user') || 'null');
 let isDark = localStorage.getItem('dark') === 'true';
 let currentType = '';
@@ -16,91 +36,74 @@ let dataRekap = [];
 let dataPatroli = [];
 let dataKejadian = [];
 let dataPembinaan = [];
+let selectedMonth = '';
 
-// === SERVICE WORKER ===
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(function(e){console.log(e)});
-}
+// ============================================
+// PWA INSTALL UNIVERSAL
+// ============================================
+let deferredPrompt;
+const installPopup = document.getElementById('installPopup');
+const btnAndroid = document.getElementById('btnInstallAndroid');
+const btnIOS = document.getElementById('btnIOS');
+const iosSteps = document.getElementById('iosSteps');
 
-// === PWA INSTALL PROMPT ===
-var deferredPrompt = null;
-var installPopup = document.getElementById('installPopup');
-var btnAndroid = document.getElementById('btnInstallAndroid');
-var btnIOS = document.getElementById('btnInstallIOS');
-var iosSteps = document.getElementById('iosSteps');
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isInStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
-var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-var isMi = /MiuiBrowser|Redmi|MIUI/i.test(navigator.userAgent);
-
-function isStandalone() {
-  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-}
-
-function cekInstall() {
-  if (isStandalone()) {
-    if (installPopup) { installPopup.style.display = 'none'; }
-    return true;
-  }
-  if (installPopup) {
-    installPopup.classList.remove('hidden');
-    installPopup.classList.add('flex');
-    if (isIOS) {
-      document.getElementById('installTitle').innerText = 'Wajib Install iPhone';
-      if (btnIOS) btnIOS.style.display = 'block';
-      if (btnAndroid) btnAndroid.style.display = 'none';
-    } else {
-      if (btnAndroid) btnAndroid.style.display = 'block';
-      if (btnIOS) btnIOS.style.display = 'none';
-    }
-  }
-  return false;
-}
-
-window.addEventListener('beforeinstallprompt', function(e) {
+window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
+  if (!isInStandalone()) {
+    installPopup.classList.remove('hidden');
+    installPopup.classList.add('flex');
+    btnAndroid.classList.remove('hidden');
+  }
 });
 
-if (btnAndroid) {
-  btnAndroid.onclick = async function() {
-    if (!deferredPrompt) {
-      alert('HP Redmi: Buka titik 3 di Chrome > Tambahkan ke layar utama');
-      if (iosSteps) {
-        iosSteps.style.display = 'block';
-        iosSteps.innerHTML = '1. Pakai Google Chrome<br>2. Titik 3 > Instal aplikasi<br>3. Buka dari Home';
-      }
-      return;
-    }
-    deferredPrompt.prompt();
-    var res = await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    if (res.outcome !== 'accepted') {
-      alert('Harus install dulu');
-    } else {
-      location.reload();
-    }
-  };
+btnAndroid?.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  installPopup.classList.add('hidden');
+});
+
+if (isIOS && !isInStandalone()) {
+  installPopup.classList.remove('hidden');
+  installPopup.classList.add('flex');
+  if (btnIOS) {
+    btnIOS.classList.remove('hidden');
+  }
 }
 
-if (btnIOS && iosSteps) {
-  btnIOS.onclick = function() {
-    iosSteps.style.display = (iosSteps.style.display === 'none' ? 'block' : 'none');
-  };
-}
+btnIOS?.addEventListener('click', () => {
+  if (iosSteps) {
+    iosSteps.classList.toggle('hidden');
+  }
+  if (btnIOS) {
+    btnIOS.innerHTML = iosSteps.classList.contains('hidden')
+      ? '<i class="fa-solid fa-share-from-square mr-2"></i>Lihat Cara Install'
+      : '<i class="fa-solid fa-check mr-2"></i>Sudah Install? Buka dari Home';
+  }
+});
 
-window.addEventListener('load', function(){ setTimeout(cekInstall, 800); });
+if (isInStandalone() && installPopup) installPopup.classList.add('hidden');
 
+// ============================================
+// INIT APP
+// ============================================
 const app = document.getElementById('app');
-if(!app) console.error('Div #app tidak ditemukan!');
-
+if (!app) console.error('❌ Div #app tidak ditemukan!');
 if (isDark) document.documentElement.classList.add('dark');
 
-// === RENDER UTAMA ===
 function render() {
   if (!user) return renderLogin();
   renderDashboard();
 }
 
+// ============================================
+// LOGIN & AUTH
+// ============================================
 function renderLogin() {
   app.innerHTML = `
   <div class="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-red-800 to-red-900">
@@ -135,17 +138,25 @@ function renderLogin() {
 async function login() {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value.trim();
-  if (!username ||!password) return toast('Username & password wajib diisi');
+  if (!username || !password) return toast('Username & password wajib diisi');
+  
   const btn = document.getElementById('btnLogin');
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Memproses...';
-  const res = await api('login', {username, password});
-  if (res.status === 'success') {
-    user = res;
-    localStorage.setItem('user', JSON.stringify(user));
-    render();
-  } else {
-    toast(res.message);
+  
+  try {
+    const res = await api('login', { username, password });
+    if (res.status === 'success') {
+      user = res;
+      localStorage.setItem('user', JSON.stringify(user));
+      render();
+    } else {
+      toast(res.message);
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i>Masuk';
+    }
+  } catch (err) {
+    toast('Koneksi gagal: ' + err.message);
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i>Masuk';
   }
@@ -173,10 +184,10 @@ function togglePass() {
 }
 
 function toggleDark() {
-  isDark =!isDark;
+  isDark = !isDark;
   localStorage.setItem('dark', isDark);
   document.documentElement.classList.toggle('dark');
-  document.getElementById('darkIcon').className = `fa-solid ${isDark? 'fa-sun' : 'fa-moon'} text-xl`;
+  document.getElementById('darkIcon').className = `fa-solid ${isDark ? 'fa-sun' : 'fa-moon'} text-xl`;
 }
 
 function toast(msg) {
@@ -187,83 +198,76 @@ function toast(msg) {
   setTimeout(() => t.remove(), 2000);
 }
 
-// === RENDER DASHBOARD (OPTIMIZED - HANYA UPDATE CONTENT AREA) ===
+// ============================================
+// DASHBOARD & NAVIGATION
+// ============================================
 function renderDashboard() {
-  // Hanya render layout utama jika belum ada
-  if (!document.getElementById('contentArea')) {
-    app.innerHTML = `
-    <nav class="bg-red-800 text-white p-4 flex justify-between items-center shadow-lg sticky top-0 z-10">
-      <div class="flex items-center gap-3">
-        <i class="fa-solid fa-user-shield text-xl"></i>
-        <div>
-          <h1 class="font-bold text-lg leading-tight">Hi, ${user.nama}</h1>
-          <p class="text-xs opacity-80">${new Date().toLocaleDateString('id-ID', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}</p>
-        </div>
-      </div>
-      <div class="flex gap-3 items-center">
-        <button onclick="toggleDark()" class="hover:bg-red-900 p-2 rounded-lg transition">
-          <i id="darkIcon" class="fa-solid ${isDark? 'fa-sun' : 'fa-moon'} text-xl"></i>
-        </button>
-        <button onclick="openProfil()" class="flex items-center gap-2 hover:bg-red-900 p-1 pr-3 rounded-full transition">
-          <img id="avatarNav" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=800000&color=fff'}"
-               class="w-9 h-9 rounded-full object-cover border-2 border-white">
-        </button>
-      </div>
-    </nav>
-
-    <div id="contentArea" class="p-4 max-w-2xl mx-auto pb-32"></div>
-
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 dark:bg-gray-800 dark:border-gray-700 shadow-lg z-20">
-      <div class="grid grid-cols-5 gap-1 max-w-2xl mx-auto">
-        <button onclick="switchPage('home')" data-page="home" class="nav-btn flex flex-col items-center py-2 ${currentPage==='home'?'text-red-800':'text-gray-500'}">
-          <i class="fa-solid fa-house text-xl mb-1"></i>
-          <span class="text-xs font-semibold">Home</span>
-        </button>
-        <button onclick="switchPage('rekap')" data-page="rekap" class="nav-btn flex flex-col items-center py-2 ${currentPage==='rekap'?'text-red-800':'text-gray-500'}">
-          <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-rekap.png" class="w-6 h-6 mb-1 ${currentPage==='rekap'?'':'opacity-50'}">
-          <span class="text-xs font-semibold">Rekap</span>
-        </button>
-        <button onclick="switchPage('patroli')" data-page="patroli" class="nav-btn flex flex-col items-center py-2 ${currentPage==='patroli'?'text-red-800':'text-gray-500'}">
-          <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-patroli.png" class="w-6 h-6 mb-1 ${currentPage==='patroli'?'':'opacity-50'}">
-          <span class="text-xs font-semibold">Patroli</span>
-        </button>
-        <button onclick="switchPage('kejadian')" data-page="kejadian" class="nav-btn flex flex-col items-center py-2 ${currentPage==='kejadian'?'text-red-800':'text-gray-500'}">
-          <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-kejadian.png" class="w-6 h-6 mb-1 ${currentPage==='kejadian'?'':'opacity-50'}">
-          <span class="text-xs font-semibold">Kejadian</span>
-        </button>
-        <button onclick="switchPage('pembinaan')" data-page="pembinaan" class="nav-btn flex flex-col items-center py-2 ${currentPage==='pembinaan'?'text-red-800':'text-gray-500'}">
-          <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-pembinaan.png" class="w-6 h-6 mb-1 ${currentPage==='pembinaan'?'':'opacity-50'}">
-          <span class="text-xs font-semibold">Pembinaan</span>
-        </button>
+  app.innerHTML = `
+  <nav class="bg-red-800 text-white p-4 flex justify-between items-center shadow-lg sticky top-0 z-10">
+    <div class="flex items-center gap-3">
+      <i class="fa-solid fa-user-shield text-xl"></i>
+      <div>
+        <h1 class="font-bold text-lg leading-tight">Hi, ${user.nama}</h1>
+        <p class="text-xs opacity-80">${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
       </div>
     </div>
+    <div class="flex gap-3 items-center">
+      <button onclick="toggleDark()" class="hover:bg-red-900 p-2 rounded-lg transition">
+        <i id="darkIcon" class="fa-solid ${isDark ? 'fa-sun' : 'fa-moon'} text-xl"></i>
+      </button>
+      <button onclick="openProfil()" class="flex items-center gap-2 hover:bg-red-900 p-1 pr-3 rounded-full transition">
+        <img id="avatarNav" src="${user.foto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.nama) + '&background=800000&color=fff'}"
+             class="w-9 h-9 rounded-full object-cover border-2 border-white">
+      </button>
+    </div>
+  </nav>
 
-    ${getModalsHTML()}`;
+  <div id="contentArea" class="p-4 max-w-2xl mx-auto pb-32">
+    ${renderPage()}
+  </div>
+
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 dark:bg-gray-800 dark:border-gray-700 shadow-lg z-20">
+  <div class="grid grid-cols-5 gap-1 max-w-2xl mx-auto">
+    <button onclick="switchPage('home')" class="flex flex-col items-center py-2 ${currentPage === 'home' ? 'text-red-800' : 'text-gray-500'}">
+      <i class="fa-solid fa-house text-xl mb-1"></i>
+      <span class="text-xs font-semibold">Home</span>
+    </button>
+    <button onclick="switchPage('rekap')" class="flex flex-col items-center py-2 ${currentPage === 'rekap' ? 'text-red-800' : 'text-gray-500'}">
+      <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-rekap.png" class="w-6 h-6 mb-1 ${currentPage === 'rekap' ? '' : 'opacity-50'}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <i class="fa-solid fa-table text-xl mb-1 hidden"></i>
+      <span class="text-xs font-semibold">Rekap</span>
+    </button>
+    <button onclick="switchPage('patroli')" class="flex flex-col items-center py-2 ${currentPage === 'patroli' ? 'text-red-800' : 'text-gray-500'}">
+      <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-patroli.png" class="w-6 h-6 mb-1 ${currentPage === 'patroli' ? '' : 'opacity-50'}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <i class="fa-solid fa-route text-xl mb-1 hidden"></i>
+      <span class="text-xs font-semibold">Patroli</span>
+    </button>
+    <button onclick="switchPage('kejadian')" class="flex flex-col items-center py-2 ${currentPage === 'kejadian' ? 'text-red-800' : 'text-gray-500'}">
+      <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-kejadian.png" class="w-6 h-6 mb-1 ${currentPage === 'kejadian' ? '' : 'opacity-50'}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <i class="fa-solid fa-triangle-exclamation text-xl mb-1 hidden"></i>
+      <span class="text-xs font-semibold">Kejadian</span>
+    </button>
+    <button onclick="switchPage('pembinaan')" class="flex flex-col items-center py-2 ${currentPage === 'pembinaan' ? 'text-red-800' : 'text-gray-500'}">
+      <img src="https://raw.githubusercontent.com/ekyarsakarya-eng/absensi-Balaikota/main/icon-pembinaan.png" class="w-6 h-6 mb-1 ${currentPage === 'pembinaan' ? '' : 'opacity-50'}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <i class="fa-solid fa-user-graduate text-xl mb-1 hidden"></i>
+      <span class="text-xs font-semibold">Pembinaan</span>
+    </button>
+  </div>
+</div>
+  ${renderModals()}
+  `;
+
+  if (currentPage === 'home') {
+    cekStatus();
+    dapatkanLokasiGPS();
   }
-
-  // [OPTIMASI] Hanya update konten area
-  const contentArea = document.getElementById('contentArea');
-  if (contentArea) contentArea.innerHTML = renderPage();
-
-  // Update status nav aktif
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    const isActive = btn.dataset.page === currentPage;
-    btn.classList.toggle('text-red-800', isActive);
-    btn.classList.toggle('text-gray-500', !isActive);
-    const img = btn.querySelector('img');
-    if (img) img.classList.toggle('opacity-50', !isActive);
-  });
-
-  // Load data sesuai halaman
-  if (currentPage === 'home') { cekStatus(); dapatkanLokasiGPS(); }
   if (currentPage === 'rekap') loadRekap();
   if (currentPage === 'patroli') loadPatroli();
   if (currentPage === 'kejadian') loadKejadian();
   if (currentPage === 'pembinaan') loadPembinaan();
 }
 
-// === MODALS (HTML KUMPUL DI SINI BIAR RAPI) ===
-function getModalsHTML() {
+function renderModals() {
   return `
   <!-- MODAL KAMERA -->
   <div id="modalCam" class="fixed inset-0 bg-black/90 hidden items-center justify-center p-4 z-[70]">
@@ -302,7 +306,7 @@ function getModalsHTML() {
         </button>
         <div class="text-center">
           <div class="relative inline-block mb-3">
-            <img id="fotoProfil" src="${user.foto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.nama)+'&background=fff&color=800000&size=256'}" class="w-24 h-24 rounded-2xl object-cover mx-auto border-4 border-white shadow-2xl">
+            <img id="fotoProfil" src="${user.foto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.nama) + '&background=fff&color=800000&size=256'}" class="w-24 h-24 rounded-2xl object-cover mx-auto border-4 border-white shadow-2xl">
             <button onclick="gantiFotoProfil()" class="absolute -bottom-1 -right-1 bg-white text-red-800 w-9 h-9 rounded-xl shadow-xl flex items-center justify-center"><i class="fa-solid fa-camera"></i></button>
           </div>
           <h3 class="font-extrabold text-xl text-white mb-1">${user.nama}</h3>
@@ -338,14 +342,14 @@ function getModalsHTML() {
         <button onclick="closeEditProfil()"><i class="fa-solid fa-xmark text-xl text-white"></i></button>
       </div>
       <div class="flex-1 overflow-y-auto p-4 space-y-3">
-        <div><label class="text-xs font-bold text-red-800 block mb-1">Nama Lengkap</label><input id="editNama" value="${user.nama||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
-        <div><label class="text-xs font-bold text-red-800 block mb-1">No KTP</label><input id="editKtp" value="${user.ktp||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
-        <div><label class="text-xs font-bold text-red-800 block mb-1">No HP</label><input id="editHp" value="${user.hp||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
-        <div><label class="text-xs font-bold text-red-800 block mb-1">Alamat</label><textarea id="editAlamat" rows="2" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white">${user.alamat||''}</textarea></div>
-        <div><label class="text-xs font-bold text-red-800 block mb-1">Tempat, Tgl Lahir</label><input id="editTtl" value="${user.ttl||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Nama Lengkap</label><input id="editNama" value="${user.nama || ''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">No KTP</label><input id="editKtp" value="${user.ktp || ''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">No HP</label><input id="editHp" value="${user.hp || ''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Alamat</label><textarea id="editAlamat" rows="2" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none resize-none dark:text-white">${user.alamat || ''}</textarea></div>
+        <div><label class="text-xs font-bold text-red-800 block mb-1">Tempat, Tgl Lahir</label><input id="editTtl" value="${user.ttl || ''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
         <div class="grid grid-cols-2 gap-3">
-          <div><label class="text-xs font-bold text-red-800 block mb-1">Bank</label><input id="editBank" value="${user.bank||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
-          <div><label class="text-xs font-bold text-red-800 block mb-1">No Rekening</label><input id="editRek" value="${user.rekening||''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+          <div><label class="text-xs font-bold text-red-800 block mb-1">Bank</label><input id="editBank" value="${user.bank || ''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
+          <div><label class="text-xs font-bold text-red-800 block mb-1">No Rekening</label><input id="editRek" value="${user.rekening || ''}" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white"></div>
         </div>
       </div>
       <div class="p-4"><button onclick="simpanProfil()" id="btnSimpanProfil" class="w-full bg-red-800 text-white py-3 rounded-2xl font-bold">Simpan</button></div>
@@ -367,7 +371,7 @@ function getModalsHTML() {
     </div>
   </div>
 
-  <!-- MODAL PATROLI -->
+  <!-- MODAL INPUT PATROLI -->
   <div id="modalPatroli" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
     <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl">
       <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between">
@@ -395,7 +399,7 @@ function getModalsHTML() {
     </div>
   </div>
 
-  <!-- MODAL KEJADIAN -->
+  <!-- MODAL INPUT KEJADIAN -->
   <div id="modalKejadian" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
     <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl">
       <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between">
@@ -433,7 +437,7 @@ function getModalsHTML() {
     </div>
   </div>
 
-  <!-- MODAL PEMBINAAN -->
+  <!-- MODAL INPUT PEMBINAAN -->
   <div id="modalPembinaan" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-[60]">
     <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl">
       <div class="bg-red-800 px-5 py-4 rounded-t-3xl flex items-center justify-between">
@@ -451,198 +455,8 @@ function getModalsHTML() {
   </div>`;
 }
 
-// === FUNGSI KAMERA ===
-function bukaKameraAbsen(type) {
-  currentCamMode = 'absen';
-  currentType = type;
-  modalAsal = '';
-  document.getElementById('judulKamera').textContent = 'Ambil Foto Selfie';
-  document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Kirim Absen';
-  currentLocation.alamat = 'Mengunci Posisi Satelit...';
-  dapatkanLokasiGPS();
-  openCam();
-}
-
-function bukaKameraPatroli() {
-  currentCamMode = 'patroli';
-  modalAsal = 'patroli';
-  document.getElementById('judulKamera').textContent = 'Foto Lokasi Patroli';
-  document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Ambil Foto';
-  currentLocation.alamat = 'Mengunci Posisi Satelit...';
-  dapatkanLokasiGPS();
-  openCam();
-}
-
-function bukaKameraKejadian() {
-  currentCamMode = 'kejadian';
-  modalAsal = 'kejadian';
-  document.getElementById('judulKamera').textContent = 'Foto Bukti Kejadian';
-  document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Ambil Foto';
-  currentLocation.alamat = 'Mengunci Posisi Satelit...';
-  dapatkanLokasiGPS();
-  openCam();
-}
-
-function openCam() {
-  const modal = document.getElementById('modalCam');
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
-  startTimemark();
-
-  const video = document.getElementById('video');
-  const isSelfie = (currentCamMode === 'absen');
-
-  video.style.transform = isSelfie? 'scaleX(-1)' : 'none';
-  document.getElementById('canvas').style.transform = isSelfie? 'scaleX(-1)' : 'none';
-
-  const constraints = {
-    audio: false,
-    video: {
-      facingMode: { ideal: isSelfie? 'user' : 'environment' },
-      width: { ideal: 1280, max: 1920 },
-      height: { ideal: 720, max: 1080 }
-    }
-  };
-
-  navigator.mediaDevices.getUserMedia(constraints)
-   .then(s => {
-      stream = s;
-      video.srcObject = s;
-      video.setAttribute('playsinline', true);
-      video.muted = true;
-      video.onloadedmetadata = () => {
-        video.play().catch(e => console.log('play error', e));
-      };
-    })
-   .catch(err => {
-      toast('Kamera error: ' + err.message);
-      closeCam();
-    });
-}
-
-function closeCam() {
-  const modal = document.getElementById('modalCam');
-  modal.classList.add('hidden');
-  modal.classList.remove('flex');
-  if (stream) {
-    stream.getTracks().forEach(track => track.stop());
-    stream = null;
-  }
-  if (animationFrame) cancelAnimationFrame(animationFrame);
-  
-  if (modalAsal === 'patroli') {
-    document.getElementById('modalPatroli').classList.replace('hidden', 'flex');
-  } else if (modalAsal === 'kejadian') {
-    document.getElementById('modalKejadian').classList.replace('hidden', 'flex');
-  }
-  modalAsal = '';
-}
-
-async function capture() {
-  const video = document.getElementById('video');
-  const canvas = document.getElementById('canvas');
-  const btn = document.getElementById('btnCapture');
-
-  if (!video ||!canvas) return;
-
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Proses...';
-
-  const ctx = canvas.getContext('2d');
-  const MAX_WIDTH = 800;
-  let width = video.videoWidth;
-  let height = video.videoHeight;
-
-  if (width > MAX_WIDTH) {
-    height = Math.round(height * (MAX_WIDTH / width));
-    width = MAX_WIDTH;
-  }
-
-  canvas.width = width;
-  canvas.height = height;
-  ctx.drawImage(video, 0, 0, width, height);
-
-  const scale = Math.max(width / 640, 1); // Minimal scale 1 agar tidak kekecilan
-
-// === WATERMARK BOX (DIPERBESAR) ===
-const wmPadding = 14 * scale;
-const wmBoxWidth = 340 * scale;
-const wmBoxHeight = 120 * scale;
-const wmX = 12 * scale;
-const wmY = height - wmBoxHeight - 12 * scale;
-
-// Background hitam transparan
-ctx.fillStyle = "rgba(0, 0, 0, 0.78)";
-ctx.fillRect(wmX, wmY, wmBoxWidth, wmBoxHeight);
-
-// Border merah di kiri (aksen)
-ctx.fillStyle = "#dc2626";
-ctx.fillRect(wmX, wmY, 6 * scale, wmBoxHeight);
-
-// Border atas tipis
-ctx.fillStyle = "rgba(255,255,255,0.15)";
-ctx.fillRect(wmX, wmY, wmBoxWidth, 2 * scale);
-
-// Posisi teks
-const textX = wmX + wmPadding + 6 * scale;
-let textY = wmY + 26 * scale;
-
-// Baris 1: Tanggal
-ctx.fillStyle = "#ffffff";
-ctx.font = `bold ${15 * scale}px Arial`;
-ctx.fillText(
-  new Date().toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }),
-  textX, textY
-);
-
-// Baris 2: Jam (lebih besar & kuning)
-textY += 26 * scale;
-ctx.fillStyle = "#facc15";
-ctx.font = `bold ${22 * scale}px Arial`;
-ctx.fillText(new Date().toLocaleTimeString('id-ID'), textX, textY);
-
-// Baris 3: Nama
-textY += 24 * scale;
-ctx.fillStyle = "#ffffff";
-ctx.font = `bold ${13 * scale}px Arial`;
-ctx.fillText(`Nama: ${user.nama}`, textX, textY);
-
-// Baris 4: GPS
-textY += 20 * scale;
-ctx.fillStyle = "#4ade80";
-ctx.font = `${12 * scale}px Courier New`;
-ctx.fillText(`GPS: ${currentLocation.lat}, ${currentLocation.long}`, textX, textY);
-
-  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.75);
-  closeCam();
-
-  if (currentCamMode === 'absen') {
-    const res = await api('absen', {
-      username: user.username,
-      tipeAbsen: currentType,
-      foto: fotoBase64,
-      lat: currentLocation.lat,
-      long: currentLocation.long
-    });
-    toast(res.message);
-    if (res.status === 'success') cekStatus();
-  } else if (currentCamMode === 'patroli') {
-    document.getElementById('patroliFotoBase64').value = fotoBase64;
-    document.getElementById('previewPatroli').innerHTML = `<img src="${fotoBase64}" class="w-full h-full object-cover">`;
-    toast('Foto patroli berhasil');
-  } else if (currentCamMode === 'kejadian') {
-    document.getElementById('kejadianFotoBase64').value = fotoBase64;
-    document.getElementById('previewKejadian').innerHTML = `<img src="${fotoBase64}" class="w-full h-full object-cover">`;
-    toast('Foto kejadian berhasil');
-  }
-
-  btn.disabled = false;
-  btn.innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Ambil Foto';
-}
-
-// === RENDER HALAMAN ===
 function renderPage() {
-  switch(currentPage) {
+  switch (currentPage) {
     case 'home': return renderHome();
     case 'rekap': return renderRekap();
     case 'patroli': return renderPatroli();
@@ -652,6 +466,16 @@ function renderPage() {
   }
 }
 
+function switchPage(page) {
+  currentPage = page;
+  // Jangan simpan selectedMonth - biarkan reset ke bulan berjalan
+  renderDashboard();
+  history.pushState({ page: page }, '', '');
+}
+
+// ============================================
+// HOME PAGE
+// ============================================
 function renderHome() {
   const { bisaIn = false, bisaOut = false, lock12Jam = false, sisaJam = 0, jamMasuk = '--:--', jamPulang = '--:--' } = statusServer;
 
@@ -712,10 +536,10 @@ function renderHome() {
     </div>
   </div>
 
-   <div class="space-y-3 mb-5">
-    <button onclick="bukaKameraAbsen('Masuk')" ${!bisaIn? 'disabled' : ''}
+  <div class="space-y-3 mb-5">
+    <button onclick="bukaKameraAbsen('Masuk')" ${!bisaIn ? 'disabled' : ''}
       class="w-full py-5 rounded-3xl font-bold text-white transition-all duration-300 flex items-center gap-4 shadow-xl
-      ${!bisaIn? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed shadow-none text-gray-500' : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:scale-[1.02] active:scale-[0.98] hover:shadow-green-500/50'}">
+      ${!bisaIn ? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed shadow-none text-gray-500' : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:scale-[1.02] active:scale-[0.98] hover:shadow-green-500/50'}">
       <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center ml-1">
         <i class="fa-solid fa-fingerprint text-3xl"></i>
       </div>
@@ -723,12 +547,12 @@ function renderHome() {
         <p class="text-xl">Absen Masuk</p>
         <p class="text-xs opacity-80">Tap untuk scan wajah & GPS</p>
       </div>
-      ${bisaIn? '<div class="w-3 h-3 bg-white rounded-full animate-ping mr-4"></div>' : ''}
+      ${bisaIn ? '<div class="w-3 h-3 bg-white rounded-full animate-ping mr-4"></div>' : ''}
     </button>
 
-    <button onclick="bukaKameraAbsen('Pulang')" ${!bisaOut? 'disabled' : ''}
+    <button onclick="bukaKameraAbsen('Pulang')" ${!bisaOut ? 'disabled' : ''}
       class="w-full py-5 rounded-3xl font-bold text-white transition-all duration-300 flex items-center gap-4 shadow-xl
-      ${!bisaOut? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed shadow-none text-gray-500' : 'bg-gradient-to-r from-red-800 to-red-900 hover:scale-[1.02] active:scale-[0.98] hover:shadow-red-800/50'}">
+      ${!bisaOut ? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed shadow-none text-gray-500' : 'bg-gradient-to-r from-red-800 to-red-900 hover:scale-[1.02] active:scale-[0.98] hover:shadow-red-800/50'}">
       <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center ml-1">
         <i class="fa-solid fa-door-open text-3xl"></i>
       </div>
@@ -736,7 +560,7 @@ function renderHome() {
         <p class="text-xl">Absen Pulang</p>
         <p class="text-xs opacity-80">Selesaikan shift hari ini</p>
       </div>
-      ${bisaOut? '<div class="w-3 h-3 bg-white rounded-full animate-ping mr-4"></div>' : ''}
+      ${bisaOut ? '<div class="w-3 h-3 bg-white rounded-full animate-ping mr-4"></div>' : ''}
     </button>
   </div>
 
@@ -755,19 +579,19 @@ function renderHome() {
 
 function getStatusText(jamMasuk, jamPulang) {
   if (jamMasuk === '--:--') return 'Belum Absen Masuk';
-  if (jamMasuk!== '--:--' && jamPulang === '--:--') return 'Sedang Bekerja';
+  if (jamMasuk !== '--:--' && jamPulang === '--:--') return 'Sedang Bekerja';
   return 'Shift Selesai 👍';
 }
 
 function updateJamRealtime() {
   const el = document.getElementById('jamRealtime');
   const statusEl = document.getElementById('statusKerja');
-  if (!el ||!statusServer) return;
+  if (!el || !statusServer) return;
 
   const now = new Date();
   el.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-  if (statusServer.jamMasuk!== '--:--' && statusServer.jamPulang === '--:--') {
+  if (statusServer.jamMasuk !== '--:--' && statusServer.jamPulang === '--:--') {
     const [jam, menit] = statusServer.jamMasuk.split(':');
     const masuk = new Date();
     masuk.setHours(parseInt(jam), parseInt(menit), 0);
@@ -781,30 +605,71 @@ setInterval(updateJamRealtime, 1000);
 
 async function loadHomeStats() {
   try {
+    // Gunakan getRekapFromSheetBulanan untuk bulan saat ini
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const bulanParam = `${month}/${year}`;
+    
+    console.log('📊 Loading home stats untuk bulan:', bulanParam);
+    
     const [rekap, patroli] = await Promise.all([
-      api('getRekap', { username: user.username }),
+      api('getRekapFromSheetBulanan', { 
+        username: user.username,
+        nama: user.nama,
+        bulan: bulanParam 
+      }),
       api('getPatroli', { username: user.username })
     ]);
+
+    console.log(' Rekap response:', rekap);
+    console.log('📥 Patroli response:', patroli);
 
     const statHadir = document.getElementById('statHadir');
     const statTelat = document.getElementById('statTelat');
     const statPatroli = document.getElementById('statPatroli');
 
-    if (rekap.status === 'success' && statHadir) {
-      const hadir = rekap.data.filter(r => r.keterangan === 'IN' && r.jam && r.jam!== '--:--').length;
+    if (rekap.status === 'success' && rekap.data && statHadir) {
+      // Group data per tanggal untuk hitung hadir
+      const grouped = {};
+      rekap.data.forEach(item => {
+        if (!grouped[item.tanggal]) {
+          grouped[item.tanggal] = { in: null, out: null };
+        }
+        const ket = String(item.keterangan || '').toUpperCase();
+        if (ket === 'IN' || ket === 'MASUK') {
+          grouped[item.tanggal].in = item.jam;
+        }
+        if (ket === 'OUT' || ket === 'PULANG') {
+          grouped[item.tanggal].out = item.jam;
+        }
+      });
+      
+      // Hitung hadir = yang ada jam masuk
+      const hadir = Object.keys(grouped).filter(tgl => grouped[tgl].in).length;
       statHadir.textContent = hadir;
-      if(statTelat) statTelat.textContent = 0;
+      
+      console.log('✅ Hadir bulan ini:', hadir);
+      
+      // Hitung telat (opsional - bisa disesuaikan dengan jam masuk standar)
+      // Untuk sekarang tampilkan 0 atau hitung berdasarkan jam masuk > 08:00
+      if (statTelat) statTelat.textContent = '0';
+    } else {
+      console.warn('⚠️ Rekap error atau kosong:', rekap);
+      if (statHadir) statHadir.textContent = '0';
+      if (statTelat) statTelat.textContent = '0';
     }
 
     if (patroli.status === 'success' && statPatroli) {
       statPatroli.textContent = patroli.data.length;
+      console.log('✅ Patroli bulan ini:', patroli.data.length);
 
       const aktivitasEl = document.getElementById('aktivitasTerakhir');
       if (aktivitasEl && patroli.data.length > 0) {
         const last = patroli.data[0];
         const waktu = new Date(last.timestamp);
         const selisih = Math.floor((new Date() - waktu) / 60000);
-        const waktuText = selisih < 60? `${selisih} menit lalu` : `${Math.floor(selisih/60)} jam lalu`;
+        const waktuText = selisih < 60 ? `${selisih} menit lalu` : `${Math.floor(selisih / 60)} jam lalu`;
 
         aktivitasEl.innerHTML = `
           <div class="flex items-center gap-3">
@@ -819,7 +684,7 @@ async function loadHomeStats() {
         `;
       }
     }
-  } catch(e) {
+  } catch (e) {
     console.error('Load stats error:', e);
   }
 }
@@ -827,7 +692,7 @@ async function loadHomeStats() {
 function updateGpsCard(jarak, radius) {
   const gpsText = document.getElementById('gpsText');
   const gpsCard = document.getElementById('gpsCard');
-  if (!gpsText ||!gpsCard) return;
+  if (!gpsText || !gpsCard) return;
 
   if (jarak <= radius) {
     gpsText.innerHTML = `<span class="text-green-600 dark:text-green-400 font-bold">Dalam radius ${Math.round(jarak)}m ✓</span>`;
@@ -838,133 +703,639 @@ function updateGpsCard(jarak, radius) {
   }
 }
 
+// ============================================
+// KAMERA & CAPTURE
+// ============================================
+function bukaKameraAbsen(type) {
+  currentCamMode = 'absen';
+  currentType = type;
+  modalAsal = '';
+  document.getElementById('judulKamera').textContent = 'Ambil Foto Selfie';
+  document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Kirim Absen';
+  currentLocation.alamat = 'Mengunci Posisi Satelit...';
+  dapatkanLokasiGPS();
+  openCam();
+}
+
+function bukaKameraPatroli() {
+  currentCamMode = 'patroli';
+  modalAsal = 'patroli';
+  document.getElementById('judulKamera').textContent = 'Foto Lokasi Patroli';
+  document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Ambil Foto';
+  currentLocation.alamat = 'Mengunci Posisi Satelit...';
+  dapatkanLokasiGPS();
+  openCam();
+}
+
+function bukaKameraKejadian() {
+  currentCamMode = 'kejadian';
+  modalAsal = 'kejadian';
+  document.getElementById('judulKamera').textContent = 'Foto Bukti Kejadian';
+  document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Ambil Foto';
+  currentLocation.alamat = 'Mengunci Posisi Satelit...';
+  dapatkanLokasiGPS();
+  openCam();
+}
+
+function openCam() {
+  const modal = document.getElementById('modalCam');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  startTimemark();
+
+  const video = document.getElementById('video');
+  const isSelfie = (currentCamMode === 'absen');
+
+  video.style.transform = isSelfie ? 'scaleX(-1)' : 'none';
+  document.getElementById('canvas').style.transform = isSelfie ? 'scaleX(-1)' : 'none';
+
+  const constraints = {
+    audio: false,
+    video: {
+      facingMode: { ideal: isSelfie ? 'user' : 'environment' },
+      width: { ideal: 1280, max: 1920 },
+      height: { ideal: 720, max: 1080 }
+    }
+  };
+
+  navigator.mediaDevices.getUserMedia(constraints)
+    .then(s => {
+      stream = s;
+      video.srcObject = s;
+      video.setAttribute('playsinline', true);
+      video.muted = true;
+      video.onloadedmetadata = () => {
+        video.play().catch(e => console.log('play error', e));
+      };
+    })
+    .catch(err => {
+      toast('Kamera error: ' + err.message + ' - pakai Safari ya');
+      closeCam();
+    });
+}
+
+function closeCam() {
+  const modal = document.getElementById('modalCam');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    stream = null;
+  }
+  if (animationFrame) cancelAnimationFrame(animationFrame);
+  
+  if (modalAsal === 'patroli') {
+    document.getElementById('modalPatroli').classList.replace('hidden', 'flex');
+  } else if (modalAsal === 'kejadian') {
+    document.getElementById('modalKejadian').classList.replace('hidden', 'flex');
+  }
+  modalAsal = '';
+}
+
+async function capture() {
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const btn = document.getElementById('btnCapture');
+
+  if (!video || !canvas) return;
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Proses...';
+
+  const ctx = canvas.getContext('2d');
+  const MAX_WIDTH = 800;
+  let width = video.videoWidth;
+  let height = video.videoHeight;
+
+  if (width > MAX_WIDTH) {
+    height = Math.round(height * (MAX_WIDTH / width));
+    width = MAX_WIDTH;
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+  ctx.drawImage(video, 0, 0, width, height);
+
+  const scale = Math.max(width / 640, 1);
+
+  const wmPadding = 14 * scale;
+  const wmBoxWidth = 340 * scale;
+  const wmBoxHeight = 120 * scale;
+  const wmX = 12 * scale;
+  const wmY = height - wmBoxHeight - 12 * scale;
+
+  ctx.fillStyle = "rgba(0, 0, 0, 0.78)";
+  ctx.fillRect(wmX, wmY, wmBoxWidth, wmBoxHeight);
+
+  ctx.fillStyle = "#dc2626";
+  ctx.fillRect(wmX, wmY, 6 * scale, wmBoxHeight);
+
+  ctx.fillStyle = "rgba(255,255,255,0.15)";
+  ctx.fillRect(wmX, wmY, wmBoxWidth, 2 * scale);
+
+  const textX = wmX + wmPadding + 6 * scale;
+  let textY = wmY + 26 * scale;
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `bold ${15 * scale}px Arial`;
+  ctx.fillText(
+    new Date().toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }),
+    textX, textY
+  );
+
+  textY += 26 * scale;
+  ctx.fillStyle = "#facc15";
+  ctx.font = `bold ${22 * scale}px Arial`;
+  ctx.fillText(new Date().toLocaleTimeString('id-ID'), textX, textY);
+
+  textY += 24 * scale;
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `bold ${13 * scale}px Arial`;
+  ctx.fillText(`Nama: ${user.nama}`, textX, textY);
+
+  textY += 20 * scale;
+  ctx.fillStyle = "#4ade80";
+  ctx.font = `${12 * scale}px Courier New`;
+  ctx.fillText(`GPS: ${currentLocation.lat}, ${currentLocation.long}`, textX, textY);
+
+  const fotoBase64 = canvas.toDataURL('image/jpeg', 0.75);
+  closeCam();
+
+  if (currentCamMode === 'absen') {
+    const res = await api('absen', {
+      username: user.username,
+      tipeAbsen: currentType,
+      foto: fotoBase64,
+      lat: currentLocation.lat,
+      long: currentLocation.long
+    });
+    toast(res.message);
+    if (res.status === 'success') cekStatus();
+  } else if (currentCamMode === 'patroli') {
+    document.getElementById('patroliFotoBase64').value = fotoBase64;
+    document.getElementById('previewPatroli').innerHTML = `<img src="${fotoBase64}" class="w-full h-full object-cover">`;
+    toast('Foto patroli berhasil');
+  } else if (currentCamMode === 'kejadian') {
+    document.getElementById('kejadianFotoBase64').value = fotoBase64;
+    document.getElementById('previewKejadian').innerHTML = `<img src="${fotoBase64}" class="w-full h-full object-cover">`;
+    toast('Foto kejadian berhasil');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fa-solid fa-camera mr-1"></i>Ambil Foto';
+}
+
+function startTimemark() {
+  if (animationFrame) cancelAnimationFrame(animationFrame);
+
+  function update() {
+    const hariEl = document.getElementById('previewHari');
+    const jamEl = document.getElementById('previewJam');
+    const namaEl = document.getElementById('previewNama');
+    const gpsEl = document.getElementById('previewGps');
+
+    if (hariEl && jamEl && namaEl) {
+      const now = new Date();
+      hariEl.innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      jamEl.innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      namaEl.innerText = user ? `👤 ${user.nama}` : '';
+      if (gpsEl) gpsEl.innerText = `📍 ${currentLocation.alamat}`;
+    }
+
+    const modalCam = document.getElementById('modalCam');
+    if (modalCam && !modalCam.classList.contains('hidden')) {
+      animationFrame = requestAnimationFrame(update);
+    }
+  }
+  update();
+}
+
+// ============================================
+// REKAP PAGE - DENGAN FITUR PILIH BULAN
+// ============================================
 function renderRekap() {
+  const monthOptions = generateMonthOptions();
+  
+  // SELALU set ke bulan berjalan saat masuk halaman Rekap
+  selectedMonth = getCurrentMonthKey();
+  
   return `
   <div class="space-y-4">
+    <!-- Header -->
     <div class="flex justify-between items-center">
-      <h2 class="text-xl font-bold text-gray-800 dark:text-white">Rekap Absensi</h2>
-      <button onclick="loadRekap()" class="bg-red-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-900 transition">
-        <i class="fa-solid fa-refresh mr-1"></i>Refresh
+      <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+        <i class="fa-solid fa-calendar-days text-red-800"></i>
+        Rekap Absensi
+      </h2>
+      <button onclick="loadRekap()" class="bg-red-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-900 transition shadow-sm">
+        <i class="fa-solid fa-rotate-right mr-1"></i>Refresh
       </button>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-      <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Bulan: ${new Date().toLocaleDateString('id-ID', {month: 'long', year: 'numeric'})}</p>
-      <div class="grid grid-cols-3 gap-3 text-center">
-        <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
-          <p class="text-2xl font-bold text-green-600" id="totalHadir">-</p>
-          <p class="text-xs text-gray-600 dark:text-gray-400">Hadir</p>
-        </div>
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg">
-          <p class="text-2xl font-bold text-yellow-600" id="totalIzin">-</p>
-          <p class="text-xs text-gray-600 dark:text-gray-400">Izin</p>
-        </div>
-        <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
-          <p class="text-2xl font-bold text-red-600" id="totalAlpha">-</p>
-          <p class="text-xs text-gray-600 dark:text-gray-400">Alpha</p>
-        </div>
+    <!-- Month Selector -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+      <label class="text-xs font-bold text-red-800 dark:text-red-400 uppercase tracking-wide block mb-2">
+        <i class="fa-regular fa-calendar mr-1"></i> Pilih Bulan
+      </label>
+      <select id="monthSelector" onchange="changeMonth(this.value)" 
+        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-sm focus:border-red-800 outline-none dark:text-white font-semibold cursor-pointer">
+        ${monthOptions}
+      </select>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-3 gap-3">
+      <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/20 p-4 rounded-2xl border border-green-200 dark:border-green-800 text-center shadow-sm">
+        <i class="fa-solid fa-circle-check text-green-600 dark:text-green-400 text-xl mb-1"></i>
+        <p class="text-2xl font-black text-green-700 dark:text-green-300" id="totalHadir">-</p>
+        <p class="text-[10px] text-green-600 dark:text-green-400 font-bold uppercase tracking-wider">Hadir</p>
+      </div>
+      <div class="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/20 p-4 rounded-2xl border border-amber-200 dark:border-amber-800 text-center shadow-sm">
+        <i class="fa-solid fa-file-signature text-amber-600 dark:text-amber-400 text-xl mb-1"></i>
+        <p class="text-2xl font-black text-amber-700 dark:text-amber-300" id="totalIzin">-</p>
+        <p class="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider">Izin</p>
+      </div>
+      <div class="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/30 dark:to-rose-900/20 p-4 rounded-2xl border border-red-200 dark:border-red-800 text-center shadow-sm">
+        <i class="fa-solid fa-circle-xmark text-red-600 dark:text-red-400 text-xl mb-1"></i>
+        <p class="text-2xl font-black text-red-700 dark:text-red-300" id="totalAlpha">-</p>
+        <p class="text-[10px] text-red-600 dark:text-red-400 font-bold uppercase tracking-wider">Alpha</p>
       </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-      <p class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Riwayat Absensi Anda</p>
-      <div class="space-y-2" id="listRekap">
+    <!-- Tabel Rekap -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+        <p class="text-sm font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2" id="rekapHeaderLabel">
+          <i class="fa-solid fa-table-list text-red-800"></i>
+          Riwayat Bulan ${getMonthName(selectedMonth)}
+        </p>
+        <span id="rekapCount" class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full"></span>
+      </div>
+      <div id="listRekap" class="p-4">
         <div class="text-center text-gray-400 py-8">
           <i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i>
-          <p class="text-sm">Loading data...</p>
+          <p class="text-sm">Memuat data...</p>
         </div>
       </div>
     </div>
   </div>`;
 }
 
-async function loadRekap() {
+function generateMonthOptions() {
+  const months = [];
+  const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  
+  const startDate = new Date(2026, 5, 1); // Mulai dari Juni 2026
+  const currentDate = new Date();
+  const endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 1);
+  
+  let current = new Date(startDate);
+  
+  while (current <= endDate) {
+    const month = String(current.getMonth() + 1).padStart(2, '0');
+    const year = current.getFullYear();
+    const key = `${month}_${year}`;
+    const label = `${monthNames[current.getMonth()]} ${year}`;
+    
+    // selectedMonth sudah di-set ke getCurrentMonthKey() di renderRekap
+    months.push(`<option value="${key}" ${selectedMonth === key ? 'selected' : ''}>${label}</option>`);
+    current.setMonth(current.getMonth() + 1);
+  }
+  
+  return months.join('');
+}
+
+function getCurrentMonthKey() {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = now.getFullYear();
+  return `${month}_${year}`;
+}
+
+function getMonthName(monthKey) {
+  const [month, year] = monthKey.split('_');
+  const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  return `${monthNames[parseInt(month) - 1]} ${year}`;
+}
+
+function changeMonth(monthKey) {
+  selectedMonth = monthKey;
+  
+  const labelEl = document.getElementById('rekapHeaderLabel');
+  if (labelEl) {
+    labelEl.innerHTML = `<i class="fa-solid fa-table-list text-red-800"></i> Riwayat Bulan ${getMonthName(monthKey)}`;
+  }
+  
+  const selectEl = document.getElementById('monthSelector');
+  if (selectEl) selectEl.value = monthKey;
+  
+  loadRekap(monthKey);
+}
+
+async function loadRekap(bulanKey = null) {
   const listEl = document.getElementById('listRekap');
-  if (listEl) listEl.innerHTML = '<div class="text-center text-gray-400 py-8"><i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i><p class="text-sm">Loading...</p></div>';
+  const countEl = document.getElementById('rekapCount');
+  
+  // Pastikan user login
+  if (!user) {
+    console.error('❌ User tidak login');
+    listEl.innerHTML = `
+      <div class="text-center py-8">
+        <i class="fa-solid fa-circle-exclamation text-5xl text-red-500 mb-3"></i>
+        <h3 class="font-bold text-gray-800 dark:text-white mb-1">Session Expired</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Silakan login ulang</p>
+      </div>
+    `;
+    return;
+  }
+  
+  const bulan = bulanKey || document.getElementById('monthSelector')?.value || getCurrentMonthKey();
+  const [month, year] = bulan.split('_');
+  const bulanParam = `${month}/${year}`;
+  
+  console.log('🔍 Loading rekap:');
+  console.log('   Bulan:', bulanParam);
+  console.log('   Username:', user.username);
+  console.log('   Nama:', user.nama);
+
+  listEl.innerHTML = `
+    <div class="text-center py-8">
+      <div class="inline-block w-10 h-10 border-4 border-red-200 border-t-red-800 rounded-full animate-spin mb-3"></div>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Memuat data absensi ${getMonthName(bulan)}...</p>
+    </div>
+  `;
+  if (countEl) countEl.textContent = '';
 
   try {
-    const res = await api('getRekap', { username: user.username });
+    // Kirim username DAN nama ke backend
+    const res = await api('getRekapFromSheetBulanan', {
+      username: user.username,
+      nama: user.nama,
+      bulan: bulanParam
+    });
 
-    if (res.status === 'success') {
-      dataRekap = res.data || [];
+    console.log('📥 Response:', res);
 
-      let hadir = 0;
-      dataRekap.forEach(r => {
-        if (r.keterangan === 'IN' && r.jam && r.jam!== '--:--') hadir++;
-      });
+    if (res.status === 'error') {
+      console.error('❌ Error:', res.message);
+      listEl.innerHTML = `
+        <div class="text-center py-8">
+          <i class="fa-solid fa-triangle-exclamation text-5xl text-amber-500 mb-3"></i>
+          <h3 class="font-bold text-gray-800 dark:text-white mb-1">Error</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">${res.message}</p>
+          <button onclick="loadRekap('${bulan}')" class="bg-red-800 text-white px-4 py-2 rounded-lg text-sm">
+            <i class="fa-solid fa-rotate-right mr-2"></i>Coba Lagi
+          </button>
+        </div>
+      `;
+      document.getElementById('totalHadir').textContent = '0';
+      document.getElementById('totalIzin').textContent = '0';
+      document.getElementById('totalAlpha').textContent = '0';
+      return;
+    }
 
-      document.getElementById('totalHadir').textContent = hadir;
-      document.getElementById('totalIzin').textContent = 0;
-      document.getElementById('totalAlpha').textContent = 0;
+    if (!res.data || res.data.length === 0) {
+      console.log('⚠️ Tidak ada data');
+      listEl.innerHTML = `
+        <div class="text-center py-8">
+          <i class="fa-regular fa-calendar-xmark text-6xl text-gray-300 dark:text-gray-600 mb-3"></i>
+          <h3 class="font-bold text-gray-700 dark:text-gray-300 mb-1">Belum Ada Data</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Belum ada riwayat absensi untuk bulan ${getMonthName(bulan)}</p>
+          <p class="text-xs text-gray-400 mt-2">Nama: ${user.nama} | Username: ${user.username}</p>
+        </div>
+      `;
+      document.getElementById('totalHadir').textContent = '0';
+      document.getElementById('totalIzin').textContent = '0';
+      document.getElementById('totalAlpha').textContent = '0';
+      if (countEl) countEl.textContent = '0 hari';
+      return;
+    }
 
-      if (dataRekap.length > 0) {
-        const grouped = {};
-        dataRekap.forEach(r => {
-          const d = new Date(r.tanggal + 'T00:00:00');
-          const tglKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-          if (!grouped[tglKey]) grouped[tglKey] = [];
-          grouped[tglKey].push(r);
-        });
+    console.log('✅ Data ditemukan:', res.data.length, 'records');
+    
+    // Group data per tanggal
+    const grouped = {};
+    let totalHadir = 0;
+    let totalIzin = 0;
+    let totalAlpha = 0;
 
-        const last7Keys = Object.keys(grouped).sort().slice(-7).reverse();
+    res.data.forEach(item => {
+      const tgl = item.tanggal;
+      if (!tgl) return;
+      
+      if (!grouped[tgl]) {
+        grouped[tgl] = { in: null, out: null, status: 'Alpha' };
+      }
+      
+      const ket = String(item.keterangan || '').toUpperCase();
+      const jam = item.jam ? String(item.jam).substring(0, 5) : null;
+      
+      if (ket === 'IN' || ket === 'MASUK') {
+        grouped[tgl].in = jam;
+        if (grouped[tgl].status === 'Alpha') grouped[tgl].status = 'Hadir';
+      } else if (ket === 'OUT' || ket === 'PULANG') {
+        grouped[tgl].out = jam;
+      } else if (ket === 'IZIN') {
+        grouped[tgl].status = 'Izin';
+        if (jam) grouped[tgl].in = jam;
+      } else if (ket === 'ALPHA') {
+        grouped[tgl].status = 'Alpha';
+      }
+    });
 
-        listEl.innerHTML = last7Keys.map(key => {
-          const records = grouped[key];
-          const masuk = records.find(r => r.keterangan === 'IN');
-          const pulang = records.find(r => r.keterangan === 'OUT');
+    Object.keys(grouped).forEach(tgl => {
+      const d = grouped[tgl];
+      if (d.status === 'Hadir') totalHadir++;
+      else if (d.status === 'Izin') totalIzin++;
+      else if (d.status === 'Alpha') totalAlpha++;
+    });
 
-          const tglObj = new Date(records[0].tanggal + 'T00:00:00');
-          const tglFormat = tglObj.toLocaleDateString('id-ID', {
-            weekday: 'short', day: '2-digit', month: 'short'
-          });
+    animateValue('totalHadir', 0, totalHadir, 500);
+    animateValue('totalIzin', 0, totalIzin, 500);
+    animateValue('totalAlpha', 0, totalAlpha, 500);
 
-          return `
-            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <p class="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">${tglFormat}</p>
-              <div class="flex justify-between items-center mb-1">
-                <div class="flex items-center gap-2">
-                  <div class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
-                    <i class="fa-solid fa-sign-in-alt text-xs"></i>
-                  </div>
-                  <span class="text-sm text-gray-700 dark:text-gray-300">Masuk</span>
-                </div>
-                <p class="text-sm font-bold text-gray-800 dark:text-white">${masuk?.jam || '--:--'}</p>
+    if (countEl) countEl.textContent = `${Object.keys(grouped).length} hari`;
+
+    const sortedDates = Object.keys(grouped).sort((a, b) => a.localeCompare(b));
+
+    let html = `
+      <div class="overflow-x-auto -mx-4 px-4">
+        <table class="w-full text-sm min-w-[500px]">
+          <thead>
+            <tr class="bg-gradient-to-r from-red-800 to-red-900 text-white">
+              <th class="px-3 py-3 text-left font-semibold text-xs uppercase tracking-wider rounded-l-lg">
+                <i class="fa-regular fa-calendar mr-1"></i>Tanggal
+              </th>
+              <th class="px-3 py-3 text-center font-semibold text-xs uppercase tracking-wider">
+                <i class="fa-solid fa-arrow-right-to-bracket mr-1"></i>Jam Masuk
+              </th>
+              <th class="px-3 py-3 text-center font-semibold text-xs uppercase tracking-wider">
+                <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i>Jam Pulang
+              </th>
+              <th class="px-3 py-3 text-center font-semibold text-xs uppercase tracking-wider rounded-r-lg">
+                <i class="fa-solid fa-circle-info mr-1"></i>Status
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+    `;
+
+    sortedDates.forEach((tgl, idx) => {
+      const d = grouped[tgl];
+      
+      let tglFmt = tgl;
+      let dayName = '';
+      try {
+        const [y, m, dd] = tgl.split('-').map(Number);
+        const dateObj = new Date(y, m - 1, dd);
+        tglFmt = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+        dayName = dateObj.toLocaleDateString('id-ID', { weekday: 'short' });
+      } catch (e) {
+        tglFmt = tgl;
+      }
+
+      let statusBadge = '';
+      let rowBg = '';
+      
+      if (d.status === 'Hadir') {
+        if (d.in && !d.out) {
+          statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+            <i class="fa-solid fa-clock text-[8px]"></i> Belum Pulang
+          </span>`;
+          rowBg = 'bg-blue-50/40 dark:bg-blue-900/10';
+        } else {
+          statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">
+            <i class="fa-solid fa-check text-[8px]"></i> Hadir
+          </span>`;
+          rowBg = idx % 2 === 0 ? '' : 'bg-gray-50/50 dark:bg-gray-700/20';
+        }
+      } else if (d.status === 'Izin') {
+        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+          <i class="fa-solid fa-file text-[8px]"></i> Izin
+        </span>`;
+        rowBg = 'bg-amber-50/40 dark:bg-amber-900/10';
+      } else if (d.status === 'Alpha') {
+        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
+          <i class="fa-solid fa-xmark text-[8px]"></i> Alpha
+        </span>`;
+        rowBg = 'bg-red-50/40 dark:bg-red-900/10';
+      } else {
+        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">${d.status}</span>`;
+      }
+
+      const jamMasukHtml = d.in 
+        ? `<span class="inline-flex items-center gap-1 px-2 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-md font-bold text-xs border border-green-200 dark:border-green-800">
+            <i class="fa-solid fa-right-to-bracket text-[10px]"></i>${d.in}
+          </span>`
+        : '<span class="text-gray-300 dark:text-gray-600 text-xs">—</span>';
+
+      const jamPulangHtml = d.out 
+        ? `<span class="inline-flex items-center gap-1 px-2 py-1 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-md font-bold text-xs border border-red-200 dark:border-red-800">
+            <i class="fa-solid fa-right-from-bracket text-[10px]"></i>${d.out}
+          </span>`
+        : '<span class="text-gray-300 dark:text-gray-600 text-xs">—</span>';
+
+      html += `
+        <tr class="${rowBg} hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-colors">
+          <td class="px-3 py-3">
+            <div class="flex items-center gap-2">
+              <div class="w-9 h-9 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 flex flex-col items-center justify-center flex-shrink-0">
+                <span class="text-[8px] font-bold uppercase leading-none">${dayName}</span>
+                <span class="text-sm font-black leading-none mt-0.5">${tglFmt.split(' ')[0]}</span>
               </div>
-              <div class="flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                  <div class="w-8 h-8 bg-red-100 text-red-600 rounded-lg flex items-center justify-center">
-                    <i class="fa-solid fa-sign-out-alt text-xs"></i>
-                  </div>
-                  <span class="text-sm text-gray-700 dark:text-gray-300">Pulang</span>
-                </div>
-                <p class="text-sm font-bold text-gray-800 dark:text-white">${pulang?.jam || '--:--'}</p>
+              <div class="leading-tight">
+                <p class="font-bold text-gray-800 dark:text-white text-xs">${tglFmt}</p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400">${dayName}</p>
               </div>
             </div>
-          `;
-        }).join('');
-      } else {
-        listEl.innerHTML = `
-          <div class="text-center text-gray-400 py-8">
-            <i class="fa-solid fa-calendar-xmark text-3xl mb-2"></i>
-            <p class="text-sm">Belum ada data absensi</p>
+          </td>
+          <td class="px-3 py-3 text-center">${jamMasukHtml}</td>
+          <td class="px-3 py-3 text-center">${jamPulangHtml}</td>
+          <td class="px-3 py-3 text-center">${statusBadge}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-gray-500 dark:text-gray-400">
+            <i class="fa-solid fa-info-circle mr-1"></i>
+            Total ${Object.keys(grouped).length} hari tercatat
+          </span>
+          <div class="flex items-center gap-3">
+            <span class="flex items-center gap-1 text-green-600 dark:text-green-400 font-bold">
+              <span class="w-2 h-2 bg-green-500 rounded-full"></span>${totalHadir}
+            </span>
+            <span class="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold">
+              <span class="w-2 h-2 bg-amber-500 rounded-full"></span>${totalIzin}
+            </span>
+            <span class="flex items-center gap-1 text-red-600 dark:text-red-400 font-bold">
+              <span class="w-2 h-2 bg-red-500 rounded-full"></span>${totalAlpha}
+            </span>
           </div>
-        `;
-      }
-    } else {
-      throw new Error(res.message || 'Unknown error');
-    }
-  } catch (err) {
-    console.error('Load rekap error:', err);
+        </div>
+      </div>
+    `;
+
+    listEl.innerHTML = html;
+
+  } catch (error) {
+    console.error('Error loading rekap:', error);
     listEl.innerHTML = `
-      <div class="text-center text-red-400 py-8">
-        <i class="fa-solid fa-circle-exclamation text-3xl mb-2"></i>
-        <p class="text-sm">Gagal memuat data</p>
-        <p class="text-xs mt-1">${err.message}</p>
+      <div class="text-center py-8">
+        <i class="fa-solid fa-circle-exclamation text-5xl text-red-500 mb-3"></i>
+        <h3 class="font-bold text-gray-800 dark:text-white mb-1">Gagal Memuat Data</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">${error.message}</p>
+        <button onclick="loadRekap('${bulan}')" class="bg-red-800 hover:bg-red-900 text-white px-5 py-2 rounded-lg text-sm font-semibold transition shadow-sm">
+          <i class="fa-solid fa-rotate-right mr-2"></i>Coba Lagi
+        </button>
       </div>
     `;
   }
 }
 
+function animateValue(id, start, end, duration) {
+  const obj = document.getElementById(id);
+  if (!obj) return;
+  
+  const range = end - start;
+  if (range === 0) {
+    obj.textContent = end;
+    return;
+  }
+  
+  const minTimer = 50;
+  let stepTime = Math.abs(Math.floor(duration / range));
+  stepTime = Math.max(stepTime, minTimer);
+  
+  let startTime = new Date().getTime();
+  let endTime = startTime + duration;
+  let timer;
+  
+  function run() {
+    let now = new Date().getTime();
+    let remaining = Math.max((endTime - now) / duration, 0);
+    let value = Math.round(end - (remaining * range));
+    obj.textContent = value;
+    if (value == end) {
+      clearInterval(timer);
+    }
+  }
+  
+  timer = setInterval(run, stepTime);
+  run();
+}
+
+// ============================================
+// PATROLI PAGE
+// ============================================
 function renderPatroli() {
   return `
   <div class="space-y-4">
@@ -993,7 +1364,7 @@ async function loadPatroli() {
   if (res.status === 'success' && res.data.length > 0) {
     dataPatroli = res.data;
     listEl.innerHTML = dataPatroli.map(p => {
-      const tgl = new Date(p.timestamp).toLocaleDateString('id-ID', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'});
+      const tgl = new Date(p.timestamp).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
       return `
         <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
           <div class="flex justify-between items-start mb-2">
@@ -1002,7 +1373,7 @@ async function loadPatroli() {
               <p class="text-xs text-red-600 dark:text-red-400 font-semibold">Petugas: ${p.nama}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">${tgl}</p>
             </div>
-            ${p.foto? `<img src="${p.foto}" onclick="bukaZoom('${p.foto}')" class="w-12 h-12 rounded-lg object-cover ml-2 cursor-pointer">` : ''}
+            ${p.foto ? `<img src="${p.foto}" onclick="bukaZoom('${p.foto}')" class="w-12 h-12 rounded-lg object-cover ml-2 cursor-pointer">` : ''}
           </div>
           <p class="text-xs text-gray-600 dark:text-gray-300">${p.keterangan || '-'}</p>
         </div>
@@ -1015,17 +1386,6 @@ async function loadPatroli() {
         <p class="text-sm">Belum ada data patroli</p>
       </div>
     `;
-  }
-}
-
-function bukaZoom(url) {
-  if (!document.getElementById('modalZoom')) {
-    const modal = document.createElement('div');
-    modal.id = 'modalZoom';
-    modal.className = 'fixed inset-0 bg-black/95 z-[9999] flex items-center justify-center p-4';
-    modal.onclick = () => modal.remove();
-    modal.innerHTML = `<img src="${url}" class="max-w-full max-h-full rounded-2xl shadow-2xl" onclick="event.stopPropagation()">`;
-    document.body.appendChild(modal);
   }
 }
 
@@ -1084,6 +1444,9 @@ async function simpanPatroli() {
   btn.innerHTML = 'Simpan Patroli';
 }
 
+// ============================================
+// KEJADIAN PAGE
+// ============================================
 function renderKejadian() {
   return `
   <div class="space-y-4">
@@ -1112,7 +1475,7 @@ async function loadKejadian() {
   if (res.status === 'success' && res.data.length > 0) {
     dataKejadian = res.data;
     listEl.innerHTML = dataKejadian.map(k => {
-      const tgl = new Date(k.timestamp).toLocaleDateString('id-ID', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'});
+      const tgl = new Date(k.timestamp).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
       return `
         <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
           <div class="flex justify-between items-start mb-2">
@@ -1121,7 +1484,7 @@ async function loadKejadian() {
               <p class="text-xs text-red-600 dark:text-red-400 font-semibold">Pelapor: ${k.nama}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">${tgl} - ${k.lokasi}</p>
             </div>
-            ${k.foto? `<img src="${k.foto}" onclick="bukaZoom('${k.foto}')" class="w-12 h-12 rounded-lg object-cover ml-2 cursor-pointer">` : ''}
+            ${k.foto ? `<img src="${k.foto}" onclick="bukaZoom('${k.foto}')" class="w-12 h-12 rounded-lg object-cover ml-2 cursor-pointer">` : ''}
           </div>
           <p class="text-xs text-gray-600 dark:text-gray-300">${k.kronologi}</p>
         </div>
@@ -1160,7 +1523,7 @@ async function simpanKejadian() {
   const kronologi = document.getElementById('kejadianKronologi').value.trim();
   const fotoBase64 = document.getElementById('kejadianFotoBase64').value;
 
-  if (!jenis ||!lokasi ||!kronologi) {
+  if (!jenis || !lokasi || !kronologi) {
     toast('Jenis, Lokasi, dan Kronologi wajib diisi');
     btn.disabled = false;
     btn.innerHTML = 'Kirim Laporan';
@@ -1195,6 +1558,9 @@ async function simpanKejadian() {
   btn.innerHTML = 'Kirim Laporan';
 }
 
+// ============================================
+// PEMBINAAN PAGE
+// ============================================
 function renderPembinaan() {
   return `
   <div class="space-y-4">
@@ -1223,7 +1589,7 @@ async function loadPembinaan() {
   if (res.status === 'success' && res.data.length > 0) {
     dataPembinaan = res.data;
     listEl.innerHTML = dataPembinaan.map(p => {
-      const tgl = new Date(p.timestamp).toLocaleDateString('id-ID', {day: '2-digit', month: 'short'});
+      const tgl = new Date(p.timestamp).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
       return `
         <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
           <div class="flex justify-between items-start mb-2">
@@ -1271,7 +1637,7 @@ async function simpanPembinaan() {
   const nilai = document.getElementById('pembinaanNilai').value;
   const ket = document.getElementById('pembinaanKet').value.trim();
 
-  if (!materi ||!pelatih ||!nilai) {
+  if (!materi || !pelatih || !nilai) {
     toast('Materi, Pelatih, dan Nilai wajib diisi');
     btn.disabled = false;
     btn.innerHTML = 'Simpan';
@@ -1298,12 +1664,9 @@ async function simpanPembinaan() {
   btn.innerHTML = 'Simpan';
 }
 
-function switchPage(page) {
-  currentPage = page;
-  renderDashboard();
-}
-
-// === GPS ===
+// ============================================
+// GPS & LOCATION
+// ============================================
 function dapatkanLokasiGPS() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -1338,38 +1701,18 @@ function dapatkanLokasiGPS() {
 }
 
 function hitungJarak(lat1, lon1, lat2, lon2) {
-  const R = 6371e3; const p1 = lat1 * Math.PI/180; const p2 = lat2 * Math.PI/180;
-  const dp = (lat2-lat1) * Math.PI/180; const dl = (lon2-lon1) * Math.PI/180;
-  const a = Math.sin(dp/2) * Math.sin(dp/2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dl/2) * Math.sin(dl/2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const R = 6371e3;
+  const p1 = lat1 * Math.PI / 180;
+  const p2 = lat2 * Math.PI / 180;
+  const dp = (lat2 - lat1) * Math.PI / 180;
+  const dl = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dp / 2) * Math.sin(dp / 2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) * Math.sin(dl / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function startTimemark() {
-  if (animationFrame) cancelAnimationFrame(animationFrame);
-
-  function update() {
-    const hariEl = document.getElementById('previewHari');
-    const jamEl = document.getElementById('previewJam');
-    const namaEl = document.getElementById('previewNama');
-    const gpsEl = document.getElementById('previewGps');
-
-    if (hariEl && jamEl && namaEl) {
-      const now = new Date();
-      hariEl.innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-      jamEl.innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      namaEl.innerText = user? `👤 ${user.nama}` : '';
-      if (gpsEl) gpsEl.innerText = `📍 ${currentLocation.alamat}`;
-    }
-
-    const modalCam = document.getElementById('modalCam');
-    if (modalCam &&!modalCam.classList.contains('hidden')) {
-      animationFrame = requestAnimationFrame(update);
-    }
-  }
-  update();
-}
-
-// === MODAL PROFIL ===
+// ============================================
+// PROFIL & SETTINGS
+// ============================================
 function openProfil() { document.getElementById('modalProfil').classList.replace('hidden', 'flex'); }
 function closeProfil() { document.getElementById('modalProfil').classList.replace('flex', 'hidden'); }
 function openEditProfil() { closeProfil(); document.getElementById('modalEditProfil').classList.replace('hidden', 'flex'); }
@@ -1419,8 +1762,8 @@ async function simpanProfil() {
     rekening: document.getElementById('editRek').value
   };
   const res = await api('updateProfil', d);
-  if(res.status==='success') {
-    user={...user,...d};
+  if (res.status === 'success') {
+    user = { ...user, ...d };
     localStorage.setItem('user', JSON.stringify(user));
     closeEditProfil();
     renderDashboard();
@@ -1432,7 +1775,6 @@ async function simpanProfil() {
   btn.innerHTML = 'Simpan';
 }
 
-// === [FIX BUG] FUNGSI GANTI PASSWORD YANG RUSAK TADI ===
 async function gantiPassword() {
   const btn = document.getElementById('btnGantiPass');
   btn.disabled = true;
@@ -1444,7 +1786,7 @@ async function gantiPassword() {
     passBaru: document.getElementById('passBaru').value
   });
   toast(res.message);
-  if(res.status==='success') {
+  if (res.status === 'success') {
     document.getElementById('passLama').value = '';
     document.getElementById('passBaru').value = '';
     closeGantiPassword();
@@ -1453,6 +1795,9 @@ async function gantiPassword() {
   btn.innerHTML = 'Update';
 }
 
+// ============================================
+// API & STATUS
+// ============================================
 async function cekStatus() {
   try {
     const res = await api('cekStatus', { username: user.username });
@@ -1466,25 +1811,37 @@ async function cekStatus() {
     } else {
       toast(res.message);
     }
-  } catch(e) {
+  } catch (e) {
     console.error('Cek status error:', e);
   }
 }
 
 async function api(action, data = {}) {
   try {
-    const res = await fetch(URL_GAS, {
+    // Tambahkan timestamp untuk bypass cache
+    const url = URL_GAS + '?t=' + Date.now();
+    
+    const res = await fetch(url, {
       method: 'POST',
-      body: JSON.stringify({action, ...data})
+      // JANGAN gunakan headers Content-Type - GAS akan otomatis parse
+      body: JSON.stringify({ action, ...data })
     });
+    
+    if (!res.ok) {
+      throw new Error('HTTP error! status: ' + res.status);
+    }
+    
     return await res.json();
-  } catch(e) {
+  } catch (e) {
+    console.error('API Error:', e);
     toast('Koneksi gagal: ' + e.message);
-    return {status: 'error', message: e.message};
+    return { status: 'error', message: e.message };
   }
 }
 
-// === BACK BUTTON HANDLING ===
+// ============================================
+// NAVIGATION & BACK BUTTON
+// ============================================
 window.addEventListener('popstate', function(event) {
   if (currentPage !== 'home') {
     currentPage = 'home';
@@ -1493,13 +1850,9 @@ window.addEventListener('popstate', function(event) {
   history.pushState({ page: 'home' }, '', '');
 });
 
+// ============================================
+// INIT
+// ============================================
+console.log('🚀 Starting app...');
 history.pushState({ page: currentPage }, '', '');
-
-const originalSwitchPage = switchPage;
-switchPage = function(page) {
-  originalSwitchPage(page);
-  history.pushState({ page: page }, '', '');
-}
-
-console.log('Starting app...');
 render();
