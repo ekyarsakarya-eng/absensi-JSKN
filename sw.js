@@ -1,37 +1,65 @@
-const CACHE = 'absensi-jskn-v11';
-const files = ['./', './index.html', './app.js', './manifest.json', './icon-192.png', './icon-512.png'];
+// Service Worker untuk Absensi JSKN
+const CACHE_NAME = 'absensi-jskn-v11';
+const urlsToCache = [
+  './',
+  './index.html',
+  './app.js',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
+];
 
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(files))
+// Install SW
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('Cache opened');
+        return cache.addAll(urlsToCache);
+      })
+      .catch(err => console.log('Cache addAll failed:', err))
   );
   self.skipWaiting();
 });
 
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys => 
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
+// Activate SW
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-self.addEventListener('fetch', e => {
-  // Lewati Google Apps Script (selalu live)
-  if (e.request.url.includes('script.google.com')) return;
+// Fetch - Network first untuk API, cache untuk static
+self.addEventListener('fetch', event => {
+  // Skip Google Apps Script calls - biarkan langsung ke network
+  if (event.request.url.includes('script.google.com')) {
+    return;
+  }
   
-  e.respondWith(
-    caches.match(e.request).then(r => {
-      // Strategi: Cache-first dengan fallback ke network
-      return r || fetch(e.request).then(response => {
-        // Cache response baru untuk next time
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        // Clone response untuk cache
         if (response.status === 200) {
-          const clone = response.clone();
-          caches.open(CACHE).then(cache => cache.put(e.request, clone));
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseClone);
+          });
         }
         return response;
-      });
-    })
+      })
+      .catch(() => {
+        // Fallback ke cache jika offline
+        return caches.match(event.request);
+      })
   );
 });
